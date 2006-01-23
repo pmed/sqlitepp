@@ -1,0 +1,17 @@
+    SQLite++ is a C++ wrapper to SQLite library.
+
+SQLite is a embedded database engine with very nice licence. It supports rich 
+subset of SQL. For addition information on SQLite visit http://www.sqlite.org.
+
+SQLite++ wraps only SQLite version 3.0 interface. For more information see 
+documentation.
+
+Library approaches with binding variables to SQL queries was inspired by 
+Maciej Sobczak' SOCI wrapper (http://www.msobczak.com/prog/soci/).
+
+
+Build and install instructions are placed in Install file.
+
+Comments and suggestions are welcome.
+
+    Pavel Medvedev <pm@despammed.com>
