@@ -1,0 +1,32 @@
+subproject sqlite ;
+
+local src ;
+
+# exclude unnecessary files
+local ex = [ GLOB $(TOP)/sqlite : shell.c tclsqlite.c ] ;
+
+for local s in [ GLOB $(TOP)/sqlite : *.c ]
+{
+    if ! ( $(s) in $(ex) )
+    {
+        src += $(s) ;
+    }
+}
+
+lib sqlite
+    # sources
+    : $(src)
+    # requierements
+    :
+    # default build
+    : debug release
+;
+
+stage sqlite
+    # sources
+    : <lib>sqlite
+    # requirements
+    : <locate>$(TOP)/lib common-variant-tag <target>stage <target>all
+    # local build
+    : debug release
+;

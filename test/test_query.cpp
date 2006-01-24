@@ -25,7 +25,7 @@ void test_group::object::test<1>()
 	ensure("empty query", q.sql().empty() );
 
 	q.set_sql("qaz");
-	ensure_equals("q.sql()", q.sql(), "qaz" );
+	ensure("q.sql() == qaz", q.sql() == "qaz" );
 }
 
 template<>template<>
@@ -33,7 +33,7 @@ void test_group::object::test<2>()
 {
 	q.set_sql("qaz");
 	query q2("qaz");
-	ensure_equals("q = q2", q.sql(), q2.sql() );
+	ensure("q = q2", q.sql() == q2.sql() );
 }
 
 template<>template<>
@@ -41,7 +41,7 @@ void test_group::object::test<3>()
 {
 	query q2("qaz");
 	q2.clear();
-	ensure_equals("clear", q.sql(), q2.sql() );
+	ensure("clear", q.sql() == q2.sql() );
 }
 
 template<>template<>
@@ -50,16 +50,16 @@ void test_group::object::test<4>()
 	query q2("qaz");
 
 	ensure("q", q.sql().empty() );
-	ensure_equals("q2.sql()", q2.sql(), "qaz" );
+	ensure("q2.sql() == qaz", q2.sql() == "qaz" );
 	swap(q, q2);
-	ensure_equals("q.sql()", q.sql(), "qaz" );
-	ensure("q2", q2.sql().empty() );
+	ensure("q.sql() == qaz", q.sql() == "qaz" );
+	ensure("q2 empty", q2.sql().empty() );
 
 	q << "aaaa";
-	ensure_equals("q.sql()", q.sql(), "qazaaaa");
+	ensure("q.sql() = qazaaaa", q.sql() == "qazaaaa");
 
 	q2 << 23.34;
-	ensure_equals("q2.sql()", q2.sql(), "23.34");
+	ensure("q2.sql() = 23.34", q2.sql() == "23.34");
 
 }
 
@@ -68,17 +68,17 @@ void test_group::object::test<5>()
 {
 	int z = 100;
 	q << "qaz" << z;
-	ensure_equals("q.sql()", q.sql(), "qaz100");
+	ensure("q.sql() == qaz100", q.sql() == "qaz100");
 
 	query q2(q);
 	ensure("destructive copy q", q.sql().empty() );
-	ensure_equals("destructive copy q2", q2.sql(), "qaz100" );
+	ensure("destructive copy q2", q2.sql() == "qaz100" );
 
 	q << "aaaa";
-	ensure_equals("q.sql()", q.sql(), "aaaa");
+	ensure("q.sql() == aaaa", q.sql() == "aaaa");
 
 	q2 << "wert";
-	ensure_equals("q2.sql()", q2.sql(), "qaz100wert");
+	ensure("q2.sql() == qaz100wert", q2.sql() == "qaz100wert");
 }
 
 template<>template<>

@@ -46,9 +46,11 @@ struct bind
 	bind(statement& st) : st_(st) {}
 	bind& operator=(bind const&);
 
-	int operator()(int pos, binder* b) const
+
+	template<typename T>
+	int operator()(int pos, T* binder) const
 	{
-		return b->bind(st_, pos);
+		return binder->bind(st_, pos);
 	}
 
 	statement& st_;

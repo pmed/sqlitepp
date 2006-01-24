@@ -26,7 +26,7 @@ void ensure_equals(statement_data::record const& r1,
 				   statement_data::record const& r2)
 {
 	tut::ensure_equals("id", r1.id, r2.id);
-	tut::ensure_equals("name", r1.name, r2.name);
+	tut::ensure("name", r1.name == r2.name);
 	tut::ensure_distance("salary", r1.salary, r2.salary, 0.01);
 	tut::ensure("data", r1.data == r2.data);
 }
@@ -54,18 +54,18 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 {
-	ensure("no query", st.sql().empty());
+	ensure("no query", st.q().sql().empty());
 	ensure("not prepared", !st.prepared());
 	ensure("not prepared 2", !st);
-	st.set_sql("zzz");
-	ensure_equals("query", st.sql(), "zzz");
+	st.q().set_sql("zzz");
+	ensure("query == zzz", st.q().sql() == "zzz");
 }
 
 // test empty query error
 template<>template<>
 void object::test<3>()
 {
-	ensure("no query", st.sql().empty());
+	ensure("no query", st.q().empty());
 	try
 	{
 		st.exec();
@@ -81,8 +81,8 @@ void object::test<3>()
 template<>template<>
 void object::test<4>()
 {
-	ensure("no query", st.sql().empty());
-	st.set_sql("insert into some_table(id, name, salary) values(1, 'lisa', 23.345)");
+	ensure("no query", st.q().empty());
+	st.q().set_sql("insert into some_table(id, name, salary) values(1, 'lisa', 23.345)");
 	
 	st.prepare();
 	ensure("prepared", st);
@@ -103,24 +103,24 @@ void object::test<5>()
 	st << "select * from some_table";
 	ensure ( "select executed", st.exec() );
 
-	ensure_equals( "col count", st.column_count(), 4 );
+	ensure( "col count == 4", st.column_count() == 4 );
 
-	ensure_equals( "col 0 name", st.column_name(0), std::string("id") );
+	ensure( "col 0 name", st.column_name(0) == "id" );
 	ensure_equals( "col 0 index", st.column_index("id"), 0 );
 	ensure_equals( "col 0 type", st.column_type(0), statement::COL_INT );
 	ensure_equals( "col 0 value", st.column_as<int>(0), r.id );
 
-	ensure_equals( "col 1 name", st.column_name(1), std::string("name") );
+	ensure( "col 1 name", st.column_name(1) == "name" );
 	ensure_equals( "col 1 index", st.column_index("name"), 1 );
 	ensure_equals( "col 1 type", st.column_type(1), statement::COL_TEXT );
-	ensure_equals( "col 1 value", st.column_as<std::string>(1), r.name );
+	ensure( "col 1 value", st.column_as<sqlitepp::string_t>(1) == r.name );
 
-	ensure_equals( "col 2 name", st.column_name(2), std::string("salary") );
+	ensure( "col 2 name", st.column_name(2) == "salary" );
 	ensure_equals( "col 2 index", st.column_index("salary"), 2 );
 	ensure_equals( "col 2 type", st.column_type(2), statement::COL_FLOAT );
-	ensure_equals( "col 2 value", st.column_as<double>(2), r.salary );
+	ensure_distance( "col 2 value", st.column_as<double>(2), r.salary, 0.01 );
 
-	ensure_equals( "col 3 name", st.column_name(3), std::string("data") );
+	ensure( "col 3 name", st.column_name(3) == "data" );
 	ensure_equals( "col 3 index", st.column_index("data"), 3 );
 	ensure_equals( "col 3 type", st.column_type(3), statement::COL_NULL );
 

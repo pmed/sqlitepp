@@ -21,13 +21,6 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-/*
-class session;
-class statement;
-class into_binder_base;
-class use_binder_base;
-*/
-
 // SQL sql_query base class.
 class query
 {
@@ -73,6 +66,12 @@ public:
 
 	// Clear sql_query sql, into and use bindings.
 	void clear(); // throw()
+	
+	// Is query empty?
+	bool empty() const // throw()
+	{
+		return sql_.str().empty() && intos_.empty() && uses_.empty();
+	}
 
 	// Into binders container type.
 	typedef std::vector<into_binder*> into_binders;

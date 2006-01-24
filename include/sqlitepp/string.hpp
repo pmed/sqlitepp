@@ -10,6 +10,9 @@
 #define SQLITEPP_STRING_HPP_INCLUDED
 
 #include <limits>
+#include <cstddef>
+#include <iosfwd>
+#include <vector>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -51,36 +54,84 @@ class const_string
 public:
 	typedef Char char_type;
 
-	const_string(char_type const* str = 0);
+	const_string(char_type const* str = 0)
+		: buf_( str, str + strlen(str) )
+	{
+	}
 
 	~const_string()
 	{
 		clear();
 	}
 
-	void clear(); 
+	void clear()
+	{
+		buffer().swap(buf_);
+	}
 
 	bool empty() const // throw()
 	{
 		return length() == 0;
 	}
 	
-	size_t length() const; // throw()
+	size_t length() const // throw()
+	{
+		return buf_.size();
+	}
+	
 	size_t size() const
 	{
 		return length() * sizeof(char_type);
 	}
 
-	char_type const* c_str() const;
+	char_type const* c_str() const
+	{
+		return &buf_[0];
+	}
+	
+	friend const_string operator+(const_string const& s1, const_string const& s2)
+	{
+		return s1 + s2.c_str();
+	}
+	friend const_string operator+(const_string const& s1, char_type const* s2)
+	{
+		buffer buf(s1.buf_);
+		buf.insert(buf.end(), s2, s2 + strlen(s2));
+		const_string result;
+		result.buf_.swap(buf);
+		return result;
+	}
 
-	friend const_string operator+(const_string const&, char_type const*);
-	friend const_string operator+(const_string const&, const_string const&);
+	friend bool operator==(const_string const& s1, const_string const& s2)
+	{
+		return s1 == s2.c_str();
+	}
+	friend bool operator==(const_string const& s1, char_type const* s2)
+	{
+		return s1.equals(s2);
+	}
 
-	friend bool operator==(const_string const& s1, const_string const& s2);
 	friend bool operator!=(const_string const& s1, const_string const& s2)
 	{
 		return !(s1 == s2);
 	}
+	friend bool operator!=(const_string const& s1, char_type const* s2)
+	{
+		return !(s1 ==s2);
+	}
+	
+	friend std::ostream& operator<<(std::ostream& os, const_string const& s)
+	{
+		return os << s.c_str();
+	}
+private:
+	bool equals(char_type const* str) const // throw()
+	{
+		return strcmp(this->c_str(), str) == 0;
+	}
+	
+	typedef std::vector<char_type> buffer;
+	buffer buf_;
 };
 
 typedef const_string<utf8_char> utf8_string;

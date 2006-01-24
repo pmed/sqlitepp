@@ -22,16 +22,16 @@ namespace sqlitepp {
 
 class statement;
 
-class binder
+class into_binder
 {
 public:
-	virtual ~binder() 
+	virtual ~into_binder() 
 	{
 	}
 
-	binder* clone() const
+	into_binder* clone() const
 	{
-		binder* copy = do_clone();
+		into_binder* copy = do_clone();
 		assert(typeid(*this)==typeid(*copy) && !"do_clone not overriden correctly");
 		return copy;
 	}
@@ -41,29 +41,24 @@ public:
 		do_bind(st, pos);
 		return pos + 1;
 	}
-protected:
-	binder()
-	{
-	}
 
-	binder(binder const&)
-	{
-	}
-	
-	binder& operator=(binder const&);
-private:
-	virtual binder* do_clone() const = 0;
-	virtual void do_bind(statement& st, int pos) = 0;
-};
-
-class into_binder : public binder
-{
-public:
 	void update(statement& st)
 	{
 		do_update(st);
 	}
+protected:
+	into_binder()
+	{
+	}
+
+	into_binder(into_binder const&)
+	{
+	}
+	
+	into_binder& operator=(into_binder const&);
 private:
+	virtual into_binder* do_clone() const = 0;
+	virtual void do_bind(statement& st, int pos) = 0;
 	virtual void do_update(statement& st) = 0;
 };
 
@@ -77,12 +72,12 @@ public:
 	{
 	}
 protected:
-	int& pos() const
+	int& pos()
 	{
 		return pos_;
 	}
 private:
-	binder* do_clone() const
+	into_binder* do_clone() const
 	{
 		return new into_pos_binder<T>(*this);
 	}
@@ -111,12 +106,12 @@ public:
 	{
 	}
 private:
-	binder* do_clone() const
+	into_binder* do_clone() const
 	{
 		return new into_name_binder<T>(*this);
 	}
 
-	void do_bind(statement&, int)
+	void do_bind(statement& st, int)
 	{
 		if ( pos() < 0 )
 		{
@@ -127,8 +122,38 @@ private:
 	string_t name_;
 };
 
-class use_binder : public binder
+class use_binder
 {
+public:
+	virtual ~use_binder() 
+	{
+	}
+
+	use_binder* clone() const
+	{
+		use_binder* copy = do_clone();
+		assert(typeid(*this)==typeid(*copy) && !"do_clone not overriden correctly");
+		return copy;
+	}
+
+	int bind(statement& st, int pos)
+	{
+		do_bind(st, pos);
+		return pos + 1;
+	}
+protected:
+	use_binder()
+	{
+	}
+
+	use_binder(use_binder const&)
+	{
+	}
+	
+	use_binder& operator=(use_binder const&);
+private:
+	virtual use_binder* do_clone() const = 0;
+	virtual void do_bind(statement& st, int pos) = 0;
 };
 
 template<typename T>
@@ -140,7 +165,7 @@ public:
 	{
 	}
 private:
-	binder* do_clone() const
+	use_binder* do_clone() const
 	{
 		return new use_pos_binder<T>(*this);
 	}
@@ -149,7 +174,12 @@ private:
 	{
 		st.use_value(pos, value_);
 	}
-
+protected:
+	T& value()
+	{
+		return value_;
+	}
+private:
 	T& value_;
 };
 
@@ -163,17 +193,17 @@ public:
 	{
 	}
 private:
-	binder* do_clone() const
+	use_binder* do_clone() const
 	{
 		return new use_name_binder<T>(*this);
 	}
 	
 	void do_bind(statement& st, int)
 	{
-		st.use_value(st.use_pos(name_), value_);
+		st.use_value(st.use_pos(name_), value());
 	}
 
-	T& value_;
+	string_t name_;
 };
 
 typedef std::auto_ptr<into_binder> into_binder_ptr;
@@ -205,7 +235,7 @@ inline use_binder_ptr use(T& t)
 
 // Create named use binding for reference t.
 template<typename T>
-inline use_binder_ptr use(T& t, std::string const& name)
+inline use_binder_ptr use(T& t, string_t const& name)
 {
 	return use_binder_ptr(new use_name_binder<T>(t, name));
 }

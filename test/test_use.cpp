@@ -40,7 +40,7 @@ void object::test<1>()
 	// count inserted record
 	int count;
 	se << "select count(*) from some_table", into(count);
-	ensure_equals("row count", count, dimof(recs) ); 
+	ensure_equals("row count", count, static_cast<int>(dimof(recs)) ); 
 
 	// check inserted records
 	record r;
@@ -50,7 +50,7 @@ void object::test<1>()
 	{
 		ensure_equals(recs[count], r);
 	}
-	ensure_equals(count, dimof(recs)); 
+	ensure_equals("row count", count, static_cast<int>(dimof(recs))); 
 }
 
 // use by name binding
@@ -72,7 +72,7 @@ void object::test<2>()
 	// count inserted record
 	int count;
 	se << "select count(*) from some_table", into(count);
-	ensure_equals("row count", count, dimof(recs) ); 
+	ensure_equals("row count", count, static_cast<int>(dimof(recs)) ); 
 
 	// check inserted records
 	record r;

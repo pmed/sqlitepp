@@ -1,0 +1,10 @@
+subproject test ;
+
+exe test
+    # sources
+    : [ GLOB $(TOP)/test : *.cpp ] <lib>../src/sqlitepp <lib>../sqlite/sqlite
+    # requirements 
+    : <sysinclude>../../include <sysinclude>../tut
+    # default build
+    : debug release
+;

@@ -1,0 +1,19 @@
+subproject src ;
+
+lib sqlitepp
+    # sources
+    : [ GLOB $(TOP)/src : *.cpp ]
+    # requirements 
+    : <sysinclude>../../include <sysinclude>../../sqlite
+    # default build
+    : debug release
+;
+
+stage sqlitepp
+    # sources
+    : <lib>sqlitepp
+    # requirements
+    : <locate>$(TOP)/lib common-variant-tag <target>stage <target>all
+    # local build
+    : debug release
+;

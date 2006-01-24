@@ -5,7 +5,7 @@
 #include "session_data.hpp"
 #include <sqlitepp/exception.hpp>
 
-session_data::session_data(std::string const& name) : name_(name)
+session_data::session_data(sqlitepp::string_t const& name) : name_(name)
 {
 	// ensure remove previously used database
 	remove(name_.c_str()); 
@@ -65,7 +65,7 @@ void object::test<3>()
 	catch(sqlitepp::exception const&)
 	{
 		ensure( "session error", se.last_error() );
-		ensure( "session error msg", se.last_error_msg() );
+		ensure( "session error msg", !se.last_error_msg().empty() );
 		ensure( "session not valid", !se );
 	}
 }
