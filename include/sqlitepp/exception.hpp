@@ -9,6 +9,8 @@
 #ifndef SQLITEPP_EXCEPTION_HPP_INCLUDED
 #define SQLITEPP_EXCEPTION_HPP_INCLUDED
 
+#include <exception>
+
 #include "string.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -18,26 +20,59 @@ namespace sqlitepp {
 //////////////////////////////////////////////////////////////////////////////
 
 // SQLite exception
-class exception
+class exception : public std::exception
 {
 public:
-	explicit exception(int err_code, string_t const& descr)
+	// create exception from error code and description
+	explicit exception(int err_code, string_t const& descr = string_t())
 		: code_(err_code), descr_(descr)
 	{
 	}
 
-	~exception() throw() {}
+	~exception() throw()
+	{
+	}
 
-	char_t const* what() const throw() { return descr_.c_str(); }
-
+	// Exception error description
+	char const* what() const throw();
 	// SQLite library error code.
 	int code() const // throw()
 	{
 		return code_;
 	}
+
+	// SQLite error description
+	string_t const& descr() const //throw()
+	{
+		return descr_;
+	}
 private:	
 	int code_;
 	string_t descr_;
+};
+
+struct nested_txn_not_supported : exception
+{
+	nested_txn_not_supported();
+	char const* what() const throw();
+};
+
+struct no_such_column : exception
+{
+	no_such_column(string_t const& col_name);
+	char const* what() const throw();
+};
+
+struct session_not_open : exception
+{
+	session_not_open();
+	char const* what() const throw();
+};
+
+struct multi_stmt_not_supported : exception
+{
+	multi_stmt_not_supported();
+	char const* what() const throw();
 };
 
 //////////////////////////////////////////////////////////////////////////////

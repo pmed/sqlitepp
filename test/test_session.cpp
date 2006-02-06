@@ -5,17 +5,20 @@
 #include "session_data.hpp"
 #include <sqlitepp/exception.hpp>
 
+using namespace sqlitepp;
+
 session_data::session_data(sqlitepp::string_t const& name) : name_(name)
 {
+	se.open(name_);
 	// ensure remove previously used database
-	remove(name_.c_str()); 
+//	remove(name_.c_str()); 
 }
 
 session_data::~session_data()
 {
 	se.close();
 	// ensure remove database
-	remove(name_.c_str()); 
+//	remove(name_.c_str()); 
 }
 
 namespace 
@@ -30,7 +33,6 @@ test_group g("session");
 template<>template<>
 void object::test<1>()
 {
-	se.open(name_);
 	ensure( "open", se.is_open() );
 	ensure( "valid", se);
 	ensure( "impl", se.impl());
@@ -41,12 +43,6 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 {
-	ensure("closed", !se.is_open());
-	se.open(name_);
-	ensure( "open", se.is_open() );
-	ensure( "valid", se);
-	ensure( "no active txn", !se.active_txn() );
-
 	se.close();
 	ensure("closed", !se.is_open());
 }
@@ -55,11 +51,9 @@ void object::test<2>()
 template<>template<>
 void object::test<3>()
 {
-	se.open(name_);
-	ensure( "open", se.is_open() );
 	try
 	{
-		se << "select * from undefined_table";
+		se << utf(L"select * from undefined_table");
 		fail( "exception expected" );
 	}
 	catch(sqlitepp::exception const&)

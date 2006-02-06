@@ -159,6 +159,9 @@ private:
 	void check_error(int code) const;
 	void check_last_error() const;
 
+	void do_prepare(utf8_string const& sql);
+	void do_prepare(utf16_string const& sql);
+	
 	session& s_;
 	query q_;
 	sqlite3_stmt* impl_;

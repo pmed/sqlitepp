@@ -22,44 +22,51 @@ test_group g("query");
 template<>template<>
 void test_group::object::test<1>()
 {
-	ensure("empty query", q.sql().empty() );
+	ensure("empty query", q.empty() );
 
-	q.set_sql("qaz");
-	ensure("q.sql() == qaz", q.sql() == "qaz" );
+	q.set_sql(utf(L"qaz"));
+	ensure("q.sql() == qaz", q.sql() == utf(L"qaz") );
 }
 
 template<>template<>
 void test_group::object::test<2>()
 {
-	q.set_sql("qaz");
-	query q2("qaz");
-	ensure("q = q2", q.sql() == q2.sql() );
+	q.set_sql(utf(L"qaz"));
+	query q2(q);
+	ensure("sql q = q2", q.sql() == q2.sql() );
+	ensure("intos q = q2", q.intos().size() == q2.intos().size() );
+	ensure("uses q = q2", q.uses().size() == q2.uses().size() );
 }
 
 template<>template<>
 void test_group::object::test<3>()
 {
-	query q2("qaz");
+	q.set_sql(utf(L"qaz"));
+	ensure("not empty", !q.empty() );
+	query q2(q);
+	ensure("sql q == q2", q.sql() == q2.sql() );
+	
 	q2.clear();
-	ensure("clear", q.sql() == q2.sql() );
+	ensure("q !empty", !q.empty() );
+	ensure("q2 empty", q2.empty() );
 }
 
 template<>template<>
 void test_group::object::test<4>()
 {
-	query q2("qaz");
+	query q2(utf(L"qaz"));
 
 	ensure("q", q.sql().empty() );
-	ensure("q2.sql() == qaz", q2.sql() == "qaz" );
+	ensure("q2.sql() == qaz", q2.sql() == utf(L"qaz") );
 	swap(q, q2);
-	ensure("q.sql() == qaz", q.sql() == "qaz" );
+	ensure("q.sql() == qaz", q.sql() == utf(L"qaz") );
 	ensure("q2 empty", q2.sql().empty() );
 
 	q << "aaaa";
-	ensure("q.sql() = qazaaaa", q.sql() == "qazaaaa");
+	ensure("q.sql() = qazaaaa", q.sql() == utf(L"qazaaaa"));
 
 	q2 << 23.34;
-	ensure("q2.sql() = 23.34", q2.sql() == "23.34");
+	ensure("q2.sql() = 23.34", q2.sql() == utf(L"23.34"));
 
 }
 
@@ -68,17 +75,11 @@ void test_group::object::test<5>()
 {
 	int z = 100;
 	q << "qaz" << z;
-	ensure("q.sql() == qaz100", q.sql() == "qaz100");
+	ensure("q.sql() == qaz100", q.sql() == utf(L"qaz100"));
 
 	query q2(q);
-	ensure("destructive copy q", q.sql().empty() );
-	ensure("destructive copy q2", q2.sql() == "qaz100" );
-
-	q << "aaaa";
-	ensure("q.sql() == aaaa", q.sql() == "aaaa");
-
 	q2 << "wert";
-	ensure("q2.sql() == qaz100wert", q2.sql() == "qaz100wert");
+	ensure("q2.sql() == qaz100wert", q2.sql() == utf(L"qaz100wert"));
 }
 
 template<>template<>

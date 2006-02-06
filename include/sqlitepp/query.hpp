@@ -32,8 +32,8 @@ public:
 	
 	// Create sql_query with SQL statement.
 	explicit query(string_t const& sql)
-		: sql_(sql.c_str())
 	{
+		sql_ << sql;
 	}
 	
 	query(query const& src)
@@ -58,7 +58,7 @@ public:
 	// Current SQL statement.
 	string_t sql() const // throw()
 	{
-		return sql_.str().c_str();
+		return sql_.str();
 	}
 	
 	// Set new SQL statement.
@@ -89,6 +89,18 @@ public:
 	use_binders const& uses() const // throw()
 	{
 		return uses_;
+	}
+
+	query& operator<<(utf8_string const& s)
+	{
+		sql_ << utf(s);
+		return *this;
+	}
+
+	query& operator<<(utf16_string const& s)
+	{
+		sql_ << utf(s);
+		return *this;
 	}
 
 	// Collect SQL.

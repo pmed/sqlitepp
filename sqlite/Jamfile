@@ -13,14 +13,16 @@ for local s in [ GLOB $(TOP)/sqlite : *.c ]
     }
 }
 
-lib sqlite
+template sqlite-t
     # sources
     : $(src)
     # requierements
-    :
+    : <vc-8_0><*><define>_CRT_SECURE_NO_DEPRECATE 
     # default build
     : debug release
 ;
+
+lib sqlite : <template>sqlite-t ;
 
 stage sqlite
     # sources

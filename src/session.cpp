@@ -23,7 +23,7 @@ void session::open(string_t const& file_name)
 	// close session
 	close();
 
-	int const r = sqlite3_open(file_name.c_str(), &impl_);
+	int const r = aux::select(::sqlite3_open, ::sqlite3_open16)(file_name.c_str(), &impl_);
 	if ( r != SQLITE_OK )
 	{
 		string_t msg( last_error_msg() );
@@ -55,7 +55,8 @@ string_t session::last_error_msg() const // throw()
 	string_t result;
 	if ( is_open() )
 	{
-		result = select(::sqlite3_errmsg, ::sqlite3_errmsg16)(impl_);
+		result = reinterpret_cast<char_t const*>
+			(aux::select(::sqlite3_errmsg, ::sqlite3_errmsg16)(impl_));
 	}
 	return result;
 }

@@ -9,7 +9,6 @@
 #include "sqlitepp/transaction.hpp"
 
 #include <sqlite3.h>
-#include <cassert>
 
 #include "sqlitepp/exception.hpp"
 #include "sqlitepp/session.hpp"
@@ -24,8 +23,7 @@ transaction::transaction(session& s) : s_(s), do_rollback_(false)
 {
 	if ( s_.active_txn() )
 	{
-		assert(!"nested transactions are not supported");
-		throw exception(SQLITE_ERROR, "nested transactions are not supported");
+		throw nested_txn_not_supported();
 	}
 	s_ << "begin";
 	s_.active_txn_ = this;

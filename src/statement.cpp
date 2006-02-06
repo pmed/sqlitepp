@@ -74,19 +74,40 @@ void statement::check_last_error() const
 }
 //----------------------------------------------------------------------------
 
+void statement::do_prepare(utf8_string const& sql)
+{
+	char const* tail;
+		
+	check_error( ::sqlite3_prepare(s_.impl(),
+		reinterpret_cast<char const*>(sql.c_str()),
+		static_cast<int>(sql.size() * sizeof(utf8_char)), 
+		&impl_, &tail) );
+	if ( tail && *tail )
+	{
+		throw multi_stmt_not_supported();
+	}
+}
+//----------------------------------------------------------------------------
+
+void statement::do_prepare(utf16_string const& sql)
+{
+	utf16_char const* tail;
+		
+	check_error( ::sqlite3_prepare16(s_.impl(), sql.c_str(),
+		static_cast<int>(sql.size() * sizeof(utf16_char)), 
+		&impl_, reinterpret_cast<void const**>(&tail)) );
+	if ( tail && *tail )
+	{
+		throw multi_stmt_not_supported();
+	}
+}
+//----------------------------------------------------------------------------
+
 void statement::prepare()
 {
 	try
 	{
-		string_t const& sql = q_.sql();
-		char_t const* tail;
-		check_error( select(::sqlite3_prepare, ::sqlite3_prepare16)
-			(s_.impl(), sql.c_str(), sql.size(), &impl_, &tail) );
-		if ( tail && *tail )
-		{
-			throw exception(SQLITE_ERROR, "only one statement is supported");
-		}
-
+		do_prepare(q_.sql());
 		// bind into and use binders
 		std::accumulate(q_.intos().begin(), q_.intos().end(), 0, bind(*this));
 		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
@@ -156,7 +177,8 @@ int statement::column_count() const
 
 string_t statement::column_name(int column) const
 {
-	char_t const* name = sqlite3_column_name(impl_, column);
+	char_t const* name = reinterpret_cast<char_t const*>
+		(aux::select(::sqlite3_column_name, ::sqlite3_column_name16)(impl_, column));
 	check_last_error();
 	return name;
 }
@@ -169,7 +191,7 @@ int statement::column_index(string_t const& name) const
 		if ( name == column_name(c) )
 			return c;
 	}
-	throw exception(SQLITE_RANGE, string_t("no column ") + name);
+	throw no_such_column(name);
 }
 
 statement::col_type statement::column_type(int column) const
@@ -203,9 +225,17 @@ void statement::column_value(int column, double& value) const
 
 void statement::column_value(int column, string_t& value) const
 {
-	char_t const* str = reinterpret_cast<char const*>(sqlite3_column_text(impl_, column));
+	char_t const* str = reinterpret_cast<char_t const*>(
+		aux::select(::sqlite3_column_text, ::sqlite3_column_text16)(impl_, column));
 	check_last_error();
-	value = str? str : "";
+	if ( str )
+	{
+		value = str;
+	}
+	else
+	{
+		value.clear();
+	}
 }
 //----------------------------------------------------------------------------
 
@@ -221,7 +251,7 @@ void statement::column_value(int column, blob& value) const
 
 int statement::use_pos(string_t const& name) const
 {
-	int pos = sqlite3_bind_parameter_index(impl_, name.c_str());
+	int pos = sqlite3_bind_parameter_index(impl_, reinterpret_cast<char const*>(utf8(name).c_str()));
 	if ( pos <= 0 )
 	{
 		throw exception(SQLITE_RANGE, s_.last_error_msg());
@@ -250,15 +280,17 @@ void statement::use_value(int pos, long long value)
 
 void statement::use_value(int pos, string_t const& value)
 {
-	check_error( sqlite3_bind_text(impl_, pos, 
-		value.empty()? 0 : value.c_str(), value.size(), SQLITE_STATIC) );
+	check_error( aux::select(::sqlite3_bind_text, sqlite3_bind_text16)
+		(impl_, pos,  value.empty()? 0 : value.c_str(),
+		static_cast<int>(value.size() * sizeof(char_t)), SQLITE_STATIC) );
 }
 //----------------------------------------------------------------------------
 
 void statement::use_value(int pos, blob const& value)
 {
 	check_error( sqlite3_bind_blob(impl_, pos, 
-		value.empty()? 0 : &value[0], value.size(), SQLITE_STATIC) );
+		value.empty()? 0 : &value[0], 
+		static_cast<int>(value.size()), SQLITE_STATIC) );
 }
 
 //////////////////////////////////////////////////////////////////////////////

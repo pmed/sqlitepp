@@ -1,17 +1,36 @@
 subproject src ;
 
-lib sqlitepp
+template sqlitepp-t
     # sources
     : [ GLOB $(TOP)/src : *.cpp ]
-    # requirements 
-    : <sysinclude>../../include <sysinclude>../../sqlite
+    # requierements
+    : <sysinclude>../../include
     # default build
     : debug release
 ;
 
+lib sqlitepp
+    # sources
+    : <template>sqlitepp-t
+    # requirements 
+    :
+    # default build
+    :
+;
+
+lib sqlitepp-utf16
+    # sources
+    : <template>sqlitepp-t
+    # requirements 
+    : <define>SQLITEPP_UTF16
+    # default build
+    :
+;
+
+
 stage sqlitepp
     # sources
-    : <lib>sqlitepp
+    : <lib>sqlitepp <lib>sqlitepp-utf16
     # requirements
     : <locate>$(TOP)/lib common-variant-tag <target>stage <target>all
     # local build

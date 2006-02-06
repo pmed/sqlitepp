@@ -8,7 +8,6 @@
 
 #include "sqlitepp/query.hpp"
 
-#include <cassert>
 #include <algorithm>
 #include <stdexcept>
 
@@ -33,7 +32,6 @@ namespace { // implementation details
 template<typename T>
 inline void delete_object(T* obj)
 {
-	assert( obj && "object should be not null");
 	delete obj;
 }
 //----------------------------------------------------------------------------
@@ -41,7 +39,6 @@ inline void delete_object(T* obj)
 template<typename T>
 inline T* clone_object(T* obj)
 {
-	assert( obj && "object should be not null");
 	return obj->clone();
 }
 
@@ -81,7 +78,7 @@ void query::clear() // throw()
 	std::for_each(uses_.begin(), uses_.end(), delete_object<use_binder>);
 	uses_.clear();
 	// clear sql
-	sql_.clear();
+	set_sql(string_t());
 }
 //----------------------------------------------------------------------------
 
@@ -89,7 +86,6 @@ query& query::put(into_binder_ptr i)
 {
 	if ( !i.get() )
 	{
-		assert(!"into binder should be not null");
 		throw std::invalid_argument("null into binder");
 	}
 	intos_.push_back(i.release());
@@ -101,7 +97,6 @@ query& query::put(use_binder_ptr u)
 {
 	if ( !u.get() )
 	{
-		assert(!"use binder should be not null");
 		throw std::invalid_argument("null use binder");
 	}
 	uses_.push_back(u.release());
@@ -148,8 +143,7 @@ once_query::~once_query()
 	{
 		if ( !s_->is_open() )
 		{
-			assert(!"session not open");
-			throw exception(SQLITE_ERROR, "session not open");
+			throw session_not_open();
 		}
 		// execute statement in session.
 		statement st(*s_);

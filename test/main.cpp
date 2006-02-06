@@ -8,21 +8,37 @@ namespace tut
 	test_runner_singleton runner;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    std::cout << "SQLite++ test application." << std::endl;
+	std::cout << "SQLite++ test application." << std::endl;
 
 	tut::reporter callback;
 	tut::runner.get().set_callback(&callback);
 	try
 	{
-		tut::runner.get().run_tests();
+		switch ( argc )
+		{
+		case 1:
+			// run all tests
+			tut::runner.get().run_tests();
+			break;
+		case 2: 
+			// run a test group
+			tut::runner.get().run_tests(argv[1]);
+			break;
+		case 3:
+			// run particular test in a group
+			tut::runner.get().run_test(argv[1], atoi(argv[2]));
+			break;
+		default:
+			std::cout << "Usage\n" << argv[0] << " [group name] [test number]" << std::endl;
+			return -1;
+		}
 	}
-	catch( const std::exception& ex )
+	catch( std::exception const& ex )
 	{
 		std::cerr << "tut raised ex: " << ex.what() << std::endl;
 	}
 
-	//return callback.all_ok() ? 0 : -1;
-	system("pause");
+//	std::cin.get();
 }

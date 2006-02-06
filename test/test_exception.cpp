@@ -6,7 +6,9 @@
 
 namespace
 {
-	
+
+using namespace sqlitepp;
+
 struct exception_data : session_data
 {
 };
@@ -21,7 +23,7 @@ void object::test<1>()
 {
 	try
 	{
-		se << "qaz";
+		se << utf(L"qaz");
 		fail( "exception expected");
 	}
 	catch(sqlitepp::exception const& ex)

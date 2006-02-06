@@ -15,11 +15,14 @@ test_group g("into");
 
 using namespace sqlitepp;
 
+template<typename C>
+struct literals;
+
 // into by pos binding
 template<>template<>
 void object::test<1>()
 {
-	record r1(1, "Елена", 345.2);
+	record r1(1, utf(L"Елена"), 345.2);
 	r1.insert(se);
 	ensure( "row inserted", se );
 
@@ -36,13 +39,13 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 	{
-	record r1(1, "Анна", 345.2);
+	record r1(1, utf(L"Анна"), 345.2);
 	r1.insert(se);
 	ensure( "row inserted", se );
 
 	record r2;
-	st << "select id, name, salary from some_table",
-		into(r2.salary, "salary"), into(r2.id, "id"), into(r2.name, "name");
+	st << L"select id, name, salary from some_table",
+		into(r2.salary, utf(L"salary")), into(r2.id, utf(L"id")), into(r2.name, utf(L"name"));
 
 	ensure( "row selected", st.exec() );
 	ensure_equals(r1, r2);
@@ -56,7 +59,7 @@ void object::test<3>()
 	try
 	{
 		int id;
-		st << "select id from some_table", into(id, "id_ZZZ");
+		st << utf(L"select id from some_table"), into(id, utf(L"id_ZZZ"));
 		st.exec();
 		fail( "exception expected" );
 	}
@@ -70,7 +73,7 @@ void object::test<3>()
 template<>template<>
 void object::test<4>()
 {
-	record r1(1, "Юля", 634.4);
+	record r1(1, utf(L"Юля"), 634.4);
 	r1.insert(se);
 	ensure( "row inserted", se );
 
