@@ -1,0 +1,11 @@
+
+project sqlitepp
+	: build-dir bin
+	: default-build release
+#	: usage-requirements <include>include <source>sqlite
+;
+
+	
+lib sqlitepp : [ glob *.cpp ] ;
+
+lib sqlitepp-utf16 : [ glob *.cpp ] : <define>SQLITEPP_UTF16 ;

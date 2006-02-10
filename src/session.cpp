@@ -18,12 +18,34 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
+namespace { // implementation details
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Need to overload open functions because of char const* UTF-8 version :(
+int do_open(utf8_string const& file_name, sqlite3** impl)
+{
+	return ::sqlite3_open(reinterpret_cast<char const*>(file_name.c_str()), impl);
+}
+//----------------------------------------------------------------------------
+
+int do_open(utf16_string const& file_name, sqlite3** impl)
+{
+	return ::sqlite3_open16(file_name.c_str(), impl);
+}
+//////////////////////////////////////////////////////////////////////////////
+
+} // namespace { // implementation details
+
+//////////////////////////////////////////////////////////////////////////////
+
 void session::open(string_t const& file_name)
 {
 	// close session
 	close();
 
-	int const r = aux::select(::sqlite3_open, ::sqlite3_open16)(file_name.c_str(), &impl_);
+	// call do_* helper - select for utf8_char not applicable for sqlite3_open :(
+	int const r = do_open(file_name, &impl_);
 	if ( r != SQLITE_OK )
 	{
 		string_t msg( last_error_msg() );

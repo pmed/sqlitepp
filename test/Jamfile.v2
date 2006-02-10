@@ -1,0 +1,14 @@
+
+project test ;
+
+import testing ;
+
+exe test-utf8
+	: [ glob *.cpp ] sqlitepp//sqlitepp
+;
+
+exe test-utf16
+	: [ glob *.cpp ] sqlitepp//sqlitepp-utf16
+	: <define>SQLITEPP_UTF16
+;
+

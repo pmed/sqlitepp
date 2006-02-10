@@ -1,0 +1,13 @@
+
+project sqlite
+	: requirements <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+;
+
+import set ;
+
+# build library from all *.c sources except shell.c and tclsqlite.c
+
+lib sqlite 
+	: [ set.difference [ glob *.c ] : shell.c tclsqlite.c ] 
+	: <version>3.3.1
+;

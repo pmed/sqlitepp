@@ -52,6 +52,8 @@ struct utf32_char_selector
 
 //////////////////////////////////////////////////////////////////////////////
 
+using std::size_t;
+
 typedef unsigned char                   utf8_char;
 typedef meta::utf16_char_selector::type utf16_char;
 typedef meta::utf32_char_selector::type utf32_char;

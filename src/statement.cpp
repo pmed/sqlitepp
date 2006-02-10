@@ -27,6 +27,7 @@ namespace { // implementation details
 
 //////////////////////////////////////////////////////////////////////////////
 
+// Update into_binder functor
 struct update
 {
 	update(statement& st) : st_(st) {}
@@ -41,11 +42,11 @@ struct update
 };
 //----------------------------------------------------------------------------
 
+// Do bindings to statement functor
 struct bind
 {
 	bind(statement& st) : st_(st) {}
 	bind& operator=(bind const&);
-
 
 	template<typename T>
 	int operator()(int pos, T* binder) const
@@ -55,6 +56,34 @@ struct bind
 
 	statement& st_;
 };
+//----------------------------------------------------------------------------
+
+// Need to overload bind_text functions because of char const* UTF-8 version :(
+int do_bind_text(sqlite3_stmt* st, int pos, utf8_string const& str)
+{
+	return ::sqlite3_bind_text(st, pos, reinterpret_cast<char const*>(str.empty()? 0 : str.data()),
+		static_cast<int>(str.size() * sizeof(utf8_char)), SQLITE_STATIC);
+}
+//----------------------------------------------------------------------------
+
+int do_bind_text(sqlite3_stmt* st, int pos, utf16_string const& str)
+{
+	return ::sqlite3_bind_text16(st, pos, str.empty()? 0 : str.data(),
+		static_cast<int>(str.size() * sizeof(utf16_char)), SQLITE_STATIC);
+}
+//----------------------------------------------------------------------------
+
+// sqlite3_bind_parameter_index exists only for UTF-8 - do overloading again :(
+int bind_index(sqlite3_stmt* st, utf8_string const& name)
+{
+	return sqlite3_bind_parameter_index(st, reinterpret_cast<char const*>(name.c_str()));
+}
+//----------------------------------------------------------------------------
+
+int bind_index(sqlite3_stmt* st, utf16_string const& name)
+{
+	return bind_index(st, utf8(name));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -251,7 +280,7 @@ void statement::column_value(int column, blob& value) const
 
 int statement::use_pos(string_t const& name) const
 {
-	int pos = sqlite3_bind_parameter_index(impl_, reinterpret_cast<char const*>(utf8(name).c_str()));
+	int pos = bind_index(impl_, name);
 	if ( pos <= 0 )
 	{
 		throw exception(SQLITE_RANGE, s_.last_error_msg());
@@ -280,9 +309,8 @@ void statement::use_value(int pos, long long value)
 
 void statement::use_value(int pos, string_t const& value)
 {
-	check_error( aux::select(::sqlite3_bind_text, sqlite3_bind_text16)
-		(impl_, pos,  value.empty()? 0 : value.c_str(),
-		static_cast<int>(value.size() * sizeof(char_t)), SQLITE_STATIC) );
+	// call do_* helper - select for utf8_char not applicable for sqlite3_bind_text :(
+	check_error( do_bind_text(impl_, pos, value) );
 }
 //----------------------------------------------------------------------------
 
