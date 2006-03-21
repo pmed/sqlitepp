@@ -91,15 +91,27 @@ public:
 		return uses_;
 	}
 
-	query& operator<<(utf8_string const& s)
+	query& operator<<(utf8_char const* str)
 	{
-		sql_ << utf(s);
+		sql_ << utf(str);
 		return *this;
 	}
 
-	query& operator<<(utf16_string const& s)
+	query& operator<<(utf8_string const& str)
 	{
-		sql_ << utf(s);
+		sql_ << utf(str);
+		return *this;
+	}
+
+	query& operator<<(utf16_char const* str)
+	{
+		sql_ << utf(str);
+		return *this;
+	}
+
+	query& operator<<(utf16_string const& str)
+	{
+		sql_ << utf(str);
 		return *this;
 	}
 
