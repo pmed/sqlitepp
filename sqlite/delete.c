@@ -12,7 +12,7 @@
 ** This file contains C code routines that are called by the parser
 ** in order to generate code for DELETE FROM statements.
 **
-** $Id: delete.c,v 1.118 2006/01/11 21:41:22 drh Exp $
+** $Id: delete.c,v 1.121 2006/02/10 02:27:43 danielk1977 Exp $
 */
 #include "sqliteInt.h"
 
@@ -108,7 +108,7 @@ void sqlite3DeleteFrom(
 #endif
 
   sContext.pParse = 0;
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( pParse->nErr || sqlite3MallocFailed() ){
     goto delete_from_cleanup;
   }
   db = pParse->db;
@@ -210,13 +210,13 @@ void sqlite3DeleteFrom(
       /* If counting rows deleted, just count the total number of
       ** entries in the table. */
       int endOfLoop = sqlite3VdbeMakeLabel(v);
-      int addr;
+      int addr2;
       if( !isView ){
         sqlite3OpenTable(pParse, iCur, iDb, pTab, OP_OpenRead);
       }
       sqlite3VdbeAddOp(v, OP_Rewind, iCur, sqlite3VdbeCurrentAddr(v)+2);
-      addr = sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
-      sqlite3VdbeAddOp(v, OP_Next, iCur, addr);
+      addr2 = sqlite3VdbeAddOp(v, OP_AddImm, 1, 0);
+      sqlite3VdbeAddOp(v, OP_Next, iCur, addr2);
       sqlite3VdbeResolveLabel(v, endOfLoop);
       sqlite3VdbeAddOp(v, OP_Close, iCur, 0);
     }
@@ -343,7 +343,7 @@ void sqlite3DeleteFrom(
   if( db->flags & SQLITE_CountRows && pParse->nested==0 && !pParse->trigStack ){
     sqlite3VdbeAddOp(v, OP_Callback, 1, 0);
     sqlite3VdbeSetNumCols(v, 1);
-    sqlite3VdbeSetColName(v, 0, "rows deleted", P3_STATIC);
+    sqlite3VdbeSetColName(v, 0, COLNAME_NAME, "rows deleted", P3_STATIC);
   }
 
 delete_from_cleanup:

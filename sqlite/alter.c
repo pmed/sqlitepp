@@ -12,7 +12,7 @@
 ** This file contains C code routines that used to generate VDBE code
 ** that implements the ALTER TABLE command.
 **
-** $Id: alter.c,v 1.16 2006/01/11 21:41:21 drh Exp $
+** $Id: alter.c,v 1.20 2006/02/09 02:56:03 drh Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>
@@ -162,7 +162,7 @@ void sqlite3AlterFunctions(sqlite3 *db){
   int i;
 
   for(i=0; i<sizeof(aFuncs)/sizeof(aFuncs[0]); i++){
-    sqlite3_create_function(db, aFuncs[i].zName, aFuncs[i].nArg,
+    sqlite3CreateFunc(db, aFuncs[i].zName, aFuncs[i].nArg,
         SQLITE_UTF8, 0, aFuncs[i].xFunc, 0, 0);
   }
 }
@@ -267,7 +267,7 @@ void sqlite3AlterRenameTable(
   char *zWhere = 0;         /* Where clause to locate temp triggers */
 #endif
   
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ) goto exit_rename_table;
+  if( sqlite3MallocFailed() ) goto exit_rename_table;
   assert( pSrc->nSrc==1 );
 
   pTab = sqlite3LocateTable(pParse, pSrc->a[0].zName, pSrc->a[0].zDatabase);
@@ -407,6 +407,13 @@ void sqlite3AlterFinishAddColumn(Parse *pParse, Token *pColDef){
   pTab = sqlite3FindTable(pParse->db, zTab, zDb);
   assert( pTab );
 
+#ifndef SQLITE_OMIT_AUTHORIZATION
+  /* Invoke the authorization callback. */
+  if( sqlite3AuthCheck(pParse, SQLITE_ALTER_TABLE, zDb, pTab->zName, 0) ){
+    return;
+  }
+#endif
+
   /* If the default value for the new column was specified with a 
   ** literal NULL, then set pDflt to 0. This simplifies checking
   ** for an SQL NULL default below.
@@ -501,7 +508,7 @@ void sqlite3AlterBeginAddColumn(Parse *pParse, SrcList *pSrc){
 
   /* Look up the table being altered. */
   assert( pParse->pNewTable==0 );
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ) goto exit_begin_add_column;
+  if( sqlite3MallocFailed() ) goto exit_begin_add_column;
   pTab = sqlite3LocateTable(pParse, pSrc->a[0].zName, pSrc->a[0].zDatabase);
   if( !pTab ) goto exit_begin_add_column;
 
@@ -534,6 +541,7 @@ void sqlite3AlterBeginAddColumn(Parse *pParse, SrcList *pSrc){
   for(i=0; i<pNew->nCol; i++){
     Column *pCol = &pNew->aCol[i];
     pCol->zName = sqliteStrDup(pCol->zName);
+    pCol->zColl = 0;
     pCol->zType = 0;
     pCol->pDflt = 0;
   }

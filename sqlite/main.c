@@ -14,7 +14,7 @@
 ** other files are for internal use by SQLite and should not be
 ** accessed by users of the library.
 **
-** $Id: main.c,v 1.323 2006/01/11 21:41:22 drh Exp $
+** $Id: main.c,v 1.334 2006/02/09 13:43:29 danielk1977 Exp $
 */
 #include "sqliteInt.h"
 #include "os.h"
@@ -29,7 +29,6 @@ const int sqlite3one = 1;
 /*
 ** The version of the library
 */
-const char rcsid3[] = "@(#) \044Id: SQLite version " SQLITE_VERSION " $";
 const char sqlite3_version[] = SQLITE_VERSION;
 const char *sqlite3_libversion(void){ return sqlite3_version; }
 int sqlite3_libversion_number(void){ return SQLITE_VERSION_NUMBER; }
@@ -131,9 +130,6 @@ int sqlite3_close(sqlite3 *db){
     return SQLITE_ERROR;
   }
 
-  /* sqlite3_close() may not invoke sqliteMalloc(). */
-  sqlite3MallocDisallow();
-
   for(j=0; j<db->nDb; j++){
     struct Db *pDb = &db->aDb[j];
     if( pDb->pBt ){
@@ -177,7 +173,6 @@ int sqlite3_close(sqlite3 *db){
   */
   sqliteFree(db->aDb[1].pSchema);
   sqliteFree(db);
-  sqlite3MallocAllow();
   sqlite3ReleaseThreadData();
   return SQLITE_OK;
 }
@@ -386,9 +381,12 @@ void sqlite3_interrupt(sqlite3 *db){
 void sqlite3_free(char *p){ free(p); }
 
 /*
-** Create new user functions.
+** This function is exactly the same as sqlite3_create_function(), except
+** that it is designed to be called by internal code. The difference is
+** that if a malloc() fails in sqlite3_create_function(), an error code
+** is returned and the mallocFailed flag cleared. 
 */
-int sqlite3_create_function(
+int sqlite3CreateFunc(
   sqlite3 *db,
   const char *zFunctionName,
   int nArg,
@@ -425,10 +423,10 @@ int sqlite3_create_function(
     enc = SQLITE_UTF16NATIVE;
   }else if( enc==SQLITE_ANY ){
     int rc;
-    rc = sqlite3_create_function(db, zFunctionName, nArg, SQLITE_UTF8,
+    rc = sqlite3CreateFunc(db, zFunctionName, nArg, SQLITE_UTF8,
          pUserData, xFunc, xStep, xFinal);
     if( rc!=SQLITE_OK ) return rc;
-    rc = sqlite3_create_function(db, zFunctionName, nArg, SQLITE_UTF16LE,
+    rc = sqlite3CreateFunc(db, zFunctionName, nArg, SQLITE_UTF16LE,
         pUserData, xFunc, xStep, xFinal);
     if( rc!=SQLITE_OK ) return rc;
     enc = SQLITE_UTF16BE;
@@ -447,6 +445,7 @@ int sqlite3_create_function(
     if( db->activeVdbeCnt ){
       sqlite3Error(db, SQLITE_BUSY, 
         "Unable to delete/modify user-function due to active statements");
+      assert( !sqlite3MallocFailed() );
       return SQLITE_BUSY;
     }else{
       sqlite3ExpirePreparedStatements(db);
@@ -454,39 +453,56 @@ int sqlite3_create_function(
   }
 
   p = sqlite3FindFunction(db, zFunctionName, nName, nArg, enc, 1);
-  if( p==0 ) return SQLITE_NOMEM;
-  p->flags = 0;
-  p->xFunc = xFunc;
-  p->xStep = xStep;
-  p->xFinalize = xFinal;
-  p->pUserData = pUserData;
+  if( p ){
+    p->flags = 0;
+    p->xFunc = xFunc;
+    p->xStep = xStep;
+    p->xFinalize = xFinal;
+    p->pUserData = pUserData;
+  }
   return SQLITE_OK;
 }
+
+/*
+** Create new user functions.
+*/
+int sqlite3_create_function(
+  sqlite3 *db,
+  const char *zFunctionName,
+  int nArg,
+  int enc,
+  void *p,
+  void (*xFunc)(sqlite3_context*,int,sqlite3_value **),
+  void (*xStep)(sqlite3_context*,int,sqlite3_value **),
+  void (*xFinal)(sqlite3_context*)
+){
+  int rc;
+  assert( !sqlite3MallocFailed() );
+  rc = sqlite3CreateFunc(db, zFunctionName, nArg, enc, p, xFunc, xStep, xFinal);
+
+  return sqlite3ApiExit(db, rc);
+}
+
 #ifndef SQLITE_OMIT_UTF16
 int sqlite3_create_function16(
   sqlite3 *db,
   const void *zFunctionName,
   int nArg,
   int eTextRep,
-  void *pUserData,
+  void *p,
   void (*xFunc)(sqlite3_context*,int,sqlite3_value**),
   void (*xStep)(sqlite3_context*,int,sqlite3_value**),
   void (*xFinal)(sqlite3_context*)
 ){
   int rc;
   char *zFunc8;
+  assert( !sqlite3MallocFailed() );
 
-  if( sqlite3SafetyCheck(db) ){
-    return SQLITE_MISUSE;
-  }
   zFunc8 = sqlite3utf16to8(zFunctionName, -1);
-  if( !zFunc8 ){
-    return SQLITE_NOMEM;
-  }
-  rc = sqlite3_create_function(db, zFunc8, nArg, eTextRep, 
-      pUserData, xFunc, xStep, xFinal);
+  rc = sqlite3CreateFunc(db, zFunc8, nArg, eTextRep, p, xFunc, xStep, xFinal);
   sqliteFree(zFunc8);
-  return rc;
+
+  return sqlite3ApiExit(db, rc);
 }
 #endif
 
@@ -645,7 +661,7 @@ int sqlite3BtreeFactory(
 */
 const char *sqlite3_errmsg(sqlite3 *db){
   const char *z;
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( !db || sqlite3MallocFailed() ){
     return sqlite3ErrStr(SQLITE_NOMEM);
   }
   if( sqlite3SafetyCheck(db) || db->errCode==SQLITE_MISUSE ){
@@ -684,7 +700,7 @@ const void *sqlite3_errmsg16(sqlite3 *db){
   };
 
   const void *z;
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( sqlite3MallocFailed() ){
     return (void *)(&outOfMemBe[SQLITE_UTF16NATIVE==SQLITE_UTF16LE?1:0]);
   }
   if( sqlite3SafetyCheck(db) || db->errCode==SQLITE_MISUSE ){
@@ -696,6 +712,7 @@ const void *sqlite3_errmsg16(sqlite3 *db){
          SQLITE_UTF8, SQLITE_STATIC);
     z = sqlite3_value_text16(db->pErr);
   }
+  sqlite3ApiExit(0, 0);
   return z;
 }
 #endif /* SQLITE_OMIT_UTF16 */
@@ -705,7 +722,7 @@ const void *sqlite3_errmsg16(sqlite3 *db){
 ** passed to this function, we assume a malloc() failed during sqlite3_open().
 */
 int sqlite3_errcode(sqlite3 *db){
-  if( !db || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( !db || sqlite3MallocFailed() ){
     return SQLITE_NOMEM;
   }
   if( sqlite3SafetyCheck(db) ){
@@ -713,6 +730,64 @@ int sqlite3_errcode(sqlite3 *db){
   }
   return db->errCode;
 }
+
+/*
+** Create a new collating function for database "db".  The name is zName
+** and the encoding is enc.
+*/
+static int createCollation(
+  sqlite3* db, 
+  const char *zName, 
+  int enc, 
+  void* pCtx,
+  int(*xCompare)(void*,int,const void*,int,const void*)
+){
+  CollSeq *pColl;
+  
+  if( sqlite3SafetyCheck(db) ){
+    return SQLITE_MISUSE;
+  }
+
+  /* If SQLITE_UTF16 is specified as the encoding type, transform this
+  ** to one of SQLITE_UTF16LE or SQLITE_UTF16BE using the
+  ** SQLITE_UTF16NATIVE macro. SQLITE_UTF16 is not used internally.
+  */
+  if( enc==SQLITE_UTF16 ){
+    enc = SQLITE_UTF16NATIVE;
+  }
+
+  if( enc!=SQLITE_UTF8 && enc!=SQLITE_UTF16LE && enc!=SQLITE_UTF16BE ){
+    sqlite3Error(db, SQLITE_ERROR, 
+        "Param 3 to sqlite3_create_collation() must be one of "
+        "SQLITE_UTF8, SQLITE_UTF16, SQLITE_UTF16LE or SQLITE_UTF16BE"
+    );
+    return SQLITE_ERROR;
+  }
+
+  /* Check if this call is removing or replacing an existing collation 
+  ** sequence. If so, and there are active VMs, return busy. If there
+  ** are no active VMs, invalidate any pre-compiled statements.
+  */
+  pColl = sqlite3FindCollSeq(db, (u8)enc, zName, strlen(zName), 0);
+  if( pColl && pColl->xCmp ){
+    if( db->activeVdbeCnt ){
+      sqlite3Error(db, SQLITE_BUSY, 
+        "Unable to delete/modify collation sequence due to active statements");
+      return SQLITE_BUSY;
+    }
+    sqlite3ExpirePreparedStatements(db);
+  }
+
+  pColl = sqlite3FindCollSeq(db, (u8)enc, zName, strlen(zName), 1);
+  if( pColl ){
+    pColl->xCmp = xCompare;
+    pColl->pUser = pCtx;
+    pColl->enc = enc;
+  }
+  sqlite3Error(db, SQLITE_OK, 0);
+  return SQLITE_OK;
+}
+
 
 /*
 ** This routine does the work of opening a database on behalf of
@@ -727,7 +802,7 @@ static int openDatabase(
   int rc;
   CollSeq *pColl;
 
-  assert( !sqlite3ThreadDataReadOnly()->mallocFailed );
+  assert( !sqlite3MallocFailed() );
 
   /* Allocate the sqlite data structure */
   db = sqliteMalloc( sizeof(sqlite3) );
@@ -741,33 +816,22 @@ static int openDatabase(
   sqlite3HashInit(&db->aFunc, SQLITE_HASH_STRING, 0);
   sqlite3HashInit(&db->aCollSeq, SQLITE_HASH_STRING, 0);
 
-#if 0
-  for(i=0; i<db->nDb; i++){
-    sqlite3HashInit(&db->aDb[i].tblHash, SQLITE_HASH_STRING, 0);
-    sqlite3HashInit(&db->aDb[i].idxHash, SQLITE_HASH_STRING, 0);
-    sqlite3HashInit(&db->aDb[i].trigHash, SQLITE_HASH_STRING, 0);
-    sqlite3HashInit(&db->aDb[i].aFKey, SQLITE_HASH_STRING, 1);
-  }
-#endif
- 
   /* Add the default collation sequence BINARY. BINARY works for both UTF-8
   ** and UTF-16, so add a version for each to avoid any unnecessary
   ** conversions. The only error that can occur here is a malloc() failure.
   */
-  if( sqlite3_create_collation(db, "BINARY", SQLITE_UTF8, 0,binCollFunc) ||
-      sqlite3_create_collation(db, "BINARY", SQLITE_UTF16, 0,binCollFunc) ||
+  if( createCollation(db, "BINARY", SQLITE_UTF8, 0, binCollFunc) ||
+      createCollation(db, "BINARY", SQLITE_UTF16BE, 0, binCollFunc) ||
+      createCollation(db, "BINARY", SQLITE_UTF16LE, 0, binCollFunc) ||
       (db->pDfltColl = sqlite3FindCollSeq(db, SQLITE_UTF8, "BINARY", 6, 0))==0 
   ){
-    /* sqlite3_create_collation() is an external API. So the mallocFailed flag
-    ** will have been cleared before returning. So set it explicitly here.
-    */
-    sqlite3ThreadData()->mallocFailed = 1;
+    assert( sqlite3MallocFailed() );
     db->magic = SQLITE_MAGIC_CLOSED;
     goto opendb_out;
   }
 
   /* Also add a UTF-8 case-insensitive collation sequence. */
-  sqlite3_create_collation(db, "NOCASE", SQLITE_UTF8, 0, nocaseCollatingFunc);
+  createCollation(db, "NOCASE", SQLITE_UTF8, 0, nocaseCollatingFunc);
 
   /* Set flags on the built-in collating sequences */
   db->pDfltColl->type = SQLITE_COLL_BINARY;
@@ -806,8 +870,10 @@ static int openDatabase(
   ** database schema yet. This is delayed until the first time the database
   ** is accessed.
   */
-  sqlite3RegisterBuiltinFunctions(db);
-  sqlite3Error(db, SQLITE_OK, 0);
+  if( !sqlite3MallocFailed() ){
+    sqlite3RegisterBuiltinFunctions(db);
+    sqlite3Error(db, SQLITE_OK, 0);
+  }
   db->magic = SQLITE_MAGIC_OPEN;
 
 opendb_out:
@@ -816,8 +882,7 @@ opendb_out:
     db = 0;
   }
   *ppDb = db;
-  sqlite3MallocClearFailed();
-  return rc;
+  return sqlite3ApiExit(0, rc);
 }
 
 /*
@@ -839,7 +904,7 @@ int sqlite3_open16(
   sqlite3 **ppDb
 ){
   char const *zFilename8;   /* zFilename encoded in UTF-8 instead of UTF-16 */
-  int rc = SQLITE_NOMEM;
+  int rc = SQLITE_OK;
   sqlite3_value *pVal;
 
   assert( zFilename );
@@ -852,14 +917,15 @@ int sqlite3_open16(
     rc = openDatabase(zFilename8, ppDb);
     if( rc==SQLITE_OK && *ppDb ){
       rc = sqlite3_exec(*ppDb, "PRAGMA encoding = 'UTF-16'", 0, 0, 0);
+      if( rc!=SQLITE_OK ){
+        sqlite3_close(*ppDb);
+        *ppDb = 0;
+      }
     }
-  }else{
-    assert( sqlite3ThreadDataReadOnly()->mallocFailed );
-    sqlite3MallocClearFailed();
   }
   sqlite3ValueFree(pVal);
 
-  return rc;
+  return sqlite3ApiExit(0, rc);
 }
 #endif /* SQLITE_OMIT_UTF16 */
 
@@ -911,53 +977,10 @@ int sqlite3_create_collation(
   void* pCtx,
   int(*xCompare)(void*,int,const void*,int,const void*)
 ){
-  CollSeq *pColl;
-  int rc = SQLITE_OK;
-  
-  if( sqlite3SafetyCheck(db) ){
-    return SQLITE_MISUSE;
-  }
-
-  /* If SQLITE_UTF16 is specified as the encoding type, transform this
-  ** to one of SQLITE_UTF16LE or SQLITE_UTF16BE using the
-  ** SQLITE_UTF16NATIVE macro. SQLITE_UTF16 is not used internally.
-  */
-  if( enc==SQLITE_UTF16 ){
-    enc = SQLITE_UTF16NATIVE;
-  }
-
-  if( enc!=SQLITE_UTF8 && enc!=SQLITE_UTF16LE && enc!=SQLITE_UTF16BE ){
-    sqlite3Error(db, SQLITE_ERROR, 
-        "Param 3 to sqlite3_create_collation() must be one of "
-        "SQLITE_UTF8, SQLITE_UTF16, SQLITE_UTF16LE or SQLITE_UTF16BE"
-    );
-    return SQLITE_ERROR;
-  }
-
-  /* Check if this call is removing or replacing an existing collation 
-  ** sequence. If so, and there are active VMs, return busy. If there
-  ** are no active VMs, invalidate any pre-compiled statements.
-  */
-  pColl = sqlite3FindCollSeq(db, (u8)enc, zName, strlen(zName), 0);
-  if( pColl && pColl->xCmp ){
-    if( db->activeVdbeCnt ){
-      sqlite3Error(db, SQLITE_BUSY, 
-        "Unable to delete/modify collation sequence due to active statements");
-      return SQLITE_BUSY;
-    }
-    sqlite3ExpirePreparedStatements(db);
-  }
-
-  pColl = sqlite3FindCollSeq(db, (u8)enc, zName, strlen(zName), 1);
-  if( 0==pColl ){
-    rc = SQLITE_NOMEM;
-  }else{
-    pColl->xCmp = xCompare;
-    pColl->pUser = pCtx;
-    pColl->enc = enc;
-  }
-  sqlite3Error(db, rc, 0);
-  return rc;
+  int rc;
+  assert( !sqlite3MallocFailed() );
+  rc = createCollation(db, zName, enc, pCtx, xCompare);
+  return sqlite3ApiExit(db, rc);
 }
 
 #ifndef SQLITE_OMIT_UTF16
@@ -971,15 +994,15 @@ int sqlite3_create_collation16(
   void* pCtx,
   int(*xCompare)(void*,int,const void*,int,const void*)
 ){
-  char *zName8;
-  int rc;
-  if( sqlite3SafetyCheck(db) ){
-    return SQLITE_MISUSE;
-  }
+  int rc = SQLITE_OK;
+  char *zName8; 
+  assert( !sqlite3MallocFailed() );
   zName8 = sqlite3utf16to8(zName, -1);
-  rc = sqlite3_create_collation(db, zName8, enc, pCtx, xCompare);
-  sqliteFree(zName8);
-  return rc;
+  if( zName8 ){
+    rc = createCollation(db, zName8, enc, pCtx, xCompare);
+    sqliteFree(zName8);
+  }
+  return sqlite3ApiExit(db, rc);
 }
 #endif /* SQLITE_OMIT_UTF16 */
 
@@ -1065,20 +1088,21 @@ int sqlite3Corrupt(void){
 */
 int sqlite3_enable_shared_cache(int enable){
   ThreadData *pTd = sqlite3ThreadData();
-  
-  /* It is only legal to call sqlite3_enable_shared_cache() when there
-  ** are no currently open b-trees that were opened by the calling thread.
-  ** This condition is only easy to detect if the shared-cache were 
-  ** previously enabled (and is being disabled). 
-  */
-  if( pTd->pBtree && !enable ){
-    assert( pTd->useSharedData );
-    return SQLITE_MISUSE;
-  }
+  if( pTd ){
+    /* It is only legal to call sqlite3_enable_shared_cache() when there
+    ** are no currently open b-trees that were opened by the calling thread.
+    ** This condition is only easy to detect if the shared-cache were 
+    ** previously enabled (and is being disabled). 
+    */
+    if( pTd->pBtree && !enable ){
+      assert( pTd->useSharedData );
+      return SQLITE_MISUSE;
+    }
 
-  pTd->useSharedData = enable;
-  sqlite3ReleaseThreadData();
-  return SQLITE_OK;
+    pTd->useSharedData = enable;
+    sqlite3ReleaseThreadData();
+  }
+  return sqlite3ApiExit(0, SQLITE_OK);
 }
 #endif
 
@@ -1087,7 +1111,123 @@ int sqlite3_enable_shared_cache(int enable){
 ** data for this thread has been deallocated.
 */
 void sqlite3_thread_cleanup(void){
-  ThreadData *pTd = sqlite3ThreadData();
-  memset(pTd, 0, sizeof(*pTd));
-  sqlite3ReleaseThreadData();
+  ThreadData *pTd = sqlite3OsThreadSpecificData(0);
+  if( pTd ){
+    memset(pTd, 0, sizeof(*pTd));
+    sqlite3OsThreadSpecificData(-1);
+  }
 }
+
+/*
+** Return meta information about a specific column of a database table.
+** See comment in sqlite3.h (sqlite.h.in) for details.
+*/
+#ifdef SQLITE_ENABLE_COLUMN_METADATA
+int sqlite3_table_column_metadata(
+  sqlite3 *db,                /* Connection handle */
+  const char *zDbName,        /* Database name or NULL */
+  const char *zTableName,     /* Table name */
+  const char *zColumnName,    /* Column name */
+  char const **pzDataType,    /* OUTPUT: Declared data type */
+  char const **pzCollSeq,     /* OUTPUT: Collation sequence name */
+  int *pNotNull,              /* OUTPUT: True if NOT NULL constraint exists */
+  int *pPrimaryKey,           /* OUTPUT: True if column part of PK */
+  int *pAutoinc               /* OUTPUT: True if colums is auto-increment */
+){
+  int rc;
+  char *zErrMsg = 0;
+  Table *pTab = 0;
+  Column *pCol = 0;
+  int iCol;
+
+  char const *zDataType = 0;
+  char const *zCollSeq = 0;
+  int notnull = 0;
+  int primarykey = 0;
+  int autoinc = 0;
+
+  /* Ensure the database schema has been loaded */
+  if( sqlite3SafetyOn(db) ){
+    return SQLITE_MISUSE;
+  }
+  rc = sqlite3Init(db, &zErrMsg);
+  if( SQLITE_OK!=rc ){
+    goto error_out;
+  }
+
+  /* Locate the table in question */
+  pTab = sqlite3FindTable(db, zTableName, zDbName);
+  if( !pTab || pTab->pSelect ){
+    pTab = 0;
+    goto error_out;
+  }
+
+  /* Find the column for which info is requested */
+  if( sqlite3IsRowid(zColumnName) ){
+    iCol = pTab->iPKey;
+    if( iCol>=0 ){
+      pCol = &pTab->aCol[iCol];
+    }
+  }else{
+    for(iCol=0; iCol<pTab->nCol; iCol++){
+      pCol = &pTab->aCol[iCol];
+      if( 0==sqlite3StrICmp(pCol->zName, zColumnName) ){
+        break;
+      }
+    }
+    if( iCol==pTab->nCol ){
+      pTab = 0;
+      goto error_out;
+    }
+  }
+
+  /* The following block stores the meta information that will be returned
+  ** to the caller in local variables zDataType, zCollSeq, notnull, primarykey
+  ** and autoinc. At this point there are two possibilities:
+  ** 
+  **     1. The specified column name was rowid", "oid" or "_rowid_" 
+  **        and there is no explicitly declared IPK column. 
+  **
+  **     2. The table is not a view and the column name identified an 
+  **        explicitly declared column. Copy meta information from *pCol.
+  */ 
+  if( pCol ){
+    zDataType = pCol->zType;
+    zCollSeq = pCol->zColl;
+    notnull = (pCol->notNull?1:0);
+    primarykey  = (pCol->isPrimKey?1:0);
+    autoinc = ((pTab->iPKey==iCol && pTab->autoInc)?1:0);
+  }else{
+    zDataType = "INTEGER";
+    primarykey = 1;
+  }
+  if( !zCollSeq ){
+    zCollSeq = "BINARY";
+  }
+
+error_out:
+  if( sqlite3SafetyOff(db) ){
+    rc = SQLITE_MISUSE;
+  }
+
+  /* Whether the function call succeeded or failed, set the output parameters
+  ** to whatever their local counterparts contain. If an error did occur,
+  ** this has the effect of zeroing all output parameters.
+  */
+  if( pzDataType ) *pzDataType = zDataType;
+  if( pzCollSeq ) *pzCollSeq = zCollSeq;
+  if( pNotNull ) *pNotNull = notnull;
+  if( pPrimaryKey ) *pPrimaryKey = primarykey;
+  if( pAutoinc ) *pAutoinc = autoinc;
+
+  if( SQLITE_OK==rc && !pTab ){
+    sqlite3SetString(&zErrMsg, "no such table column: ", zTableName, ".", 
+        zColumnName, 0);
+    rc = SQLITE_ERROR;
+  }
+  sqlite3Error(db, rc, (zErrMsg?"%s":0), zErrMsg);
+  sqliteFree(zErrMsg);
+  return sqlite3ApiExit(db, rc);
+}
+#endif
+

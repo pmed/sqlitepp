@@ -11,7 +11,7 @@
 *************************************************************************
 ** Internal interface definitions for SQLite.
 **
-** @(#) $Id: sqliteInt.h,v 1.467 2006/01/13 06:33:24 danielk1977 Exp $
+** @(#) $Id: sqliteInt.h,v 1.481 2006/02/11 01:25:51 drh Exp $
 */
 #ifndef _SQLITEINT_H_
 #define _SQLITEINT_H_
@@ -30,7 +30,7 @@
 ** option is set.  Thus NDEBUG becomes an opt-in rather than an opt-out
 ** feature.
 */
-#if !defined(NDEBUG) && !defined(SQLITE_DEBUG)
+#if !defined(NDEBUG) && !defined(SQLITE_DEBUG) 
 # define NDEBUG 1
 #endif
 
@@ -73,9 +73,14 @@
 #ifdef SQLITE_OMIT_FLOATING_POINT
 # define double sqlite_int64
 # define LONGDOUBLE_TYPE sqlite_int64
-# define SQLITE_BIG_DBL (0x7fffffffffffffff)
+# ifndef SQLITE_BIG_DBL
+#   define SQLITE_BIG_DBL (0x7fffffffffffffff)
+# endif
 # define SQLITE_OMIT_DATETIME_FUNCS 1
 # define SQLITE_OMIT_TRACE 1
+#endif
+#ifndef SQLITE_BIG_DBL
+# define SQLITE_BIG_DBL (1e99)
 #endif
 
 /*
@@ -261,9 +266,16 @@ extern int sqlite3_nMalloc;      /* Number of sqliteMalloc() calls */
 extern int sqlite3_nFree;        /* Number of sqliteFree() calls */
 extern int sqlite3_iMallocFail;  /* Fail sqliteMalloc() after this many calls */
 extern int sqlite3_iMallocReset; /* Set iMallocFail to this when it reaches 0 */
-#define ENTER_MALLOC (\
-  sqlite3ThreadData()->zFile = __FILE__, sqlite3ThreadData()->iLine = __LINE__ \
-)
+
+
+extern void *sqlite3_pFirst;         /* Pointer to linked list of allocations */
+extern int sqlite3_nMaxAlloc;        /* High water mark of ThreadData.nAlloc */
+extern int sqlite3_mallocDisallowed; /* assert() in sqlite3Malloc() if set */
+extern int sqlite3_isFail;           /* True if all malloc calls should fail */
+extern const char *sqlite3_zFile;    /* Filename to associate debug info with */
+extern int sqlite3_iLine;            /* Line number for debug info */
+
+#define ENTER_MALLOC (sqlite3_zFile = __FILE__, sqlite3_iLine = __LINE__)
 #define sqliteMalloc(x)          (ENTER_MALLOC, sqlite3Malloc(x))
 #define sqliteMallocRaw(x)       (ENTER_MALLOC, sqlite3MallocRaw(x))
 #define sqliteRealloc(x,y)       (ENTER_MALLOC, sqlite3Realloc(x,y))
@@ -289,14 +301,9 @@ extern int sqlite3_iMallocReset; /* Set iMallocFail to this when it reaches 0 */
 /*
 ** An instance of this structure might be allocated to store information
 ** specific to a single thread.
-**
-** To avoid a memory leak on windows, the content of this structure is
-** checked at the conclusion of each API call.  If it is all zero, it
-** is deallocated.
 */
 struct ThreadData {
-  int mallocFailed;        /* True after a malloc() has failed */
-  int nRef;                /* Number of users */
+  int dummy;               /* So that this structure is never empty */
 
 #ifdef SQLITE_ENABLE_MEMORY_MANAGEMENT
   int nSoftHeapLimit;      /* Suggested max mem allocation.  No limit if <0 */
@@ -307,15 +314,6 @@ struct ThreadData {
 #ifndef SQLITE_OMIT_SHARED_CACHE
   u8 useSharedData;        /* True if shared pagers and schemas are enabled */
   BtShared *pBtree;        /* Linked list of all currently open BTrees */
-#endif
-
-#ifdef SQLITE_MEMDEBUG
-  int nMaxAlloc;           /* High water mark of ThreadData.nAlloc */
-  int mallocDisallowed;    /* assert() in sqlite3Malloc() if set */
-  int isFail;              /* True if all malloc() calls should fail */
-  const char *zFile;       /* Filename to associate debugging info with */
-  int iLine;               /* Line number to associate debugging info with */
-  void *pFirst;            /* Pointer to linked list of allocations */
 #endif
 };
 
@@ -546,6 +544,7 @@ struct sqlite3 {
 #define SQLITE_IgnoreChecks   0x00002000  /* Do not enforce check constraints */
 #define SQLITE_ReadUncommitted 0x00004000  /* For shared-cache mode */
 #define SQLITE_LegacyFileFmt  0x00008000  /* Create new databases in format 1 */
+#define SQLITE_FullFSync      0x00010000  /* Use full fsync on the backend */
 
 /*
 ** Possible values for the sqlite.magic field.
@@ -700,7 +699,6 @@ struct Table {
   int tnum;        /* Root BTree node for this table (see note above) */
   Select *pSelect; /* NULL for tables.  Points to definition if a view. */
   u8 readOnly;     /* True if this table should not be written by the user */
-// u8 iDb;          /* Index into sqlite.aDb[] of the backend for this table */
   u8 isTransient;  /* True if automatically deleted when VDBE finishes */
   u8 hasPrimKey;   /* True if there exists a primary key */
   u8 keyConf;      /* What to do in case of uniqueness conflict on iPKey */
@@ -964,7 +962,6 @@ struct AggInfo {
 struct Expr {
   u8 op;                 /* Operation performed by this node */
   char affinity;         /* The affinity of the column or 0 if not a column */
-//u8 iDb;                /* Database referenced by this expression */
   u8 flags;              /* Various flags.  See below */
   CollSeq *pColl;        /* The collation type of the column or 0 */
   Expr *pLeft, *pRight;  /* Left and right subnodes */
@@ -1073,6 +1070,7 @@ struct SrcList {
     char *zAlias;     /* The "B" part of a "A AS B" phrase.  zName is the "A" */
     Table *pTab;      /* An SQL table corresponding to zName */
     Select *pSelect;  /* A SELECT statement used in place of a table name */
+    u8 isPopulated;   /* Temporary table associated with SELECT is populated */
     u8 jointype;      /* Type of join between this table and the next */
     i16 iCursor;      /* The VDBE cursor number used to access this table */
     Expr *pOn;        /* The ON clause of a join */
@@ -1258,7 +1256,6 @@ struct Parse {
   int ckOffset;        /* Stack offset to data used by CHECK constraints */
   u32 writeMask;       /* Start a write transaction on these databases */
   u32 cookieMask;      /* Bitmask of schema verified databases */
-  ThreadData *pTsd;    /* Thread specific data for this thread */
   int cookieGoto;      /* Address of OP_Goto to cookie verifier subroutine */
   int cookieValue[MAX_ATTACHED+2];  /* Values of cookies to verify */
 #ifndef SQLITE_OMIT_SHARED_CACHE
@@ -1746,6 +1743,13 @@ void sqlite3SchemaFree(void *);
 Schema *sqlite3SchemaGet(Btree *);
 int sqlite3SchemaToIndex(sqlite3 *db, Schema *);
 KeyInfo *sqlite3IndexKeyinfo(Parse *, Index *);
+int sqlite3CreateFunc(sqlite3 *, const char *, int, int, void *, 
+  void (*)(sqlite3_context*,int,sqlite3_value **),
+  void (*)(sqlite3_context*,int,sqlite3_value **), void (*)(sqlite3_context*));
+int sqlite3ApiExit(sqlite3 *db, int);
+int sqlite3MallocFailed(void);
+void sqlite3FailedMalloc(void);
+void sqlite3AbortOtherActiveVdbes(sqlite3 *, Vdbe *);
 
 #ifndef SQLITE_OMIT_SHARED_CACHE
   void sqlite3TableLock(Parse *, int, int, u8, const char *);
@@ -1753,13 +1757,14 @@ KeyInfo *sqlite3IndexKeyinfo(Parse *, Index *);
   #define sqlite3TableLock(v,w,x,y,z)
 #endif
 
-void sqlite3MallocClearFailed();
-#ifdef NDEBUG
+#ifdef SQLITE_MEMDEBUG
+  void sqlite3MallocDisallow(void);
+  void sqlite3MallocAllow(void);
+  int sqlite3TestMallocFail(void);
+#else
+  #define sqlite3TestMallocFail() 0
   #define sqlite3MallocDisallow()
   #define sqlite3MallocAllow()
-#else
-  void sqlite3MallocDisallow();
-  void sqlite3MallocAllow();
 #endif
 
 #ifdef SQLITE_SSE

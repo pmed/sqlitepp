@@ -144,13 +144,16 @@
 #define OP_NotUsed_135                        135
 #define OP_NotUsed_136                        136
 
-#define NOPUSH_MASK_0 32600
-#define NOPUSH_MASK_1 61019
-#define NOPUSH_MASK_2 40822
-#define NOPUSH_MASK_3 65522
-#define NOPUSH_MASK_4 65535
-#define NOPUSH_MASK_5 56123
-#define NOPUSH_MASK_6 53215
-#define NOPUSH_MASK_7 18893
-#define NOPUSH_MASK_8 15872
-#define NOPUSH_MASK_9 0
+/* Opcodes that are guaranteed to never push a value onto the stack
+** contain a 1 their corresponding position of the following mask
+** set.  See the opcodeNoPush() function in vdbeaux.c  */
+#define NOPUSH_MASK_0 0x7f58
+#define NOPUSH_MASK_1 0xee5b
+#define NOPUSH_MASK_2 0x9f76
+#define NOPUSH_MASK_3 0xfff2
+#define NOPUSH_MASK_4 0xffff
+#define NOPUSH_MASK_5 0xdb3b
+#define NOPUSH_MASK_6 0xcfdf
+#define NOPUSH_MASK_7 0x49cd
+#define NOPUSH_MASK_8 0x3e00
+#define NOPUSH_MASK_9 0x0000

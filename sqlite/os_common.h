@@ -148,17 +148,19 @@ void *sqlite3GenericMalloc(int n){
   assert(sizeof(int)<=8);
   if( p ){
     *(int *)p = n;
+    p += 8;
   }
-  return (void *)(p + 8);
+  return (void *)p;
 }
 void *sqlite3GenericRealloc(void *p, int n){
   char *p2 = ((char *)p - 8);
   assert(n>0);
-  p2 = realloc(p2, n+8);
+  p2 = (char*)realloc(p2, n+8);
   if( p2 ){
     *(int *)p2 = n;
+    p2 += 8;
   }
-  return (void *)((char *)p2 + 8);
+  return (void *)p2;
 }
 void sqlite3GenericFree(void *p){
   assert(p);
@@ -181,9 +183,6 @@ void sqlite3GenericFree(void *p){
   assert(p);
   free(p);
 }
-#if 0   /* Never actually invoked */
-int sqlite3GenericAllocationSize(void *p){
-  assert(0);
-}
-#endif
+/* Never actually used, but needed for the linker */
+int sqlite3GenericAllocationSize(void *p){ return 0; }
 #endif

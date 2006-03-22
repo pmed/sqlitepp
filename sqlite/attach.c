@@ -11,7 +11,7 @@
 *************************************************************************
 ** This file contains code used to implement the ATTACH and DETACH commands.
 **
-** $Id: attach.c,v 1.46 2006/01/11 21:41:22 drh Exp $
+** $Id: attach.c,v 1.49 2006/01/24 12:09:18 danielk1977 Exp $
 */
 #include "sqliteInt.h"
 
@@ -33,7 +33,7 @@
 **
 ** will fail because neither abc or def can be resolved.
 */
-int resolveAttachExpr(NameContext *pName, Expr *pExpr)
+static int resolveAttachExpr(NameContext *pName, Expr *pExpr)
 {
   int rc = SQLITE_OK;
   if( pExpr ){
@@ -176,15 +176,15 @@ static void attachFunc(
     sqlite3SafetyOff(db);
   }
   if( rc ){
-    int i = db->nDb - 1;
-    assert( i>=2 );
-    if( db->aDb[i].pBt ){
-      sqlite3BtreeClose(db->aDb[i].pBt);
-      db->aDb[i].pBt = 0;
-      db->aDb[i].pSchema = 0;
+    int iDb = db->nDb - 1;
+    assert( iDb>=2 );
+    if( db->aDb[iDb].pBt ){
+      sqlite3BtreeClose(db->aDb[iDb].pBt);
+      db->aDb[iDb].pBt = 0;
+      db->aDb[iDb].pSchema = 0;
     }
     sqlite3ResetInternalSchema(db, 0);
-    db->nDb = i;
+    db->nDb = iDb;
     sqlite3_snprintf(127, zErr, "unable to open database: %s", zFile);
     goto attach_error;
   }
@@ -272,7 +272,7 @@ static void codeAttach(
   sqlite3* db = pParse->db;
 
 #ifndef SQLITE_OMIT_AUTHORIZATION
-  assert( sqlite3ThreadDataReadOnly()->mallocFailed || pAuthArg );
+  assert( sqlite3MallocFailed() || pAuthArg );
   if( pAuthArg ){
     char *zAuthArg = sqlite3NameFromToken(&pAuthArg->span);
     if( !zAuthArg ){
@@ -303,7 +303,7 @@ static void codeAttach(
   sqlite3ExprCode(pParse, pDbname);
   sqlite3ExprCode(pParse, pKey);
 
-  assert(v || sqlite3ThreadDataReadOnly()->mallocFailed);
+  assert( v || sqlite3MallocFailed() );
   if( v ){
     sqlite3VdbeAddOp(v, OP_Function, 0, nFunc);
     pFunc = sqlite3FindFunction(db, zFunc, strlen(zFunc), nFunc, SQLITE_UTF8,0);
@@ -345,8 +345,8 @@ void sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
 */
 void sqlite3AttachFunctions(sqlite3 *db){
   static const int enc = SQLITE_UTF8;
-  sqlite3_create_function(db, "sqlite_attach", 3, enc, db, attachFunc, 0, 0);
-  sqlite3_create_function(db, "sqlite_detach", 1, enc, db, detachFunc, 0, 0);
+  sqlite3CreateFunc(db, "sqlite_attach", 3, enc, db, attachFunc, 0, 0);
+  sqlite3CreateFunc(db, "sqlite_detach", 1, enc, db, detachFunc, 0, 0);
 }
 
 /*

@@ -353,14 +353,23 @@ static Hash openHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
 **    1:  Yes.  Threads can override each others locks.
 **   -1:  We don't know yet.
 **
+** On some systems, we know at compile-time if threads can override each
+** others locks.  On those systems, the SQLITE_THREAD_OVERRIDE_LOCK macro
+** will be set appropriately.  On other systems, we have to check at
+** runtime.  On these latter systems, SQLTIE_THREAD_OVERRIDE_LOCK is
+** undefined.
+**
 ** This variable normally has file scope only.  But during testing, we make
 ** it a global so that the test code can change its value in order to verify
 ** that the right stuff happens in either case.
 */
+#ifndef SQLITE_THREAD_OVERRIDE_LOCK
+# define SQLITE_THREAD_OVERRIDE_LOCK -1
+#endif
 #ifdef SQLITE_TEST
-int threadsOverrideEachOthersLocks = -1;
+int threadsOverrideEachOthersLocks = SQLITE_THREAD_OVERRIDE_LOCK;
 #else
-static int threadsOverrideEachOthersLocks = -1;
+static int threadsOverrideEachOthersLocks = SQLITE_THREAD_OVERRIDE_LOCK;
 #endif
 
 /*
@@ -450,7 +459,7 @@ static void *threadLockingTest(void *pArg){
 ** can override each others locks then sets the 
 ** threadsOverrideEachOthersLocks variable appropriately.
 */
-static void testThreadLockingBehavior(fd_orig){
+static void testThreadLockingBehavior(int fd_orig){
   int fd;
   struct threadTestData d[2];
   pthread_t t[2];
@@ -478,7 +487,7 @@ static void testThreadLockingBehavior(fd_orig){
 ** Release a lockInfo structure previously allocated by findLockInfo().
 */
 static void releaseLockInfo(struct lockInfo *pLock){
-  assert( sqlite3OsInMutex() );
+  assert( sqlite3OsInMutex(1) );
   pLock->nRef--;
   if( pLock->nRef==0 ){
     sqlite3HashInsert(&lockHash, &pLock->key, sizeof(pLock->key), 0);
@@ -490,7 +499,7 @@ static void releaseLockInfo(struct lockInfo *pLock){
 ** Release a openCnt structure previously allocated by findLockInfo().
 */
 static void releaseOpenCnt(struct openCnt *pOpen){
-  assert( sqlite3OsInMutex() );
+  assert( sqlite3OsInMutex(1) );
   pOpen->nRef--;
   if( pOpen->nRef==0 ){
     sqlite3HashInsert(&openHash, &pOpen->key, sizeof(pOpen->key), 0);
@@ -520,7 +529,7 @@ static int findLockInfo(
   rc = fstat(fd, &statbuf);
   if( rc!=0 ) return 1;
 
-  assert( sqlite3OsInMutex() );
+  assert( sqlite3OsInMutex(1) );
   memset(&key1, 0, sizeof(key1));
   key1.dev = statbuf.st_dev;
   key1.ino = statbuf.st_ino;
@@ -693,8 +702,6 @@ int sqlite3UnixOpenReadWrite(
 
   CRASH_TEST_OVERRIDE(sqlite3CrashOpenReadWrite, zFilename, pId, pReadonly);
   assert( 0==*pId );
-  f.dirfd = -1;
-  SET_THREADID(&f);
   f.h = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY,
                           SQLITE_DEFAULT_FILE_PERMISSIONS);
   if( f.h<0 ){
@@ -718,7 +725,6 @@ int sqlite3UnixOpenReadWrite(
     close(f.h);
     return SQLITE_NOMEM;
   }
-  f.locktype = 0;
   TRACE3("OPEN    %-3d %s\n", f.h, zFilename);
   return allocateUnixFile(&f, pId);
 }
@@ -747,8 +753,6 @@ int sqlite3UnixOpenExclusive(const char *zFilename, OsFile **pId, int delFlag){
   if( access(zFilename, 0)==0 ){
     return SQLITE_CANTOPEN;
   }
-  SET_THREADID(&f);
-  f.dirfd = -1;
   f.h = open(zFilename,
                 O_RDWR|O_CREAT|O_EXCL|O_NOFOLLOW|O_LARGEFILE|O_BINARY,
                 SQLITE_DEFAULT_FILE_PERMISSIONS);
@@ -763,7 +767,6 @@ int sqlite3UnixOpenExclusive(const char *zFilename, OsFile **pId, int delFlag){
     unlink(zFilename);
     return SQLITE_NOMEM;
   }
-  f.locktype = 0;
   if( delFlag ){
     unlink(zFilename);
   }
@@ -784,8 +787,6 @@ int sqlite3UnixOpenReadOnly(const char *zFilename, OsFile **pId){
 
   CRASH_TEST_OVERRIDE(sqlite3CrashOpenReadOnly, zFilename, pId, 0);
   assert( 0==*pId );
-  SET_THREADID(&f);
-  f.dirfd = -1;
   f.h = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
   if( f.h<0 ){
     return SQLITE_CANTOPEN;
@@ -797,9 +798,7 @@ int sqlite3UnixOpenReadOnly(const char *zFilename, OsFile **pId){
     close(f.h);
     return SQLITE_NOMEM;
   }
-  f.locktype = 0;
   TRACE3("OPEN-RO %-3d %s\n", f.h, zFilename);
-
   return allocateUnixFile(&f, pId);
 }
 
@@ -982,6 +981,17 @@ int sqlite3_fullsync_count = 0;
 # define fdatasync fsync
 #endif
 
+/*
+** Define HAVE_FULLFSYNC to 0 or 1 depending on whether or not
+** the F_FULLFSYNC macro is defined.  F_FULLFSYNC is currently
+** only available on Mac OS X.  But that could change.
+*/
+#ifdef F_FULLFSYNC
+# define HAVE_FULLFSYNC 1
+#else
+# define HAVE_FULLFSYNC 0
+#endif
+
 
 /*
 ** The fsync() system call does not work as advertised on many
@@ -1013,7 +1023,7 @@ static int full_fsync(int fd, int fullSync, int dataOnly){
   rc = SQLITE_OK;
 #else
 
-#ifdef F_FULLFSYNC
+#if HAVE_FULLFSYNC
   if( fullSync ){
     rc = fcntl(fd, F_FULLFSYNC, 0);
   }else{
@@ -1058,10 +1068,21 @@ static int unixSync(OsFile *id, int dataOnly){
     return SQLITE_IOERR;
   }
   if( pFile->dirfd>=0 ){
-    TRACE2("DIRSYNC %-3d\n", pFile->dirfd);
+    TRACE4("DIRSYNC %-3d (have_fullfsync=%d fullsync=%d)\n", pFile->dirfd,
+            HAVE_FULLFSYNC, pFile->fullSync);
 #ifndef SQLITE_DISABLE_DIRSYNC
-    if( full_fsync(pFile->dirfd, pFile->fullSync, 0) ){
-        return SQLITE_IOERR;
+    /* The directory sync is only attempted if full_fsync is
+    ** turned off or unavailable.  If a full_fsync occurred above,
+    ** then the directory sync is superfluous.
+    */
+    if( (!HAVE_FULLFSYNC || !pFile->fullSync) && full_fsync(pFile->dirfd,0,0) ){
+       /*
+       ** We have received multiple reports of fsync() returning
+       ** errors when applied to directories on certain file systems.
+       ** A failed directory sync is not a big deal.  So it seems
+       ** better to ignore the error.  Ticket #1657
+       */
+       /* return SQLITE_IOERR; */
     }
 #endif
     close(pFile->dirfd);  /* Only need to sync once, so close the directory */
@@ -1471,7 +1492,6 @@ static int unixUnlock(OsFile *id, int locktype){
 */
 static int unixClose(OsFile **pId){
   unixFile *id = (unixFile*)*pId;
-  int rc;
 
   if( !id ) return SQLITE_OK;
   unixUnlock(*pId, NO_LOCK);
@@ -1508,7 +1528,7 @@ static int unixClose(OsFile **pId){
   OpenCounter(-1);
   sqliteFree(id);
   *pId = 0;
-  return rc;
+  return SQLITE_OK;
 }
 
 /*
@@ -1584,6 +1604,10 @@ static const IoMethod sqlite3UnixIoMethod = {
 */
 static int allocateUnixFile(unixFile *pInit, OsFile **pId){
   unixFile *pNew;
+  pInit->dirfd = -1;
+  pInit->fullSync = 0;
+  pInit->locktype = 0;
+  SET_THREADID(pInit);
   pNew = sqliteMalloc( sizeof(unixFile) );
   if( pNew==0 ){
     close(pInit->h);
@@ -1663,11 +1687,42 @@ int sqlite3UnixSleep(int ms){
 }
 
 /*
-** Static variables used for thread synchronization
+** Static variables used for thread synchronization.
+**
+** inMutex      the nesting depth of the recursive mutex.  The thread
+**              holding mutexMain can read this variable at any time.
+**              But is must hold mutexAux to change this variable.  Other
+**              threads must hold mutexAux to read the variable and can
+**              never write.
+**
+** mutexOwner   The thread id of the thread holding mutexMain.  Same
+**              access rules as for inMutex.
+**
+** mutexOwnerValid   True if the value in mutexOwner is valid.  The same
+**                   access rules apply as for inMutex.
+**
+** mutexMain    The main mutex.  Hold this mutex in order to get exclusive
+**              access to SQLite data structures.
+**
+** mutexAux     An auxiliary mutex needed to access variables defined above.
+**
+** Mutexes are always acquired in this order: mutexMain mutexAux.   It
+** is not necessary to acquire mutexMain in order to get mutexAux - just
+** do not attempt to acquire them in the reverse order: mutexAux mutexMain.
+** Either get the mutexes with mutexMain first or get mutexAux only.
+**
+** When running on a platform where the three variables inMutex, mutexOwner,
+** and mutexOwnerValid can be set atomically, the mutexAux is not required.
+** On many systems, all three are 32-bit integers and writing to a 32-bit
+** integer is atomic.  I think.  But there are no guarantees.  So it seems
+** safer to protect them using mutexAux.
 */
 static int inMutex = 0;
 #ifdef SQLITE_UNIX_THREADS
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_t mutexOwner;          /* Thread holding mutexMain */
+static int mutexOwnerValid = 0;       /* True if mutexOwner is valid */
+static pthread_mutex_t mutexMain = PTHREAD_MUTEX_INITIALIZER; /* The mutex */
+static pthread_mutex_t mutexAux = PTHREAD_MUTEX_INITIALIZER;  /* Aux mutex */
 #endif
 
 /*
@@ -1678,28 +1733,60 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 ** SQLite uses only a single Mutex.  There is not much critical
 ** code and what little there is executes quickly and without blocking.
 **
-** This mutex is not recursive.
+** As of version 3.3.2, this mutex must be recursive.
 */
 void sqlite3UnixEnterMutex(){
 #ifdef SQLITE_UNIX_THREADS
-  pthread_mutex_lock(&mutex);
+  pthread_mutex_lock(&mutexAux);
+  if( !mutexOwnerValid || !pthread_equal(mutexOwner, pthread_self()) ){
+    pthread_mutex_unlock(&mutexAux);
+    pthread_mutex_lock(&mutexMain);
+    assert( inMutex==0 );
+    assert( !mutexOwnerValid );
+    pthread_mutex_lock(&mutexAux);
+    mutexOwner = pthread_self();
+    mutexOwnerValid = 1;
+  }
+  inMutex++;
+  pthread_mutex_unlock(&mutexAux);
+#else
+  inMutex++;
 #endif
-  assert( !inMutex );
-  inMutex = 1;
 }
 void sqlite3UnixLeaveMutex(){
-  assert( inMutex );
-  inMutex = 0;
+  assert( inMutex>0 );
 #ifdef SQLITE_UNIX_THREADS
-  pthread_mutex_unlock(&mutex);
+  pthread_mutex_lock(&mutexAux);
+  inMutex--;
+  assert( pthread_equal(mutexOwner, pthread_self()) );
+  if( inMutex==0 ){
+    assert( mutexOwnerValid );
+    mutexOwnerValid = 0;
+    pthread_mutex_unlock(&mutexMain);
+  }
+  pthread_mutex_unlock(&mutexAux);
+#else
+  inMutex--;
 #endif
 }
 
 /*
-** Return TRUE if we are currently within the mutex and FALSE if not.
+** Return TRUE if the mutex is currently held.
+**
+** If the thisThrd parameter is true, return true only if the
+** calling thread holds the mutex.  If the parameter is false, return
+** true if any thread holds the mutex.
 */
-int sqlite3UnixInMutex(){
-  return inMutex;
+int sqlite3UnixInMutex(int thisThrd){
+#ifdef SQLITE_UNIX_THREADS
+  int rc;
+  pthread_mutex_lock(&mutexAux);
+  rc = inMutex>0 && (thisThrd==0 || pthread_equal(mutexOwner,pthread_self()));
+  pthread_mutex_unlock(&mutexAux);
+  return rc;
+#else
+  return inMutex>0;
+#endif
 }
 
 /*
@@ -1722,7 +1809,6 @@ int sqlite3_tsd_count = 0;
 # define TSD_COUNTER(N)  /* no-op */
 #endif
 
-
 /*
 ** If called with allocateFlag>0, then return a pointer to thread
 ** specific data for the current thread.  Allocate and zero the
@@ -1738,7 +1824,8 @@ int sqlite3_tsd_count = 0;
 ** unallocated or gets deallocated.
 */
 ThreadData *sqlite3UnixThreadSpecificData(int allocateFlag){
-  static const ThreadData zeroData;
+  static const ThreadData zeroData = {0};  /* Initializer to silence warnings
+                                           ** from broken compilers */
 #ifdef SQLITE_UNIX_THREADS
   static pthread_key_t key;
   static int keyInit = 0;
@@ -1761,7 +1848,12 @@ ThreadData *sqlite3UnixThreadSpecificData(int allocateFlag){
   pTsd = pthread_getspecific(key);
   if( allocateFlag>0 ){
     if( pTsd==0 ){
-      pTsd = sqlite3OsMalloc(sizeof(zeroData));
+      if( !sqlite3TestMallocFail() ){
+        pTsd = sqlite3OsMalloc(sizeof(zeroData));
+      }
+#ifdef SQLITE_MEMDEBUG
+      sqlite3_isFail = 0;
+#endif
       if( pTsd ){
         *pTsd = zeroData;
         pthread_setspecific(key, pTsd);
@@ -1769,7 +1861,7 @@ ThreadData *sqlite3UnixThreadSpecificData(int allocateFlag){
       }
     }
   }else if( pTsd!=0 && allocateFlag<0 
-            && memcmp(pTsd, &zeroData, sizeof(zeroData))==0 ){
+            && memcmp(pTsd, &zeroData, sizeof(ThreadData))==0 ){
     sqlite3OsFree(pTsd);
     pthread_setspecific(key, 0);
     TSD_COUNTER(-1);
@@ -1780,14 +1872,19 @@ ThreadData *sqlite3UnixThreadSpecificData(int allocateFlag){
   static ThreadData *pTsd = 0;
   if( allocateFlag>0 ){
     if( pTsd==0 ){
-      pTsd = sqlite3OsMalloc( sizeof(zeroData) );
+      if( !sqlite3TestMallocFail() ){
+        pTsd = sqlite3OsMalloc( sizeof(zeroData) );
+      }
+#ifdef SQLITE_MEMDEBUG
+      sqlite3_isFail = 0;
+#endif
       if( pTsd ){
         *pTsd = zeroData;
         TSD_COUNTER(+1);
       }
     }
   }else if( pTsd!=0 && allocateFlag<0
-            && memcmp(pTsd, &zeroData, sizeof(zeroData))==0 ){
+            && memcmp(pTsd, &zeroData, sizeof(ThreadData))==0 ){
     sqlite3OsFree(pTsd);
     TSD_COUNTER(-1);
     pTsd = 0;

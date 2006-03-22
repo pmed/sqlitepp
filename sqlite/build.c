@@ -22,7 +22,7 @@
 **     COMMIT
 **     ROLLBACK
 **
-** $Id: build.c,v 1.380 2006/01/13 18:06:40 danielk1977 Exp $
+** $Id: build.c,v 1.386 2006/02/10 18:08:09 drh Exp $
 */
 #include "sqliteInt.h"
 #include <ctype.h>
@@ -130,7 +130,7 @@ void sqlite3FinishCoding(Parse *pParse){
   sqlite3 *db;
   Vdbe *v;
 
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ) return;
+  if( sqlite3MallocFailed() ) return;
   if( pParse->nested ) return;
   if( !pParse->pVdbe ){
     if( pParse->rc==SQLITE_OK && pParse->nErr ){
@@ -1364,8 +1364,7 @@ void sqlite3EndTable(
   sqlite3 *db = pParse->db;
   int iDb;
 
-  if( (pEnd==0 && pSelect==0) || 
-      pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ) {
+  if( (pEnd==0 && pSelect==0) || pParse->nErr || sqlite3MallocFailed() ) {
     return;
   }
   p = pParse->pNewTable;
@@ -1547,10 +1546,14 @@ void sqlite3EndTable(
 
 #ifndef SQLITE_OMIT_ALTERTABLE
     if( !p->pSelect ){
-      const unsigned char *zName = pParse->sNameToken.z;
+      const char *zName = (const char *)pParse->sNameToken.z;
+      int nName;
       assert( !pSelect && pCons && pEnd );
-      if( pCons->z==0 ) pCons = pEnd;
-      p->addColOffset = 13 + sqlite3utf8CharLen(zName, pCons->z - zName);
+      if( pCons->z==0 ){
+        pCons = pEnd;
+      }
+      nName = (const char *)pCons->z - zName;
+      p->addColOffset = 13 + sqlite3utf8CharLen(zName, nName);
     }
 #endif
   }
@@ -1603,7 +1606,7 @@ void sqlite3CreateView(
   */
   p->pSelect = sqlite3SelectDup(pSelect);
   sqlite3SelectDelete(pSelect);
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( sqlite3MallocFailed() ){
     return;
   }
   if( !pParse->db->init.busy ){
@@ -1659,12 +1662,10 @@ int sqlite3ViewGetColumnNames(Parse *pParse, Table *pTable){
   ** Actually, this error is caught previously and so the following test
   ** should always fail.  But we will leave it in place just to be safe.
   */
-#if 0
   if( pTable->nCol<0 ){
     sqlite3ErrorMsg(pParse, "view %s is circularly defined", pTable->zName);
     return 1;
   }
-#endif
   assert( pTable->nCol>=0 );
 
   /* If we get this far, it means we need to compute the table names.
@@ -1845,7 +1846,7 @@ void sqlite3DropTable(Parse *pParse, SrcList *pName, int isView, int noErr){
   sqlite3 *db = pParse->db;
   int iDb;
 
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( pParse->nErr || sqlite3MallocFailed() ){
     goto exit_drop_table;
   }
   assert( pName->nSrc==1 );
@@ -2206,7 +2207,7 @@ void sqlite3CreateIndex(
   int nExtra = 0;
   char *zExtra;
 
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( pParse->nErr || sqlite3MallocFailed() ){
     goto exit_create_index;
   }
 
@@ -2360,11 +2361,11 @@ void sqlite3CreateIndex(
       nName + 1 +                  /* Index.zName      */
       nExtra                       /* Collation sequence names */
   );
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ) goto exit_create_index;
-  pIndex->aiColumn = (int *)(&pIndex[1]);
-  pIndex->aiRowEst = (int *)(&pIndex->aiColumn[nCol]);
-  pIndex->azColl = (char **)(&pIndex->aiRowEst[nCol+1]);
-  pIndex->aSortOrder = (u8 *)(&pIndex->azColl[nCol]);
+  if( sqlite3MallocFailed() ) goto exit_create_index;
+  pIndex->azColl = (char**)(&pIndex[1]);
+  pIndex->aiColumn = (int *)(&pIndex->azColl[nCol]);
+  pIndex->aiRowEst = (unsigned *)(&pIndex->aiColumn[nCol]);
+  pIndex->aSortOrder = (u8 *)(&pIndex->aiRowEst[nCol+1]);
   pIndex->zName = (char *)(&pIndex->aSortOrder[nCol]);
   zExtra = (char *)(&pIndex->zName[nName+1]);
   strcpy(pIndex->zName, zName);
@@ -2647,7 +2648,7 @@ void sqlite3DropIndex(Parse *pParse, SrcList *pName, int ifExists){
   sqlite3 *db = pParse->db;
   int iDb;
 
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ){
+  if( pParse->nErr || sqlite3MallocFailed() ){
     goto exit_drop_index;
   }
   assert( pName->nSrc==1 );
@@ -2846,6 +2847,7 @@ SrcList *sqlite3SrcListAppend(SrcList *pList, Token *pTable, Token *pDatabase){
   pItem->zName = sqlite3NameFromToken(pTable);
   pItem->zDatabase = sqlite3NameFromToken(pDatabase);
   pItem->iCursor = -1;
+  pItem->isPopulated = 0;
   pList->nSrc++;
   return pList;
 }
@@ -2856,7 +2858,7 @@ SrcList *sqlite3SrcListAppend(SrcList *pList, Token *pTable, Token *pDatabase){
 void sqlite3SrcListAssignCursors(Parse *pParse, SrcList *pList){
   int i;
   struct SrcList_item *pItem;
-  assert(pList || sqlite3ThreadDataReadOnly()->mallocFailed);
+  assert(pList || sqlite3MallocFailed() );
   if( pList ){
     for(i=0, pItem=pList->a; i<pList->nSrc; i++, pItem++){
       if( pItem->iCursor>=0 ) break;
@@ -2905,7 +2907,7 @@ void sqlite3BeginTransaction(Parse *pParse, int type){
   int i;
 
   if( pParse==0 || (db=pParse->db)==0 || db->aDb[0].pBt==0 ) return;
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ) return;
+  if( pParse->nErr || sqlite3MallocFailed() ) return;
   if( sqlite3AuthCheck(pParse, SQLITE_TRANSACTION, "BEGIN", 0, 0) ) return;
 
   v = sqlite3GetVdbe(pParse);
@@ -2926,7 +2928,7 @@ void sqlite3CommitTransaction(Parse *pParse){
   Vdbe *v;
 
   if( pParse==0 || (db=pParse->db)==0 || db->aDb[0].pBt==0 ) return;
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ) return;
+  if( pParse->nErr || sqlite3MallocFailed() ) return;
   if( sqlite3AuthCheck(pParse, SQLITE_TRANSACTION, "COMMIT", 0, 0) ) return;
 
   v = sqlite3GetVdbe(pParse);
@@ -2943,7 +2945,7 @@ void sqlite3RollbackTransaction(Parse *pParse){
   Vdbe *v;
 
   if( pParse==0 || (db=pParse->db)==0 || db->aDb[0].pBt==0 ) return;
-  if( pParse->nErr || sqlite3ThreadDataReadOnly()->mallocFailed ) return;
+  if( pParse->nErr || sqlite3MallocFailed() ) return;
   if( sqlite3AuthCheck(pParse, SQLITE_TRANSACTION, "ROLLBACK", 0, 0) ) return;
 
   v = sqlite3GetVdbe(pParse);
@@ -3154,10 +3156,10 @@ void sqlite3Reindex(Parse *pParse, Token *pName1, Token *pName2){
     assert( pName1->z );
     pColl = sqlite3FindCollSeq(db, ENC(db), (char*)pName1->z, pName1->n, 0);
     if( pColl ){
-      char *z = sqliteStrNDup(pName1->z, pName1->n);
-      if( z ){
-        reindexDatabases(pParse, z);
-        sqliteFree(z);
+      char *zColl = sqliteStrNDup((const char *)pName1->z, pName1->n);
+      if( zColl ){
+        reindexDatabases(pParse, zColl);
+        sqliteFree(zColl);
       }
       return;
     }

@@ -74,6 +74,7 @@ const void *sqlite3_value_text16le(sqlite3_value *pVal){
 int sqlite3_value_type(sqlite3_value* pVal){
   return pVal->type;
 }
+/* sqlite3_value_numeric_type() defined in vdbe.c */
 
 /**************************** sqlite3_result_  *******************************
 ** The following routines are used by user-defined functions to specify
@@ -95,10 +96,12 @@ void sqlite3_result_error(sqlite3_context *pCtx, const char *z, int n){
   pCtx->isError = 1;
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF8, SQLITE_TRANSIENT);
 }
+#ifndef SQLITE_OMIT_UTF16
 void sqlite3_result_error16(sqlite3_context *pCtx, const void *z, int n){
   pCtx->isError = 1;
   sqlite3VdbeMemSetStr(&pCtx->s, z, n, SQLITE_UTF16NATIVE, SQLITE_TRANSIENT);
 }
+#endif
 void sqlite3_result_int(sqlite3_context *pCtx, int iVal){
   sqlite3VdbeMemSetInt64(&pCtx->s, (i64)iVal);
 }
@@ -156,7 +159,8 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   sqlite3 *db;
   int rc;
 
-  assert(!sqlite3ThreadDataReadOnly()->mallocFailed);
+  /* Assert that malloc() has not failed */
+  assert( !sqlite3MallocFailed() );
 
   if( p==0 || p->magic!=VDBE_MAGIC_RUN ){
     return SQLITE_MISUSE;
@@ -240,8 +244,8 @@ int sqlite3_step(sqlite3_stmt *pStmt){
   }
 #endif
 
-  sqlite3Error(p->db, rc, p->zErrMsg ? "%s" : 0, p->zErrMsg);
-  sqlite3MallocClearFailed();
+  sqlite3Error(p->db, rc, 0);
+  p->rc = sqlite3ApiExit(p->db, p->rc);
   return rc;
 }
 
@@ -332,9 +336,10 @@ void sqlite3_set_auxdata(
 ** Return the number of times the Step function of a aggregate has been 
 ** called.
 **
-** This routine is defined here in vdbe.c because it depends on knowing
-** the internals of the sqlite3_context structure which is only defined in
-** this source file.
+** This function is deprecated.  Do not use it for new code.  It is
+** provide only to avoid breaking legacy code.  New aggregate function
+** implementations should keep their own counts within their aggregate
+** context.
 */
 int sqlite3_aggregate_count(sqlite3_context *p){
   assert( p && p->pFunc && p->pFunc->xStep );
@@ -404,10 +409,8 @@ static void columnMallocFailure(sqlite3_stmt *pStmt)
   ** SQLITE_NOMEM. The next call to _step() (if any) will return SQLITE_ERROR
   ** and _finalize() will return NOMEM.
   */
-  if( sqlite3ThreadDataReadOnly()->mallocFailed ){
-    ((Vdbe *)pStmt)->rc = SQLITE_NOMEM;
-    sqlite3MallocClearFailed();
-  }
+  Vdbe *p = (Vdbe *)pStmt;
+  p->rc = sqlite3ApiExit(0, p->rc);
 }
 
 /**************************** sqlite3_column_  *******************************
@@ -467,6 +470,13 @@ int sqlite3_column_type(sqlite3_stmt *pStmt, int i){
   return sqlite3_value_type( columnMem(pStmt,i) );
 }
 
+/* The following function is experimental and subject to change or
+** removal */
+/*int sqlite3_column_numeric_type(sqlite3_stmt *pStmt, int i){
+**  return sqlite3_value_numeric_type( columnMem(pStmt,i) );
+**}
+*/
+
 /*
 ** Convert the N-th element of pStmt->pColName[] into a string using
 ** xFunc() then return that string.  If N is out of range, return 0.
@@ -502,7 +512,7 @@ static const void *columnName(
   /* A malloc may have failed inside of the xFunc() call. If this is the case,
   ** clear the mallocFailed flag and return NULL.
   */
-  sqlite3MallocClearFailed();
+  sqlite3ApiExit(0, 0);
   return ret;
 }
 
@@ -511,11 +521,13 @@ static const void *columnName(
 ** statement pStmt.
 */
 const char *sqlite3_column_name(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 0);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_NAME);
 }
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_name16(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 0);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_NAME);
 }
 #endif
 
@@ -524,26 +536,30 @@ const void *sqlite3_column_name16(sqlite3_stmt *pStmt, int N){
 ** of the result set of SQL statement pStmt.
 */
 const char *sqlite3_column_decltype(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 1);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_DECLTYPE);
 }
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_decltype16(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 1);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DECLTYPE);
 }
 #endif /* SQLITE_OMIT_UTF16 */
 
-#if !defined(SQLITE_OMIT_ORIGIN_NAMES) && 0
+#ifdef SQLITE_ENABLE_COLUMN_METADATA
 /*
 ** Return the name of the database from which a result column derives.
 ** NULL is returned if the result column is an expression or constant or
 ** anything else which is not an unabiguous reference to a database column.
 */
 const char *sqlite3_column_database_name(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 2);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_DATABASE);
 }
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_database_name16(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 2);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_DATABASE);
 }
 #endif /* SQLITE_OMIT_UTF16 */
 
@@ -553,11 +569,13 @@ const void *sqlite3_column_database_name16(sqlite3_stmt *pStmt, int N){
 ** anything else which is not an unabiguous reference to a database column.
 */
 const char *sqlite3_column_table_name(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 3);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_TABLE);
 }
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_table_name16(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 3);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_TABLE);
 }
 #endif /* SQLITE_OMIT_UTF16 */
 
@@ -567,16 +585,16 @@ const void *sqlite3_column_table_name16(sqlite3_stmt *pStmt, int N){
 ** anything else which is not an unabiguous reference to a database column.
 */
 const char *sqlite3_column_origin_name(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, 4);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text, COLNAME_COLUMN);
 }
 #ifndef SQLITE_OMIT_UTF16
 const void *sqlite3_column_origin_name16(sqlite3_stmt *pStmt, int N){
-  return columnName(pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, 4);
+  return columnName(
+      pStmt, N, (const void*(*)(Mem*))sqlite3_value_text16, COLNAME_COLUMN);
 }
 #endif /* SQLITE_OMIT_UTF16 */
-#endif /* SQLITE_OMIT_ORIGIN_NAMES */
-
-
+#endif /* SQLITE_ENABLE_COLUMN_METADATA */
 
 
 /******************************* sqlite3_bind_  ***************************
@@ -630,13 +648,12 @@ static int bindText(
   }
   pVar = &p->aVar[i-1];
   rc = sqlite3VdbeMemSetStr(pVar, zData, nData, encoding, xDel);
-  if( rc ){
-    return rc;
-  }
   if( rc==SQLITE_OK && encoding!=0 ){
     rc = sqlite3VdbeChangeEncoding(pVar, ENC(p->db));
   }
-  return rc;
+
+  sqlite3Error(((Vdbe *)pStmt)->db, rc, 0);
+  return sqlite3ApiExit(((Vdbe *)pStmt)->db, rc);
 }
 
 
@@ -780,7 +797,9 @@ int sqlite3_transfer_bindings(sqlite3_stmt *pFromStmt, sqlite3_stmt *pToStmt){
     return SQLITE_ERROR;
   }
   for(i=0; rc==SQLITE_OK && i<pFrom->nVar; i++){
+    sqlite3MallocDisallow();
     rc = sqlite3VdbeMemMove(&pTo->aVar[i], &pFrom->aVar[i]);
+    sqlite3MallocAllow();
   }
   return rc;
 }
