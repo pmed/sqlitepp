@@ -362,6 +362,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\test\test_row.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\test\test_session.cpp"
 			>
 		</File>

@@ -100,8 +100,6 @@ void object::test<5>()
 	
 	st << utf(L"select * from some_table");
 	ensure ( "select executed", st.exec() );
-	ensure("session valid", se);
-/*
 
 	ensure( "col count == 4", st.column_count() == 4 );
 
@@ -142,7 +140,8 @@ void object::test<5>()
 	{
 		ensure( "session invalid", !se );
 	}
-*/
+
+	st.reset();
 }
 
 } // namespace

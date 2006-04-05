@@ -40,5 +40,5 @@ int main(int argc, char** argv)
 		std::cerr << "tut raised ex: " << ex.what() << std::endl;
 	}
 
-//	std::cin.get();
+	std::cin.get();
 }

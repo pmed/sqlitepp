@@ -38,7 +38,7 @@ void object::test<1>()
 // into by name binding
 template<>template<>
 void object::test<2>()
-	{
+{
 	record r1(1, utf(L"Анна"), 345.2);
 	r1.insert(se);
 	ensure( "row inserted", se );

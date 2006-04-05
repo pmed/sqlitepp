@@ -70,6 +70,9 @@ public:
 	// If session is not opended returns null.
 	string_t last_error_msg() const; // throw()
 
+	// Is autocommit mode enabled
+	bool is_autocommit() const; // throw()
+
 	// Is there an active transaction?
 	// Currently SQLite 3 doesn't support nested transactions.
 	// So we can test, is there any transaction in session.

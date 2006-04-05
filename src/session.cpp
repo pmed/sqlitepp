@@ -72,6 +72,12 @@ int session::last_error() const // throw()
 }
 //----------------------------------------------------------------------------
 
+bool session::is_autocommit() const // throw()
+{
+	return ::sqlite3_get_autocommit(impl_) != 0;
+}
+//----------------------------------------------------------------------------
+
 string_t session::last_error_msg() const // throw()
 {
 	string_t result;
