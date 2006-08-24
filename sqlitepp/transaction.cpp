@@ -6,12 +6,11 @@
 // Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "sqlitepp/transaction.hpp"
-
 #include <sqlite3.h>
 
-#include "sqlitepp/exception.hpp"
-#include "sqlitepp/session.hpp"
+#include "transaction.hpp"
+#include "exception.hpp"
+#include "session.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -25,7 +24,7 @@ transaction::transaction(session& s) : s_(s), do_rollback_(false)
 	{
 		throw nested_txn_not_supported();
 	}
-	s_ << "begin";
+	s_ << utf(L"begin");
 	s_.active_txn_ = this;
 	do_rollback_ = true;
 }
@@ -39,7 +38,7 @@ transaction::~transaction()
 	}
 	try
 	{
-		s_ << "end";
+		s_ << utf(L"end");
 	}
 	catch(std::exception const&)
 	{
@@ -53,7 +52,7 @@ void transaction::rollback() // throw()
 {
 	try
 	{
-		s_ << "rollback";
+		s_ << utf(L"rollback");
 	}
 	catch(std::exception const&)
 	{
@@ -64,7 +63,7 @@ void transaction::rollback() // throw()
 
 void transaction::commit()
 {
-	s_ << "commit";
+	s_ << utf(L"commit");
 }
 //----------------------------------------------------------------------------
 

@@ -13,7 +13,6 @@
 
 #include "string.hpp"
 #include "query.hpp" 
-#include "binders.hpp"
 
 struct sqlite3_stmt;
 
@@ -24,8 +23,6 @@ namespace sqlitepp {
 //////////////////////////////////////////////////////////////////////////////
 
 class session;
-
-typedef std::vector<unsigned char> blob;
 
 // Database statement, noncopyable
 class statement
@@ -100,13 +97,13 @@ public:
 	// Reset statement. Return to prepared state.
 	void reset();
 
+
 	// Number of columns in result set of prepared statement.
 	int column_count() const;
 	// Column name in result set.
 	string_t column_name(int column) const;
 	// Column index in result set.
 	int column_index(string_t const& name) const;
-
 	// Colmn type of result set in prepared statement.
 	enum col_type { COL_INT = 1, COL_FLOAT = 2, COL_TEXT = 3, COL_BLOB = 4, COL_NULL = 5 };
 	// Column type in result set.
@@ -123,14 +120,6 @@ public:
 	// Column value as BLOB.
 	void column_value(int column, blob& value) const;
 
-	template<typename T>
-	T column_as(int column) const
-	{
-		T t;
-		column_value(column, t);
-		return t;
-	}
-	
 	// Use int value in query.
 	void use_value(int pos, int value);
 	// Use 64-bit int value in query.
@@ -148,6 +137,14 @@ public:
 	sqlite3_stmt* impl() const // throw()
 	{
 		return impl_;
+	}
+
+	template<typename T>
+	T get(int column) const
+	{
+		typename converter<T>::base_type t;
+		column_value(column, t);
+		return converter<T>::to(t);
 	}
 private:
 	// Copy not allowed.

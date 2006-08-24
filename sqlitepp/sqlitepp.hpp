@@ -17,12 +17,10 @@
 
 // include library headers
 #include "exception.hpp"
-#include "blob.hpp"
 #include "binders.hpp"
 #include "statement.hpp"
 #include "session.hpp"
 #include "transaction.hpp"
-#include "row.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 

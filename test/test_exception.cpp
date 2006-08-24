@@ -11,6 +11,8 @@ using namespace sqlitepp;
 
 struct exception_data : session_data
 {
+	exception ex;
+	exception_data() : ex(2343, utf(L"exception message")) {}
 };
 
 typedef tut::test_group<exception_data> test_group;
@@ -21,6 +23,45 @@ test_group g("exception");
 template<>template<>
 void object::test<1>()
 {
+	ensure_equals("code", ex.code(), 2343);
+	ensure_equals("what", ex.what(), utf8(L"exception message"));
+}
+
+template<>template<>
+void object::test<2>()
+{
+	exception ex_copy(ex);
+	ensure_equals("code copy", ex_copy.code(), 2343);
+	ensure_equals("what copy", ex_copy.what(), utf8(L"exception message"));
+}
+
+template<>template<>
+void object::test<3>()
+{
+	try
+	{
+		try
+		{
+			throw ex;
+			fail("exception was thrown");
+		}
+		catch(std::runtime_error const& rt_err)
+		{
+			ensure_equals("what copy catch", rt_err.what(), utf8(L"exception message"));
+			throw;
+		}
+		fail("exception was re-thrown");
+	}
+	catch(sqlitepp::exception const& e)
+	{
+		ensure_equals("code copy catch", e.code(), 2343);
+		ensure_equals("what copy catch", e.what(), utf8(L"exception message"));
+	}
+}
+
+template<>template<>
+void object::test<4>()
+{
 	try
 	{
 		se << utf(L"qaz");
@@ -28,8 +69,8 @@ void object::test<1>()
 	}
 	catch(sqlitepp::exception const& ex)
 	{
-		ensure( "error code", ex.code() );
-		ensure( "what", ex.what() );
+		ensure( "error code", ex.code() != 0 );
+		ensure( "what", ex.what() != 0 );
 	}
 }
 

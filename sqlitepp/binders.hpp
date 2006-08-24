@@ -10,9 +10,9 @@
 #define SQLITEPP_BINDERS_HPP_INCLUDED
 
 #include <memory>
-#include <cassert>
 
-#include "sqlitepp/string.hpp"
+#include "string.hpp"
+#include "converters.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -22,39 +22,18 @@ namespace sqlitepp {
 
 class statement;
 
+/// into binder interface
 class into_binder
 {
 public:
-	virtual ~into_binder() 
-	{
-	}
+	virtual ~into_binder();
+	into_binder* clone() const;
 
-	into_binder* clone() const
-	{
-		into_binder* copy = do_clone();
-		assert(typeid(*this)==typeid(*copy) && !"do_clone not overriden correctly");
-		return copy;
-	}
-
-	int bind(statement& st, int pos)
-	{
-		do_bind(st, pos);
-		return pos + 1;
-	}
-
-	void update(statement& st)
-	{
-		do_update(st);
-	}
+	int bind(statement& st, int pos);
+	void update(statement& st);
 protected:
-	into_binder()
-	{
-	}
-
-	into_binder(into_binder const&)
-	{
-	}
-	
+	into_binder();
+	into_binder(into_binder const&);
 	into_binder& operator=(into_binder const&);
 private:
 	virtual into_binder* do_clone() const = 0;
@@ -72,10 +51,7 @@ public:
 	{
 	}
 protected:
-	int& pos()
-	{
-		return pos_;
-	}
+	int pos_;
 private:
 	into_binder* do_clone() const
 	{
@@ -89,10 +65,11 @@ private:
 
 	void do_update(statement& st)
 	{
-		st.column_value(pos_, value_);
+		typename converter<T>::base_type t;
+		st.column_value(pos_, t);
+		value_ = converter<T>::to(t);
 	}
 
-	int pos_;
 	T& value_;
 };
 
@@ -113,43 +90,26 @@ private:
 
 	void do_bind(statement& st, int)
 	{
-		if ( pos() < 0 )
+		if ( pos_ < 0 )
 		{
-			pos() = st.column_index(name_);
+			pos_ = st.column_index(name_);
 		}
 	}
 
 	string_t name_;
 };
 
+/// use binder interface
 class use_binder
 {
 public:
-	virtual ~use_binder() 
-	{
-	}
+	virtual ~use_binder();
+	use_binder* clone() const;
 
-	use_binder* clone() const
-	{
-		use_binder* copy = do_clone();
-		assert(typeid(*this)==typeid(*copy) && !"do_clone not overriden correctly");
-		return copy;
-	}
-
-	int bind(statement& st, int pos)
-	{
-		do_bind(st, pos);
-		return pos + 1;
-	}
+	int bind(statement& st, int pos);
 protected:
-	use_binder()
-	{
-	}
-
-	use_binder(use_binder const&)
-	{
-	}
-	
+	use_binder();
+	use_binder(use_binder const&);
 	use_binder& operator=(use_binder const&);
 private:
 	virtual use_binder* do_clone() const = 0;
@@ -172,14 +132,9 @@ private:
 	
 	void do_bind(statement& st, int pos)
 	{
-		st.use_value(pos, value_);
+		st.use_value(pos, converter<T>::from(value_));
 	}
 protected:
-	T& value()
-	{
-		return value_;
-	}
-private:
 	T& value_;
 };
 
@@ -200,7 +155,7 @@ private:
 	
 	void do_bind(statement& st, int)
 	{
-		st.use_value(st.use_pos(name_), value());
+		st.use_value(st.use_pos(name_), converter<T>::from(value_));
 	}
 
 	string_t name_;

@@ -6,16 +6,15 @@
 // Boost Software License, Version 1.0. (See accompanying file 
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "sqlitepp/statement.hpp"
-
 #include <algorithm>
 #include <numeric>
 
 #include <sqlite3.h>
 
-#include "sqlitepp/binders.hpp"
-#include "sqlitepp/session.hpp"
-#include "sqlitepp/exception.hpp"
+#include "statement.hpp"
+#include "exception.hpp"
+#include "binders.hpp"
+#include "session.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 

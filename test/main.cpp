@@ -1,7 +1,10 @@
+#include <iostream>
+
+#include <sqlitepp/string.hpp>
+#include <sqlitepp/sqlitepp.hpp>
+
 #include <tut.h>
 #include <tut_reporter.h>
-
-#include <iostream>
 
 namespace tut
 {
@@ -11,6 +14,7 @@ namespace tut
 int main(int argc, char** argv)
 {
 	std::cout << "SQLite++ test application." << std::endl;
+	std::cout << "char_t size " << sizeof(sqlitepp::char_t) << std::endl;
 
 	tut::reporter callback;
 	tut::runner.get().set_callback(&callback);
@@ -38,7 +42,8 @@ int main(int argc, char** argv)
 	catch( std::exception const& ex )
 	{
 		std::cerr << "tut raised ex: " << ex.what() << std::endl;
+		return -999;
 	}
-
-	std::cin.get();
+	
+	return 0;
 }

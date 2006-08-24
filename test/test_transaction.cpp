@@ -29,8 +29,7 @@ void object::test<1>()
 	ensure( "no active txn", !se.active_txn() );
 	{
 		transaction t(se);
-		ensure( "active txn", se.active_txn() );
-		ensure( "this active txn", se.active_txn() == &t );
+		ensure_equals( "this active txn", se.active_txn(), &t );
 		
 		record r1(1, utf(L"Евгения"), 566.24);
 		r1.insert(se);

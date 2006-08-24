@@ -10,7 +10,8 @@
 #define SQLITEPP_STRING_HPP_INCLUDED
 
 #include <string>
-#include <locale>
+#include <vector>
+#include <iostream>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -52,9 +53,12 @@ struct utf32_char_selector
 
 //////////////////////////////////////////////////////////////////////////////
 
+typedef std::vector<unsigned char> blob;
+
 using std::size_t;
 
-typedef unsigned char                   utf8_char;
+//typedef unsigned char                   utf8_char;
+typedef char							utf8_char;
 typedef meta::utf16_char_selector::type utf16_char;
 typedef meta::utf32_char_selector::type utf32_char;
 
@@ -74,18 +78,12 @@ size_t const npos = (size_t)-1;
 
 utf8_string  utf16_to_utf8(utf16_char const* str, size_t size = npos);
 utf8_string  utf32_to_utf8(utf32_char const* str, size_t size = npos);
-utf8_string  ansi_to_utf8(char const* str, size_t size = npos, std::locale const& = std::locale());
-std::string  utf8_to_ansi(utf8_char const* str, size_t size = npos, std::locale const& = std::locale());
 
 utf16_string utf8_to_utf16(utf8_char const* str, size_t size = npos);
 utf16_string utf32_to_utf16(utf32_char const* str, size_t size = npos);
-utf16_string ansi_to_utf16(char const* str, size_t size = npos, std::locale const& = std::locale());
-std::string  utf16_to_ansi(utf16_char const* str, size_t size = npos, std::locale const& = std::locale());
 
 utf32_string utf8_to_utf32(utf8_char const* str, size_t size = npos);
 utf32_string utf16_to_utf32(utf16_char const* str, size_t size = npos);
-utf32_string ansi_to_utf32(char const* str, size_t size = npos, std::locale const& = std::locale());
-std::string  utf32_to_ansi(utf32_char const* str, size_t size = npos, std::locale const& = std::locale());
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -136,14 +134,6 @@ struct converter<utf8_char>
 	{
 		return utf32_to_utf8(str, size);
 	}
-	static utf8_string utf(char const* str, size_t size, std::locale const& loc)
-	{
-		return ansi_to_utf8(str, size, loc);
-	}
-	static std::string ansi(utf8_char const* str, size_t size, std::locale const& loc)
-	{
-		return utf8_to_ansi(str, size, loc);
-	}
 };
 
 template<>
@@ -153,21 +143,13 @@ struct converter<utf16_char>
 	{
 		return utf8_to_utf16(str, size);
 	}
-	static utf16_string utf(utf16_char const* str, size_t size)
+	static utf16_string utf(utf16_char const* str, size_t)
 	{
 		return str;
 	}
 	static utf16_string utf(utf32_char const* str, size_t size)
 	{
 		return utf32_to_utf16(str, size);
-	}
-	static utf16_string utf(char const* str, size_t size, std::locale const& loc)
-	{
-		return ansi_to_utf16(str, size, loc);
-	}
-	static std::string ansi(utf16_char const* str, size_t size, std::locale const& loc)
-	{
-		return utf16_to_ansi(str, size, loc);
 	}
 };
 
@@ -186,14 +168,6 @@ struct converter<utf32_char>
 	{
 		return str;
 	}
-	static utf32_string utf(char const* str, size_t size, std::locale const& loc)
-	{
-		return ansi_to_utf32(str, size, loc);
-	}
-	static std::string ansi(utf32_char const* str, size_t size, std::locale const& loc)
-	{
-		return utf32_to_ansi(str, size, loc);
-	}
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -201,6 +175,16 @@ struct converter<utf32_char>
 } // namespace aux
 
 //////////////////////////////////////////////////////////////////////////////
+
+inline utf8_string utf8(utf8_char const* str, size_t)
+{
+	return str;
+}
+
+inline utf8_string utf8(utf8_string const& str)
+{
+	return str;
+}
 
 inline utf8_string utf8(utf16_char const* str, size_t size = npos)
 {
@@ -222,16 +206,6 @@ inline utf8_string utf8(utf32_string const& str)
 	return aux::converter<utf8_char>::utf(str.c_str(), str.size());
 }
 
-inline utf8_string utf8(char const* str, size_t size = npos, std::locale const& loc = std::locale())
-{
-	return aux::converter<utf8_char>::utf(str, size, loc);
-}
-
-inline utf8_string utf8(std::string const& str, std::locale const& loc = std::locale())
-{
-	return aux::converter<utf8_char>::utf(str.c_str(), str.size(), loc);
-}
-
 inline utf16_string utf16(utf8_char const* str, size_t size = npos)
 {
 	return aux::converter<utf16_char>::utf(str, size);
@@ -242,6 +216,16 @@ inline utf16_string utf16(utf8_string const& str)
 	return aux::converter<utf16_char>::utf(str.c_str(), str.size());
 }
 
+inline utf16_string utf16(utf16_char const* str, size_t)
+{
+	return str;
+}
+
+inline utf16_string utf16(utf16_string const& str)
+{
+	return str;
+}
+
 inline utf16_string utf16(utf32_char const* str, size_t size = npos)
 {
 	return aux::converter<utf16_char>::utf(str, size);
@@ -250,16 +234,6 @@ inline utf16_string utf16(utf32_char const* str, size_t size = npos)
 inline utf16_string utf16(utf32_string const& str)
 {
 	return aux::converter<utf16_char>::utf(str.c_str(), str.size());
-}
-
-inline utf16_string utf16(char const* str, size_t size = npos, std::locale const& loc = std::locale())
-{
-	return aux::converter<utf16_char>::utf(str, size, loc);
-}
-
-inline utf16_string utf16(std::string const& str, std::locale const& loc = std::locale())
-{
-	return aux::converter<utf16_char>::utf(str.c_str(), str.size(), loc);
 }
 
 inline utf32_string utf32(utf8_char const* str, size_t size = npos)
@@ -282,16 +256,15 @@ inline utf32_string utf32(utf16_string const& str)
 	return aux::converter<utf32_char>::utf(str.c_str(), str.size());
 }
 
-inline utf32_string utf32(char const* str, size_t size = npos, std::locale const& loc = std::locale())
+inline utf32_string utf32(utf32_char const* str, size_t)
 {
-	return aux::converter<utf32_char>::utf(str, size, loc);
+	return str;
 }
 
-inline utf32_string utf32(std::string const& str, std::locale const& loc = std::locale())
+inline utf32_string utf32(utf32_string const& str)
 {
-	return aux::converter<utf32_char>::utf(str.c_str(), str.size(), loc);
+	return str;
 }
-
 
 inline string_t utf(utf8_char const* str, size_t size = npos)
 {
@@ -323,31 +296,21 @@ inline string_t utf(utf32_string const& str)
 	return aux::converter<char_t>::utf(str.c_str(), str.size());
 }
 
-inline string_t ansi_to_utf(char const* str, size_t size = npos, std::locale const& loc = std::locale())
-{
-	return aux::converter<char_t>::utf(str, size, loc);
-}
-
-inline string_t ansi_to_utf(std::string const& str, std::locale const& loc = std::locale())
-{
-	return aux::converter<char_t>::utf(str.c_str(), str.size(), loc);
-}
-
-inline std::string utf_to_ansi(char_t const* str, size_t size = npos, std::locale const& loc = std::locale())
-{
-	return aux::converter<char_t>::ansi(str, size, loc);
-}
-
-inline std::string utf_to_ansi(string_t const& str, std::locale const& loc = std::locale())
-{
-	return aux::converter<char_t>::ansi(str.c_str(), str.size(), loc);
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 } // namespace sqlitepp
 
 //////////////////////////////////////////////////////////////////////////////
+
+
+#ifdef SQLITEPP_UTF16
+//!!! TEST only!!!
+inline std::ostream& operator<<(std::ostream& os, sqlitepp::string_t const& str)
+{
+	return os << sqlitepp::utf8(str);
+}
+#endif // SQLITEPP_UTF16
+
 
 #endif // SQLITEPP_STRING_HPP_INCLUDED
 

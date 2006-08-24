@@ -1,9 +1,0 @@
-project-root ;
-
-subinclude sqlite ;
-subinclude src ;
-subinclude test ;
-
-#local subprojects = sqlite src test ;
-
-#install-subinclude $(subprojects)/$(JAMFILE) : ;

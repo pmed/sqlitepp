@@ -11,14 +11,14 @@ session_data::session_data(sqlitepp::string_t const& name) : name_(name)
 {
 	se.open(name_);
 	// ensure remove previously used database
-//	remove(name_.c_str()); 
+	remove(utf8(name_).c_str()); 
 }
 
 session_data::~session_data()
 {
 	se.close();
 	// ensure remove database
-//	remove(name_.c_str()); 
+	remove(utf8(name_).c_str()); 
 }
 
 namespace 
@@ -35,7 +35,7 @@ void object::test<1>()
 {
 	ensure( "open", se.is_open() );
 	ensure( "valid", se);
-	ensure( "impl", se.impl());
+	ensure( "impl", se.impl() != 0);
 	ensure( "no active txn", !se.active_txn() );
 }
 
@@ -58,7 +58,7 @@ void object::test<3>()
 	}
 	catch(sqlitepp::exception const&)
 	{
-		ensure( "session error", se.last_error() );
+		ensure( "session error", se.last_error() != 0 );
 		ensure( "session error msg", !se.last_error_msg().empty() );
 		ensure( "session not valid", !se );
 	}

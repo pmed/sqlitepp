@@ -11,6 +11,7 @@
 
 #include "string.hpp"
 #include "query.hpp"
+#include "statement.hpp"
 
 struct sqlite3;
 

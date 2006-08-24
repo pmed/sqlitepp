@@ -6,11 +6,10 @@
 // Boost Software License, Version 1.0. (See accompanying file 
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include "sqlitepp/session.hpp"
-
 #include <sqlite3.h>
 
-#include "sqlitepp/exception.hpp"
+#include "session.hpp"
+#include "exception.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -49,8 +48,9 @@ void session::open(string_t const& file_name)
 	if ( r != SQLITE_OK )
 	{
 		string_t msg( last_error_msg() );
+        int err = last_error();
 		close(); // session should be closed anyway
-		throw exception(r, msg);
+		throw exception(err, msg);
 	}
 }
 //----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ void session::check_error(int code) const
 		throw exception(code, last_error_msg());
 	}
 }
-	 
+
 //////////////////////////////////////////////////////////////////////////////
 
 } // namespace sqlitepp

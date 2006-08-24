@@ -33,10 +33,10 @@
 //#include <boost/cstdint.hpp>
 //#include <boost/utility/enable_if.hpp>
 
-#include "sqlitepp/string.hpp"
-#include <vector>
 #include <cassert>
 #include <stdexcept>
+
+#include "string.hpp"
 
 /*************************************************************************************************/
 

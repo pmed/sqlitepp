@@ -1,8 +1,0 @@
-
-project sqlitepp
-	: requirements <source>../sqlite//sqlite <include>../include
-;
-
-lib sqlitepp : [ glob *.cpp ] ;
-
-lib sqlitepp-utf16 : sqlitepp : <define>SQLITEPP_UTF16 ;

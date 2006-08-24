@@ -45,8 +45,8 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="false"
+				WarningLevel="0"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 				CompileAs="1"
 			/>
@@ -106,8 +106,8 @@
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				WarningLevel="4"
-				Detect64BitPortabilityProblems="false"
+				WarningLevel="0"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 				CompileAs="1"
 			/>
@@ -217,6 +217,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\sqlite\loadext.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\sqlite\main.c"
 			>
 		</File>
@@ -238,6 +242,10 @@
 		</File>
 		<File
 			RelativePath="..\..\sqlite\os_common.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlite\os_os2.c"
 			>
 		</File>
 		<File
@@ -285,11 +293,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\sqlite\sqlite3.def"
+			RelativePath="..\..\sqlite\sqlite3.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\sqlite\sqlite3.h"
+			RelativePath="..\..\sqlite\sqlite3ext.h"
 			>
 		</File>
 		<File
@@ -350,6 +358,10 @@
 		</File>
 		<File
 			RelativePath="..\..\sqlite\vdbemem.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlite\vtab.c"
 			>
 		</File>
 		<File

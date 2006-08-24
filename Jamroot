@@ -1,11 +1,28 @@
+variant utf8 : release ;
+variant utf8d : debug ;
+
+variant utf16 : release : <define>SQLITEPP_UTF16 ;
+variant utf16d : debug : <define>SQLITEPP_UTF16 ;
 
 project sqlitepp
 	: build-dir bin
-	: default-build release
-#	: usage-requirements <include>include <source>sqlite
+	: default-build release <link>static
 ;
 
 	
-lib sqlitepp : [ glob *.cpp ] ;
+lib sqlitepp 
+	: [ glob sqlitepp/*.cpp ] ./sqlite//sqlite 
+	: <include>sqlite 
+;
 
-lib sqlitepp-utf16 : [ glob *.cpp ] : <define>SQLITEPP_UTF16 ;
+install ./lib 
+	: ./sqlite//sqlite .//sqlitepp 
+;
+
+install ./include
+	: ./sqlite/sqlite3.h 
+;
+
+install ./include/sqlitepp
+	: [ glob sqlitepp/*.hpp ] 
+;

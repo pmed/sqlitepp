@@ -39,13 +39,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../test/tut"
+				AdditionalIncludeDirectories="../..;../../test/tut"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
@@ -114,11 +114,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../../include;../../test/tut"
+				AdditionalIncludeDirectories="../..;../../test/tut"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
@@ -190,13 +190,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../test/tut"
+				AdditionalIncludeDirectories="../..;../../test/tut"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SQLITEPP_UTF16"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
@@ -265,11 +265,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../../include;../../test/tut"
+				AdditionalIncludeDirectories="../..;../../test/tut"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SQLITEPP_UTF16"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="4"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 			/>
@@ -336,6 +336,10 @@
 				RelativePath="..\..\test\tut\tut_restartable.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\test\tut\tut_wreporter.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\test\main.cpp"
@@ -350,6 +354,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\test\test_convert.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\test\test_exception.cpp"
 			>
 		</File>
@@ -359,10 +367,6 @@
 		</File>
 		<File
 			RelativePath="..\..\test\test_query.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\test\test_row.cpp"
 			>
 		</File>
 		<File

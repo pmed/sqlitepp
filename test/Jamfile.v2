@@ -1,14 +1,6 @@
-
-project test ;
-
 import testing ;
 
-exe test-utf8
-	: [ glob *.cpp ] sqlitepp//sqlitepp
+unit-test test
+	: [ glob *.cpp ] ..//sqlitepp 
+	: <include>tut <include>.. <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
 ;
-
-exe test-utf16
-	: [ glob *.cpp ] sqlitepp//sqlitepp-utf16
-	: <define>SQLITEPP_UTF16
-;
-

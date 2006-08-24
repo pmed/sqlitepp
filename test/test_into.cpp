@@ -8,15 +8,13 @@ namespace
 {
 	
 struct into_data : statement_data {};
+
 typedef tut::test_group<into_data> test_group;
 typedef test_group::object object;
 
 test_group g("into");
 
 using namespace sqlitepp;
-
-template<typename C>
-struct literals;
 
 // into by pos binding
 template<>template<>
@@ -27,7 +25,7 @@ void object::test<1>()
 	ensure( "row inserted", se );
 
 	record r2;
-	st << "select * from some_table where id = 1", 
+	st << utf(L"select * from some_table where id = 1"), 
 		into(r2.id), into(r2.name), into(r2.salary);
 
 	ensure("select completed", st.exec());
@@ -78,7 +76,7 @@ void object::test<4>()
 	ensure( "row inserted", se );
 
 	record r2;
-	st << "select * from some_table where id = 1", 
+	st << utf(L"select * from some_table where id = 1"), 
 		into(r2.id), into(r2.name), into(r2.salary), into(r2.data);
 
 	ensure("select completed", st.exec());

@@ -48,7 +48,7 @@ void object::test<1>()
 		into(r.id, utf(L"id")), into(r.name, utf(L"name")), into(r.salary, utf(L"salary"));
 	for (count = 0; st.exec(); ++count)
 	{
-		ensure_equals(recs[count], r);
+		ensure_equals(r, recs[count]);
 	}
 	ensure_equals("row count", count, static_cast<int>(dimof(recs))); 
 }
@@ -80,7 +80,7 @@ void object::test<2>()
 		into(r.id, utf(L"id")), into(r.name, utf(L"name")), into(r.salary, utf(L"salary"));
 	for (count = 0; st.exec(); ++count)
 	{
-		ensure_equals(recs[count], r);
+		ensure_equals(r, recs[count]);
 	}
 	ensure_equals(count, dimof(recs)); 
 }
@@ -122,7 +122,7 @@ void object::test<4>()
 		into(r2.id), into(r2.name), into(r2.salary), into(r2.data);
 
 	ensure("select completed", st.exec());
-	ensure_equals(r1, r2);
+	ensure_equals(r2, r1);
 	ensure( "single row", !st.exec() );
 }
 
