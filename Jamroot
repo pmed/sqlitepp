@@ -1,28 +1,69 @@
+# build variants
 variant utf8 : release ;
 variant utf8d : debug ;
 
 variant utf16 : release : <define>SQLITEPP_UTF16 ;
 variant utf16d : debug : <define>SQLITEPP_UTF16 ;
 
+# project 
 project sqlitepp
+	: requirements <tag>@$(__name__).tag # Used to encode variant in target name. See the 'tag' rule below. 
 	: build-dir bin
-	: default-build release <link>static
+	: default-build utf8 <link>static
 ;
 
-	
-lib sqlitepp 
-	: [ glob sqlitepp/*.cpp ] ./sqlite//sqlite 
-	: <include>sqlite 
-;
+build-project sqlite ;
+build-project sqlitepp ;
 
-install ./lib 
-	: ./sqlite//sqlite .//sqlitepp 
-;
+layout = versioned ;
 
-install ./include
-	: ./sqlite/sqlite3.h 
-;
+# This rule is called by Boost.Build to determine the name of 
+# target. We use it to encode build variant, compiler name and
+# library version in the target name
+import stage ; 
 
-install ./include/sqlitepp
-	: [ glob sqlitepp/*.hpp ] 
-;
+rule tag ( name : type ? : property-set )
+{
+    if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB
+    {        
+        if $(layout) = versioned
+        {
+			if $(name) = sqlitepp
+			{
+				switch [ $(property-set).get <variant> ]
+				{
+					case utf8* :  name = $(name)-utf8 ;
+					case utf16* : name = $(name)-utf16 ;
+				}
+				echo $(name) ;
+			}
+            name = [ stage.add-variant-and-compiler $(name) 
+              : $(type) : $(property-set) ] ;
+            
+            local version-tag = [ $(property-set).get <version> ] ;
+			version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(version-tag) ] ;
+            version-tag = $(version-tag:J="_") ;
+            
+            # On NT, library with version suffix won't be recognized
+            # by linkers. On CYGWIN, we get strage duplicate symbol
+            # errors when library is generated with version suffix.
+            # On OSX, version suffix is not needed -- the linker expets
+            # libFoo.1.2.3.dylib format.
+            # AIX linkers don't accept version suffixes either.
+            if [ $(property-set).get <os> ] in NT CYGWIN MACOSX AIX
+            {
+                return $(name:B)-$(version-tag)$(name:S) ;
+            }
+            else
+            {
+                return $(name:B)-$(version-tag)$(name:S).$(version-tag)  ;
+            }
+        }
+        else
+        {
+            return [ stage.add-variant-and-compiler $(name) 
+              : $(type) : $(property-set) ] ;
+        }
+    }
+}
+ 
