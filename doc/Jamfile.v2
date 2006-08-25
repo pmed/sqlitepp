@@ -1,0 +1,4 @@
+using boostbook ;
+import quickbook ; 
+
+boostbook doc : sqlitepp.qbk ; 
