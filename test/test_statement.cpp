@@ -52,7 +52,6 @@ void object::test<1>()
 {
 	record r(1, utf(L"Жанна"), 345.2);
 	r.insert(se);
-	ensure("session valid", se);
 }
 
 // test query
@@ -60,9 +59,8 @@ template<>template<>
 void object::test<2>()
 {
 	ensure("no query", st.q().sql().empty());
-	ensure("not prepared", !st.prepared());
-	ensure("not prepared 2", !st);
-	st.q().set_sql(utf(L"zzz"));
+	ensure("not prepared", !st.is_prepared());
+	st.q().sql(utf(L"zzz"));
 	ensure_equals("query == zzz", st.q().sql(), utf(L"zzz"));
 }
 
@@ -78,7 +76,7 @@ void object::test<3>()
 	}
 	catch(sqlitepp::exception const&)
 	{
-		ensure("not prepared", !st);
+		ensure("not prepared", !st.is_prepared());
 	}
 }
 
@@ -87,15 +85,15 @@ template<>template<>
 void object::test<4>()
 {
 	ensure("no query", st.q().empty());
-	st.q().set_sql(utf(L"insert into some_table(id, name, salary) values(1, 'lisa', 23.345)"));
+	st.q().sql(utf(L"insert into some_table(id, name, salary) values(1, 'lisa', 23.345)"));
 	
 	st.prepare();
-	ensure("prepared", st);
+	ensure("prepared", st.is_prepared());
 	
 	st.exec();
 
 	st.finalize();
-	ensure("not prepared", !st);
+	ensure("not prepared", !st.is_prepared());
 }
 
 template<>template<>
@@ -103,7 +101,6 @@ void object::test<5>()
 {
 	record r(1, utf(L"Дарья"), 123.45);
 	r.insert(se);
-	ensure("session valid", se);
 	
 	st << utf(L"select * from some_table");
 	ensure ( "select executed", st.exec() );
@@ -136,7 +133,6 @@ void object::test<5>()
 	}
 	catch(sqlitepp::exception const&)
 	{
-		ensure( "session invalid", !se );
 	}
 	try
 	{
@@ -145,7 +141,6 @@ void object::test<5>()
 	}
 	catch(sqlitepp::exception const&)
 	{
-		ensure( "session invalid", !se );
 	}
 
 	st.reset();

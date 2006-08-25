@@ -97,9 +97,9 @@ void object::test<3>()
 		st.exec();
 		fail( "exception expected" );
 	}
-	catch(sqlitepp::exception const&)
+	catch(sqlitepp::no_such_column const&)
 	{
-		ensure( "statement not prepared", !st );
+		ensure( "statement not prepared", !st.is_prepared() );
 	}
 }
 

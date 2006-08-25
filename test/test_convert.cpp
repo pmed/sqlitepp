@@ -35,7 +35,6 @@ namespace
 	conv_data()
 	{
 		se << utf(L"insert into some_table(id, name, salary) values(100, 'qaqa', 0.1)");
-		tut::ensure( "row inserted", se );
 	}
 
 	template<typename T>

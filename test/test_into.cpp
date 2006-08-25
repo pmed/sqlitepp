@@ -22,7 +22,6 @@ void object::test<1>()
 {
 	record r1(1, utf(L"Елена"), 345.2);
 	r1.insert(se);
-	ensure( "row inserted", se );
 
 	record r2;
 	st << utf(L"select * from some_table where id = 1"), 
@@ -39,7 +38,6 @@ void object::test<2>()
 {
 	record r1(1, utf(L"Анна"), 345.2);
 	r1.insert(se);
-	ensure( "row inserted", se );
 
 	record r2;
 	st << L"select id, name, salary from some_table",
@@ -63,7 +61,7 @@ void object::test<3>()
 	}
 	catch(sqlitepp::exception const&)
 	{
-		ensure( "statement not prepared", !st );
+		ensure( "statement not prepared", !st.is_prepared() );
 	}
 }
 
@@ -73,7 +71,6 @@ void object::test<4>()
 {
 	record r1(1, utf(L"Юля"), 634.4);
 	r1.insert(se);
-	ensure( "row inserted", se );
 
 	record r2;
 	st << utf(L"select * from some_table where id = 1"), 

@@ -34,8 +34,6 @@ template<>template<>
 void object::test<1>()
 {
 	ensure( "open", se.is_open() );
-	ensure( "valid", se);
-	ensure( "impl", se.impl() != 0);
 	ensure( "no active txn", !se.active_txn() );
 }
 
@@ -58,9 +56,6 @@ void object::test<3>()
 	}
 	catch(sqlitepp::exception const&)
 	{
-		ensure( "session error", se.last_error() != 0 );
-		ensure( "session error msg", !se.last_error_msg().empty() );
-		ensure( "session not valid", !se );
 	}
 }
 
