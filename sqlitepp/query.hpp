@@ -11,9 +11,9 @@
 
 #include <vector>
 #include <sstream>
+#include <memory>
 
 #include "string.hpp"
-#include "binders.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -21,39 +21,26 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-// SQL sql_query base class.
+class into_binder;
+class use_binder;
+
+// see binders.hpp
+typedef std::auto_ptr<into_binder> into_binder_ptr;
+typedef std::auto_ptr<use_binder> use_binder_ptr;
+
+// SQL sql_query base class. Noncopyable.
 class query
 {
 public:
-	// Create empty sql_query.
-	query()
-	{
-	}
+	// Create an empty query.
+	query();
 	
-	// Create sql_query with SQL statement.
-	explicit query(string_t const& sql)
-	{
-		sql_ << sql;
-	}
+	// Create a query with SQL text.
+	explicit query(string_t const& sql);
 	
-	query(query const& src)
-	{
-		assign(src);
-	}
-	
-	query& operator=(query const& src)
-	{
-		assign(src);
-		return *this;
-	}
 
-	// Clear sql_query on destroy.
-	~query()
-	{
-		clear();
-	}
-
-	void assign(query const& src);
+	// Clear query on destroy.
+	~query();
 
 	// Current SQL statement.
 	string_t sql() const // throw()
@@ -62,16 +49,13 @@ public:
 	}
 	
 	// Set new SQL statement.
-	void set_sql(string_t const& sql);
+	void sql(string_t const& text);
 
 	// Clear sql_query sql, into and use bindings.
 	void clear(); // throw()
 	
 	// Is query empty?
-	bool empty() const // throw()
-	{
-		return sql_.str().empty() && intos_.empty() && uses_.empty();
-	}
+	bool empty() const; // throw()
 
 	// Into binders container type.
 	typedef std::vector<into_binder*> into_binders;
@@ -91,31 +75,7 @@ public:
 		return uses_;
 	}
 
-	query& operator<<(utf8_char const* str)
-	{
-		sql_ << utf(str);
-		return *this;
-	}
-
-	query& operator<<(utf8_string const& str)
-	{
-		sql_ << utf(str);
-		return *this;
-	}
-
-	query& operator<<(utf16_char const* str)
-	{
-		sql_ << utf(str);
-		return *this;
-	}
-
-	query& operator<<(utf16_string const& str)
-	{
-		sql_ << utf(str);
-		return *this;
-	}
-
-	// Collect SQL.
+	// Collect SQL text.
 	template<typename T>
 	query& operator<<(T const& t)
 	{
@@ -143,7 +103,12 @@ public:
 
 	// Swap queries.
 	friend void swap(query& lhs, query& rhs);
-private:	
+protected:	
+	// Noncopyable.
+	query(query const& src);
+	// Nonassignable.
+	query& operator=(query const& src);
+private:
 	into_binders intos_;
 	use_binders  uses_;
 
@@ -153,23 +118,16 @@ private:
 // Statement preparing proxy.
 class prepare_query : public query
 {
-	friend class statement;
+	friend class statement; // access to ctor
 public:
-	// Destructive copy.
-	prepare_query(prepare_query& src)
-	{
-		swap(*this, src);
-		st_ = src.st_; src.st_ = 0;
-	}
+	// Transfer execution responsibiblty from src to this object.
+	prepare_query(prepare_query& src);
 
-	// Set statement sql_query on destroy.
+	// Move query to statement on destroy.
 	~prepare_query();
 private:
 	// Create preparing proxy for statement.
-	prepare_query(statement* st)
-		: st_(st)
-	{
-	}
+	prepare_query(statement& st);
 	
 	// Assignment not allowed.
 	prepare_query& operator=(prepare_query const&);
@@ -177,27 +135,20 @@ private:
 	statement* st_;
 };
 
-// Immediatly executed sql_query.
+// Immediatly executed query proxy.
 class once_query : public query
 {
-	friend class session;
+	friend class session; // access to ctor
 public:
-	// Destructive copy.
-	once_query(once_query& src)
-	{
-		swap(*this, src);
-		s_ = src.s_; src.s_ = 0;
-	}
+	// Transfer execution responsibiblty from src to this object.
+	once_query(once_query& src);
 
-	// Execute sql_query on destroy.
+	// Execute statement on destroy.
 	~once_query();
 private:
 	// Create proxy for session.
-	once_query(session* s)
-		: s_(s)
-	{
-	}
-	
+	once_query(session& s);
+
 	// Assignment not allowed.
 	once_query& operator=(once_query const&); 
 

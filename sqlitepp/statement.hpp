@@ -13,6 +13,7 @@
 
 #include "string.hpp"
 #include "query.hpp" 
+#include "converters.hpp" 
 
 struct sqlite3_stmt;
 
@@ -28,41 +29,38 @@ class session;
 class statement
 {
 public:
-	// Create empty statement
-	explicit statement(session& s)
-		: s_(s)
-		, impl_(0)
-	{
-	}
+	// Create an empty statement
+	explicit statement(session& s);
 	
-	// Create statement with SQL query.
-	explicit statement(session& s, string_t const& sql)
-		: s_(s)
-		, q_(sql)
-		, impl_(0)
+	// Create statement with SQL query text.
+	statement(session& s, string_t const& sql);
+
+	// Finalize statement on destroy.
+	~statement();
+
+	// Execute statement. Return true if result exists.
+	bool exec();
+
+	// Prepare statement.
+	void prepare();
+
+	// Finalize statement.
+	void finalize(); // throw()
+
+	// Is statement prepared.
+	bool is_prepared() const throw() 
 	{
+		return impl_ != 0; 
 	}
 
-	// Destroy statement.
-	~statement()
-	{
-		finalize();
-	}
-	
-	// Bool-like type for implicit casting.
-	typedef bool (statement::*unspecified_bool_type)() const;
-
-	// Implicit cast into bool-like type. Return prepared()
-	operator unspecified_bool_type() const // throw()
-	{
-		return prepared() ? &statement::prepared : 0;
-	}
+	// Reset statement. Return to prepared state.
+	void reset();
 
 	// Start statement preparing.
 	template<typename T>
 	prepare_query operator<<(T const& t)
 	{
-		prepare_query pq(this);
+		prepare_query pq(*this);
 		pq << t;
 		return pq;
 	}
@@ -78,25 +76,6 @@ public:
 	{
 		return q_;
 	}
-
-	// Set new query
-	void set_q(query const& q)
-	{
-		q_ = q;
-	}
-
-	// Execute statement. Return true if result exists.
-	bool exec();
-
-	// Prepare statement.
-	void prepare();
-	// Finalize statement.
-	void finalize(); // throw()
-	// Is statement prepared.
-	bool prepared() const throw() { return impl_ != 0; }
-	// Reset statement. Return to prepared state.
-	void reset();
-
 
 	// Number of columns in result set of prepared statement.
 	int column_count() const;
@@ -120,6 +99,15 @@ public:
 	// Column value as BLOB.
 	void column_value(int column, blob& value) const;
 
+	// Get column value as type T.
+	template<typename T>
+	T get(int column) const
+	{
+		typename converter<T>::base_type t;
+		column_value(column, t);
+		return converter<T>::to(t);
+	}
+
 	// Use int value in query.
 	void use_value(int pos, int value);
 	// Use 64-bit int value in query.
@@ -133,31 +121,11 @@ public:
 
 	// Get use position by name in query.
 	int use_pos(string_t const& name) const;
-
-	sqlite3_stmt* impl() const // throw()
-	{
-		return impl_;
-	}
-
-	template<typename T>
-	T get(int column) const
-	{
-		typename converter<T>::base_type t;
-		column_value(column, t);
-		return converter<T>::to(t);
-	}
 private:
 	// Copy not allowed.
 	statement(statement const&);
 	// Assignment not allowed.
 	statement& operator=(statement const&);
-
-	// Check error code. If code is not ok, throws exception.
-	void check_error(int code) const;
-	void check_last_error() const;
-
-	void do_prepare(utf8_string const& sql);
-	void do_prepare(utf16_string const& sql);
 	
 	session& s_;
 	query q_;

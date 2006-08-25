@@ -11,7 +11,6 @@
 
 #include "string.hpp"
 #include "query.hpp"
-#include "statement.hpp"
 
 struct sqlite3;
 
@@ -26,29 +25,17 @@ class transaction;
 // Database session. Noncopyable.
 class session
 {
-	friend class transaction; // for access to active_txn_ and impl_
-//	friend class statement;   // access to check_error()
+	friend class transaction; // access to active_txn_ and impl_
+	friend class statement;   // access to impl_ and check_error
 public:
-	// Create an empty session.
-	session() : impl_(0), active_txn_(0) {}
+	// Create a session.
+	session();
 	
 	// Create and open session.
-	session(string_t const& file_name) : impl_(0), active_txn_(0)
-	{
-		open(file_name);
-	}
+	explicit session(string_t const& file_name);
 	
 	// Close session on destroy.
-	~session()
-	{
-		try
-		{
-			close();
-		}
-		catch(...)
-		{
-		}
-	}
+	~session();
 
 	// Open database session. Previous one will be closed.
 	void open(string_t const& file_name);
@@ -61,15 +48,6 @@ public:
 	{
 		return impl_ != 0;
 	}
-	
-	// Last sqlite error code.
-	// If session is not opended returns SQLITE_OK.
-	// For more inforamtion see SQLite error codes.
-	int last_error() const; // throw()
-	
-	// Last sqlite error message.
-	// If session is not opended returns null.
-	string_t last_error_msg() const; // throw()
 
 	// Is autocommit mode enabled
 	bool is_autocommit() const; // throw()
@@ -83,39 +61,25 @@ public:
 		return active_txn_; 
 	}
 
-	// Bool-like type for implicit casting.
-	typedef bool (session::*unspecified_bool_type)() const;
-
-	// Implicit cast into bool-like type. Return !last_error()
-	operator unspecified_bool_type() const // throw()
-	{
-		return last_error() ? 0 : &session::is_open;
-	}
-
-	/// Check error code. If code is not ok, throws exception.
-	void check_error(int code) const;
-
 	// Execute SQL query immediately.
 	// It might be useful for resultless statements like INSERT, UPDATE etc.
 	// T is any output-stream-shiftable type.
 	template<typename T>
 	once_query operator<<(T const& t)
 	{
-		once_query q(this);
+		once_query q(*this);
 		q << t;
 		return q;
-	}
-
-	// Get SQLite handle.
-	sqlite3* impl() const // throw()
-	{
-		return impl_;
 	}
 private:
 	// Noncopyable.
 	session(session const&);
 	// Nonassignable.
 	session& operator=(session const&);
+
+	/// Check error code. If code is not ok, throws exception.
+	void check_error(int code) const;
+	void check_last_error() const;
 
 	sqlite3* impl_;
 	transaction* active_txn_;

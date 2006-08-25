@@ -12,6 +12,7 @@
 #include <sqlite3.h>
 
 #include "query.hpp"
+#include "binders.hpp"
 #include "exception.hpp"
 #include "statement.hpp"
 #include "session.hpp"
@@ -19,8 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
-
-//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -35,39 +34,38 @@ inline void delete_object(T* obj)
 }
 //----------------------------------------------------------------------------
 
-template<typename T>
-inline T* clone_object(T* obj)
-{
-	return obj->clone();
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
-} // namespace // implementation details
-//////////////////////////////////////////////////////////////////////////////
+} // namespace { // implementation details
 
 //////////////////////////////////////////////////////////////////////////////
 // 
 // query 
 //
 
-void query::assign(query const& src)
+query::query()
+{
+}
+//----------------------------------------------------------------------------
+
+query::query(string_t const& sql)
+{
+	sql_ << sql;
+}
+//----------------------------------------------------------------------------
+
+query::~query()
 {
 	clear();
-	// clone binders
-	std::transform(src.intos_.begin(), src.intos_.end(),
-		std::back_inserter(intos_), clone_object<into_binder>);
-	std::transform(src.uses_.begin(), src.uses_.end(),
-		std::back_inserter(uses_), clone_object<use_binder>);
-	// set sql
-	set_sql(src.sql());
 }
+//----------------------------------------------------------------------------
 
-void query::set_sql(string_t const& sql)
+void query::sql(string_t const& text)
 {
-	sql_.str(sql.c_str());
+	sql_.str(text);
 	sql_.seekp(0, std::ios_base::end).clear();
 }
+//----------------------------------------------------------------------------
 
 void query::clear() // throw()
 {
@@ -77,7 +75,13 @@ void query::clear() // throw()
 	std::for_each(uses_.begin(), uses_.end(), delete_object<use_binder>);
 	uses_.clear();
 	// clear sql
-	set_sql(string_t());
+	sql(string_t());
+}
+//----------------------------------------------------------------------------
+
+bool query::empty() const // throw()
+{
+	return sql_.str().empty() && intos_.empty() && uses_.empty();
 }
 //----------------------------------------------------------------------------
 
@@ -109,20 +113,30 @@ void swap(query& q1, query& q2)
 	swap(q1.intos_, q2.intos_);
 	swap(q1.uses_, q2.uses_);
 	// swap sql streams
-	string_t s1(q1.sql_.str().c_str());
-	string_t s2(q2.sql_.str().c_str());
-	q1.sql_.str(s2.c_str());
-	q1.sql_.seekp(0, std::ios_base::end).clear();
-	q2.sql_.str(s1.c_str());
-	q2.sql_.seekp(0, std::ios_base::end).clear();
+	string_t tmp = q1.sql();
+	q1.sql(q2.sql());
+	q2.sql(tmp);
 }
 //----------------------------------------------------------------------------
-
 
 //////////////////////////////////////////////////////////////////////////////
 // 
 // prepare_query 
 //
+
+prepare_query::prepare_query(statement& st)
+	: st_(&st)
+{
+}
+//----------------------------------------------------------------------------
+
+prepare_query::prepare_query(prepare_query& src)
+{
+	swap(*this, src);
+	st_ = src.st_; src.st_ = 0;
+}
+//----------------------------------------------------------------------------
+
 prepare_query::~prepare_query()
 {
 	if ( st_ )
@@ -131,11 +145,26 @@ prepare_query::~prepare_query()
 		swap(st_->q(), *this); 
 	}
 }
+//----------------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////////
 // 
 // once_query
 //
+
+once_query::once_query(session& s)
+	: s_(&s)
+{
+}
+//----------------------------------------------------------------------------
+
+once_query::once_query(once_query& src)
+{
+	swap(*this, src);
+	s_ = src.s_; src.s_ = 0;
+}
+//----------------------------------------------------------------------------
+
 once_query::~once_query()
 {
 	if ( s_ )
@@ -150,6 +179,7 @@ once_query::~once_query()
 		st.exec();
 	}
 }
+//----------------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////////
 

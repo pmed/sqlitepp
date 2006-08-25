@@ -21,34 +21,61 @@ namespace { // implementation details
 
 //////////////////////////////////////////////////////////////////////////////
 
-// Need to overload open functions because of char const* UTF-8 version :(
-int do_open(utf8_string const& file_name, sqlite3** impl)
+string_t last_error_msg(sqlite3* impl)
 {
-	return ::sqlite3_open(reinterpret_cast<char const*>(file_name.c_str()), impl);
+	string_t result;
+	if ( impl )
+	{
+		result = reinterpret_cast<char_t const*>
+			(aux::select(::sqlite3_errmsg, ::sqlite3_errmsg16)(impl));
+	}
+	return result;
 }
-//----------------------------------------------------------------------------
 
-int do_open(utf16_string const& file_name, sqlite3** impl)
-{
-	return ::sqlite3_open16(file_name.c_str(), impl);
-}
 //////////////////////////////////////////////////////////////////////////////
 
 } // namespace { // implementation details
 
 //////////////////////////////////////////////////////////////////////////////
 
+	// Create an empty session.
+session::session() 
+	: impl_(0)
+	, active_txn_(0)
+{
+}
+//----------------------------------------------------------------------------
+
+session::session(string_t const& file_name)
+	: impl_(0)
+	, active_txn_(0)
+{
+	open(file_name);
+}
+//----------------------------------------------------------------------------
+
+session::~session()
+{
+	try
+	{
+		close();
+	}
+	catch(...)
+	{
+	}
+}
+//----------------------------------------------------------------------------
+
 void session::open(string_t const& file_name)
 {
-	// close session
+	// close previouse session
 	close();
 
-	// call do_* helper - select for utf8_char not applicable for sqlite3_open :(
-	int const r = do_open(file_name, &impl_);
+	int const r = aux::select(::sqlite3_open, ::sqlite3_open16)(file_name.c_str(), &impl_);
 	if ( r != SQLITE_OK )
 	{
-		string_t msg( last_error_msg() );
-        int err = last_error();
+		string_t const msg( last_error_msg(impl_) );
+		int const err = ::sqlite3_errcode(impl_);
 		close(); // session should be closed anyway
 		throw exception(err, msg);
 	}
@@ -66,27 +93,9 @@ void session::close()
 }
 //----------------------------------------------------------------------------
 
-int session::last_error() const // throw()
-{
-	return is_open() ? sqlite3_errcode(impl_) : SQLITE_OK;
-}
-//----------------------------------------------------------------------------
-
 bool session::is_autocommit() const // throw()
 {
 	return ::sqlite3_get_autocommit(impl_) != 0;
-}
-//----------------------------------------------------------------------------
-
-string_t session::last_error_msg() const // throw()
-{
-	string_t result;
-	if ( is_open() )
-	{
-		result = reinterpret_cast<char_t const*>
-			(aux::select(::sqlite3_errmsg, ::sqlite3_errmsg16)(impl_));
-	}
-	return result;
 }
 //----------------------------------------------------------------------------
 
@@ -94,8 +103,14 @@ void session::check_error(int code) const
 {
 	if ( code != SQLITE_OK && code != SQLITE_ROW && code != SQLITE_DONE )
 	{
-		throw exception(code, last_error_msg());
+		throw exception(code, last_error_msg(impl_));
 	}
+}
+//----------------------------------------------------------------------------
+
+void session::check_last_error() const
+{
+	check_error(::sqlite3_errcode(impl_));
 }
 
 //////////////////////////////////////////////////////////////////////////////

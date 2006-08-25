@@ -26,21 +26,17 @@ class statement;
 class into_binder
 {
 public:
-	virtual ~into_binder();
-	into_binder* clone() const;
-
+	virtual ~into_binder() {}
+	// Bind value to statement st in positin pos.
 	int bind(statement& st, int pos);
+	// Update bound value.
 	void update(statement& st);
-protected:
-	into_binder();
-	into_binder(into_binder const&);
-	into_binder& operator=(into_binder const&);
 private:
-	virtual into_binder* do_clone() const = 0;
 	virtual void do_bind(statement& st, int pos) = 0;
 	virtual void do_update(statement& st) = 0;
 };
 
+/// Positional into binder.
 template<typename T>
 class into_pos_binder : public into_binder
 {
@@ -53,11 +49,6 @@ public:
 protected:
 	int pos_;
 private:
-	into_binder* do_clone() const
-	{
-		return new into_pos_binder<T>(*this);
-	}
-
 	void do_bind(statement&, int pos)
 	{
 		pos_ = pos;
@@ -73,6 +64,7 @@ private:
 	T& value_;
 };
 
+/// Named into binder.
 template<typename T>
 class into_name_binder : public into_pos_binder<T>
 {
@@ -83,11 +75,6 @@ public:
 	{
 	}
 private:
-	into_binder* do_clone() const
-	{
-		return new into_name_binder<T>(*this);
-	}
-
 	void do_bind(statement& st, int)
 	{
 		if ( pos_ < 0 )
@@ -103,19 +90,14 @@ private:
 class use_binder
 {
 public:
-	virtual ~use_binder();
-	use_binder* clone() const;
-
+	virtual ~use_binder() {}
+	/// Bind value to statement st in position pos
 	int bind(statement& st, int pos);
-protected:
-	use_binder();
-	use_binder(use_binder const&);
-	use_binder& operator=(use_binder const&);
 private:
-	virtual use_binder* do_clone() const = 0;
 	virtual void do_bind(statement& st, int pos) = 0;
 };
 
+/// Positional use binder.
 template<typename T>
 class use_pos_binder : public use_binder
 {
@@ -124,20 +106,16 @@ public:
 		: value_(value)
 	{
 	}
+protected:
+	T& value_;
 private:
-	use_binder* do_clone() const
-	{
-		return new use_pos_binder<T>(*this);
-	}
-	
 	void do_bind(statement& st, int pos)
 	{
 		st.use_value(pos, converter<T>::from(value_));
 	}
-protected:
-	T& value_;
 };
 
+/// Named use binder.
 template<typename T>
 class use_name_binder : public use_pos_binder<T>
 {
@@ -148,11 +126,6 @@ public:
 	{
 	}
 private:
-	use_binder* do_clone() const
-	{
-		return new use_name_binder<T>(*this);
-	}
-	
 	void do_bind(statement& st, int)
 	{
 		st.use_value(st.use_pos(name_), converter<T>::from(value_));
