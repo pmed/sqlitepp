@@ -17,7 +17,7 @@ struct transaction_data : statement_data
 typedef tut::test_group<transaction_data> test_group;
 typedef test_group::object object;
 
-test_group g("transaction");
+test_group g("5. transaction");
 
 using namespace sqlitepp;
 

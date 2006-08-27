@@ -27,7 +27,7 @@ namespace
 typedef tut::test_group<session_data> test_group;
 typedef test_group::object object;
 
-test_group g("session");
+test_group g("3. session");
 
 // test open session
 template<>template<>

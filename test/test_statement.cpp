@@ -44,7 +44,7 @@ namespace
 typedef tut::test_group<statement_data> test_group;
 typedef test_group::object object;
 
-test_group g("statement");
+test_group g("4. statement");
 
 // test INSERT
 template<>template<>

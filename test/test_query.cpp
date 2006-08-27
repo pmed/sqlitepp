@@ -17,7 +17,7 @@ struct query_data
 typedef tut::test_group<query_data> test_group;
 typedef test_group::object object;
 
-test_group g("query");
+test_group g("6. query");
 
 template<>template<>
 void test_group::object::test<1>()

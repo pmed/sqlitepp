@@ -18,7 +18,7 @@ struct use_data : statement_data
 typedef tut::test_group<use_data> test_group;
 typedef test_group::object object;
 
-test_group g("use");
+test_group g("8. use");
 
 using namespace sqlitepp;
 

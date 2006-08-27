@@ -15,7 +15,7 @@ struct string_data
 typedef tut::test_group<string_data> test_group;
 typedef test_group::object object;
 
-test_group g("string");
+test_group g("1. string");
 
 
 template<>template<>

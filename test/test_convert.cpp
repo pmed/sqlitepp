@@ -42,7 +42,7 @@ namespace
 	{
 		T id;
 		se << utf(L"select id from some_table"), into(id);
-		tut::ensure_equals("id", id, 100);
+		tut::ensure_equals("id", id, T(100));
 	}
 
 	template<typename T>
@@ -57,7 +57,7 @@ namespace
 typedef tut::test_group<conv_data> test_group;
 typedef test_group::object object;
 
-test_group g("bindings conversion");
+test_group g("9. conversion");
 
 template<>template<>
 void object::test<1>()

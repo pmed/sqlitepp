@@ -18,7 +18,7 @@ struct exception_data : session_data
 typedef tut::test_group<exception_data> test_group;
 typedef test_group::object object;
 
-test_group g("exception");
+test_group g("2. exception");
 
 template<>template<>
 void object::test<1>()
@@ -43,19 +43,17 @@ void object::test<3>()
 		try
 		{
 			throw ex;
-			fail("exception was thrown");
 		}
 		catch(std::runtime_error const& rt_err)
 		{
-			ensure_equals("what copy catch", rt_err.what(), utf8(L"exception message"));
+			ensure_equals("catched what", rt_err.what(), utf8(L"exception message"));
 			throw;
 		}
-		fail("exception was re-thrown");
 	}
 	catch(sqlitepp::exception const& e)
 	{
-		ensure_equals("code copy catch", e.code(), 2343);
-		ensure_equals("what copy catch", e.what(), utf8(L"exception message"));
+		ensure_equals("catched code", e.code(), 2343);
+		ensure_equals("catched what", e.what(), utf8(L"exception message"));
 	}
 }
 

@@ -12,7 +12,7 @@ struct into_data : statement_data {};
 typedef tut::test_group<into_data> test_group;
 typedef test_group::object object;
 
-test_group g("into");
+test_group g("7. into");
 
 using namespace sqlitepp;
 
@@ -40,7 +40,7 @@ void object::test<2>()
 	r1.insert(se);
 
 	record r2;
-	st << L"select id, name, salary from some_table",
+	st << utf(L"select id, name, salary from some_table"),
 		into(r2.salary, utf(L"salary")), into(r2.id, utf(L"id")), into(r2.name, utf(L"name"));
 
 	ensure( "row selected", st.exec() );
