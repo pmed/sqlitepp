@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// exception.cpp
+// $Id$
 //
 // Copyright (c) 2004 Pavel Medvedev
 // Use, modification and distribution is subject to the 

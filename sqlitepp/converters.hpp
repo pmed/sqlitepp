@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////////
-// converters.hpp
+// $Id$
 //
 // Copyright (c) 2005 Pavel Medvedev
 // Use, modification and distribution is subject to the
