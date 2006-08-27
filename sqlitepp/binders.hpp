@@ -26,12 +26,18 @@ class statement;
 class into_binder
 {
 public:
+	into_binder() {}
 	virtual ~into_binder() {}
 	// Bind value to statement st in positin pos.
 	int bind(statement& st, int pos);
 	// Update bound value.
 	void update(statement& st);
 private:
+	// Noncopyable.
+	into_binder(into_binder const&);
+	// Nonassignable.
+	into_binder& operator=(into_binder const&);
+
 	virtual void do_bind(statement& st, int pos) = 0;
 	virtual void do_update(statement& st) = 0;
 };
@@ -90,10 +96,16 @@ private:
 class use_binder
 {
 public:
+	use_binder() {}
 	virtual ~use_binder() {}
 	/// Bind value to statement st in position pos
 	int bind(statement& st, int pos);
 private:
+	// Noncopyable.
+	use_binder(use_binder const&);
+	// Nonassignable.
+	use_binder& operator=(use_binder const&);
+
 	virtual void do_bind(statement& st, int pos) = 0;
 };
 

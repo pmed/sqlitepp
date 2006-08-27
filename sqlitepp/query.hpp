@@ -14,19 +14,13 @@
 #include <memory>
 
 #include "string.hpp"
+#include "binders.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
-
-class into_binder;
-class use_binder;
-
-// see binders.hpp
-typedef std::auto_ptr<into_binder> into_binder_ptr;
-typedef std::auto_ptr<use_binder> use_binder_ptr;
 
 // SQL sql_query base class. Noncopyable.
 class query

@@ -87,11 +87,13 @@ void statement::prepare()
 {
 	try
 	{
+		typedef meta::if_<sizeof char_t == sizeof utf8_char, char const*, void const*>::type tail_type;
 		char_t const* tail;
 		string_t const sql = q_.sql();
 		s_.check_error(
 			aux::select(::sqlite3_prepare, ::sqlite3_prepare16)(s_.impl_, sql.c_str(),
-				static_cast<int>(sql.size() * sizeof(char_t)), &impl_, &tail) );
+				static_cast<int>(sql.size() * sizeof(char_t)),
+				&impl_, reinterpret_cast<tail_type*>(&tail)) );
 		if ( tail && *tail )
 		{
 			throw multi_stmt_not_supported();
