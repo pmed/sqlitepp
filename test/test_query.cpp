@@ -7,22 +7,22 @@
 #include <sqlitepp/query.hpp>
 #include <sqlitepp/binders.hpp>
 
-namespace {
-
 using namespace sqlitepp;
+
+namespace tut {
 
 struct query_data
 {
 	query q;
 };
 
-typedef tut::test_group<query_data> test_group;
-typedef test_group::object object;
+typedef tut::test_group<query_data> query_test_group;
+typedef query_test_group::object object;
 
-test_group g("6. query");
+query_test_group qg("6. query");
 
 template<>template<>
-void test_group::object::test<1>()
+void object::test<1>()
 {
 	ensure("empty query", q.empty() );
 
@@ -31,7 +31,7 @@ void test_group::object::test<1>()
 }
 
 template<>template<>
-void test_group::object::test<2>()
+void object::test<2>()
 {
 	int z = 100;
 	q << utf(L"qaz") << z;
@@ -39,7 +39,7 @@ void test_group::object::test<2>()
 }
 
 template<>template<>
-void test_group::object::test<6>()
+void object::test<6>()
 {
 	try
 	{
@@ -63,4 +63,4 @@ void test_group::object::test<6>()
 	ensure("uses empty", q.uses().empty());
 }
 
-} // namespace {
+} // namespace tut {

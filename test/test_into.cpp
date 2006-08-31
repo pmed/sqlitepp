@@ -3,26 +3,25 @@
 #include <tut.h>
 
 #include <sqlitepp/exception.hpp>
-#include <sqlitepp/binders.hpp>
+#include <sqlitepp/into.hpp>
 #include "statement_data.hpp"
 
-namespace
-{
+using namespace sqlitepp;
+
+namespace tut {
 	
 struct into_data : statement_data {};
 
-typedef tut::test_group<into_data> test_group;
-typedef test_group::object object;
+typedef test_group<into_data> into_test_group;
+typedef into_test_group::object object;
 
-test_group g("7. into");
-
-using namespace sqlitepp;
+into_test_group into_g("7. into");
 
 // into by pos binding
 template<>template<>
 void object::test<1>()
 {
-	record r1(1, utf(L"Елена"), 345.2);
+	record r1(1, utf(L"Elena"), 345.2);
 	r1.insert(se);
 
 	record r2;
@@ -38,7 +37,7 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 {
-	record r1(1, utf(L"Анна"), 345.2);
+	record r1(1, utf(L"Anna"), 345.2);
 	r1.insert(se);
 
 	record r2;
@@ -71,7 +70,7 @@ void object::test<3>()
 template<>template<>
 void object::test<4>()
 {
-	record r1(1, utf(L"Юля"), 634.4);
+	record r1(1, utf(L"Julie"), 634.4);
 	r1.insert(se);
 
 	record r2;
@@ -84,4 +83,4 @@ void object::test<4>()
 	ensure( "single row", !st.exec() );
 }
 
-} // namespace
+} // namespace tut {

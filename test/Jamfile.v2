@@ -1,6 +1,6 @@
 import testing ;
 
 unit-test test
-	: [ glob *.cpp ] ..//sqlitepp 
+    : [ glob *.cpp ] ..//sqlitepp 
 	: <include>tut <include>.. <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
 ;

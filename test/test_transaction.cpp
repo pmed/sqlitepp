@@ -4,24 +4,22 @@
 
 #include <sqlitepp/transaction.hpp>
 #include <sqlitepp/exception.hpp>
-#include <sqlitepp/binders.hpp>
+#include <sqlitepp/into.hpp>
 
 #include "statement_data.hpp"
 
-namespace
-{
+using namespace sqlitepp;
 
+namespace tut {
 
 struct transaction_data : statement_data
 {
 };
 
-typedef tut::test_group<transaction_data> test_group;
-typedef test_group::object object;
+typedef tut::test_group<transaction_data> txn_test_group;
+typedef txn_test_group::object object;
 
-test_group g("5. transaction");
-
-using namespace sqlitepp;
+txn_test_group txn_g("5. transaction");
 
 // implicit rollback
 template<>template<>
@@ -33,7 +31,7 @@ void object::test<1>()
 		transaction t(se);
 		ensure_equals( "this active txn", se.active_txn(), &t );
 		
-		record r1(1, utf(L"Евгения"), 566.24);
+		record r1(1, utf(L"Eugenia"), 566.24);
 		r1.insert(se);
 
 		se << utf(L"select count(*) from some_table"), into(rows);
@@ -50,7 +48,7 @@ void object::test<2>()
 {
 	{
 		transaction t(se);
-		record r1(1, utf(L"Евгения"), 566.24);
+		record r1(1, utf(L"Eugenia"), 566.24);
 		r1.insert(se);
 		t.commit();
 	}

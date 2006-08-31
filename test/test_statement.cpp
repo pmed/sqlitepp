@@ -1,6 +1,7 @@
 // $Id$
 
 #include <cmath>
+#include <iterator>
 #include <tut.h>
 #include <sqlitepp/exception.hpp>
 
@@ -40,19 +41,18 @@ void ensure_equals(statement_data::record const& r1,
 	tut::ensure_equals("data", r1.data, r2.data);
 }
 
-namespace
-{
+namespace tut {
 	
-typedef tut::test_group<statement_data> test_group;
-typedef test_group::object object;
+typedef tut::test_group<statement_data> statement_test_group;
+typedef statement_test_group::object object;
 
-test_group g("4. statement");
+statement_test_group st_g("4. statement");
 
 // test INSERT
 template<>template<>
 void object::test<1>()
 {
-	record r(1, utf(L"Жанна"), 345.2);
+	record r(1, utf(L"Janet"), 345.2);
 	r.insert(se);
 }
 
@@ -101,7 +101,7 @@ void object::test<4>()
 template<>template<>
 void object::test<5>()
 {
-	record r(1, utf(L"Дарья"), 123.45);
+	record r(1, utf(L"Daria"), 123.45);
 	r.insert(se);
 	
 	st << utf(L"select * from some_table");
@@ -148,4 +148,4 @@ void object::test<5>()
 	st.reset();
 }
 
-} // namespace
+} // namespace tut {

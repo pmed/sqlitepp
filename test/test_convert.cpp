@@ -3,36 +3,38 @@
 #include <tut.h>
 #include <time.h>
 
-#include <sqlitepp/binders.hpp>
 #include <sqlitepp/string.hpp>
 #include <sqlitepp/transaction.hpp>
+#include <sqlitepp/use.hpp>
+#include <sqlitepp/into.hpp>
 
 #include "statement_data.hpp"
 
 using namespace sqlitepp;
 
-namespace sqlitepp 
-{
+namespace sqlitepp {
 
+// specialize convert for the tm struct
 template<>
 struct converter<tm>
 {
-	typedef time_t base_type;
-	static time_t from(tm& src)
+	typedef long long base_type;
+	static long long from(tm& src)
 	{
 		return mktime(&src);
 	}
-	static tm to(time_t const src)
+	static tm to(long long src)
 	{
-		return *localtime(&src);
+        time_t tt = src;
+		return *localtime(&tt);
 	}
 };
 
-}
-namespace
-{
+} // namespace sqlitepp 
 
-	struct conv_data : statement_data
+namespace tut {
+
+struct conv_data : statement_data
 {
 	conv_data()
 	{
@@ -44,7 +46,7 @@ namespace
 	{
 		T id;
 		se << utf(L"select id from some_table"), into(id);
-		tut::ensure_equals("id", id, T(100));
+		ensure_equals("id", id, T(100));
 	}
 
 	template<typename T>
@@ -52,14 +54,14 @@ namespace
 	{
 		T salary;
 		se << utf(L"select salary from some_table"), into(salary);
-		tut::ensure_distance("salary", salary, expected, dist);
+		ensure_distance("salary", salary, expected, dist);
 	}
 };
 
-typedef tut::test_group<conv_data> test_group;
-typedef test_group::object object;
+typedef test_group<conv_data> conv_test_group;
+typedef conv_test_group::object object;
 
-test_group g("9. conversion");
+conv_test_group conv_tests("9. conversion");
 
 template<>template<>
 void object::test<1>()
@@ -95,7 +97,7 @@ void object::test<3>()
 	tm t2;
 	se << utf(L"select t from timer"), into(t2);
 
-	ensure("tm equal", memcmp(&t1, &t2, sizeof tm) == 0);
+	ensure("tm equal", memcmp(&t1, &t2, sizeof(tm)) == 0);
 }
 
-} // namespace
+} // namespace tut {

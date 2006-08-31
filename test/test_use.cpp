@@ -3,12 +3,14 @@
 #include <tut.h>
 
 #include <sqlitepp/exception.hpp>
-#include <sqlitepp/binders.hpp>
+#include <sqlitepp/into.hpp>
+#include <sqlitepp/use.hpp>
 
 #include "statement_data.hpp"
 
-namespace
-{
+using namespace sqlitepp;
+
+namespace tut {
 	
 struct use_data : statement_data
 {
@@ -17,19 +19,17 @@ struct use_data : statement_data
 	}
 };
 
-typedef tut::test_group<use_data> test_group;
-typedef test_group::object object;
+typedef tut::test_group<use_data> use_test_group;
+typedef use_test_group::object object;
 
-test_group g("8. use");
-
-using namespace sqlitepp;
+use_test_group u_g("8. use");
 
 // use by pos binding
 template<>template<>
 void object::test<1>()
 {
 	
-	record recs[2] = { record(1, utf(L"Наталия"), 123.45), record(2, utf(L"Анастасия"), 678.90) };
+	record recs[2] = { record(1, utf(L"Natalia"), 123.45), record(2, utf(L"Anastasia"), 678.90) };
 
 	// insert records
 	for (size_t i = 0; i < dimof(recs); ++i)
@@ -59,7 +59,7 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 {
-	record recs[2] = { record(1, utf(L"Маша"), 123.45), record(2, utf(L"Люба"), 678.90) };
+	record recs[2] = { record(1, utf(L"Masha"), 123.45), record(2, utf(L"Luba"), 678.90) };
 
 	// insert records
 	for (size_t i = 0; i < dimof(recs); ++i)
@@ -84,7 +84,7 @@ void object::test<2>()
 	{
 		ensure_equals(r, recs[count]);
 	}
-	ensure_equals(count, dimof(recs)); 
+	ensure_equals(count, static_cast<int>(dimof(recs))); 
 }
 
 // use by invalid name binding
@@ -111,7 +111,7 @@ void object::test<4>()
 {
 	const char BLOB_data[] = { "very big data" };
 
-	record r1(1, utf(L"Вера"), 545.6);
+	record r1(1, utf(L"Vera"), 545.6);
 	r1.data.assign(BLOB_data, BLOB_data + sizeof(BLOB_data));
 	
 	st << utf(L"insert into some_table(id, name, salary, data) values( :id, :name, :salary, :data)"),

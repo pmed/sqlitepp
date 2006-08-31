@@ -23,13 +23,12 @@ session_data::~session_data()
 	remove(utf8(name_).c_str()); 
 }
 
-namespace 
-{
+namespace tut {
 	
-typedef tut::test_group<session_data> test_group;
-typedef test_group::object object;
+typedef tut::test_group<session_data> session_test_group;
+typedef session_test_group::object object;
 
-test_group g("3. session");
+session_test_group s_g("3. session");
 
 // test open session
 template<>template<>
@@ -61,4 +60,4 @@ void object::test<3>()
 	}
 }
 
-} // namespace
+} // namespace tut {

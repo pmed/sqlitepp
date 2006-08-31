@@ -6,10 +6,9 @@
 
 #include "session_data.hpp"
 
-namespace
-{
-
 using namespace sqlitepp;
+
+namespace tut {
 
 struct exception_data : session_data
 {
@@ -17,10 +16,10 @@ struct exception_data : session_data
 	exception_data() : ex(2343, utf(L"exception message")) {}
 };
 
-typedef tut::test_group<exception_data> test_group;
-typedef test_group::object object;
+typedef test_group<exception_data> ex_test_group;
+typedef ex_test_group::object object;
 
-test_group g("2. exception");
+ex_test_group ex_g("2. exception");
 
 template<>template<>
 void object::test<1>()
@@ -74,4 +73,5 @@ void object::test<4>()
 	}
 }
 
-} // namespace
+} // namespace tut {
+

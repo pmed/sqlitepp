@@ -4,20 +4,19 @@
 
 #include <sqlitepp/string.hpp>
 
-namespace 
-{
-
 using namespace sqlitepp;
+
+namespace tut {
 
 struct string_data
 {
 	string_t str_;
 };
 	
-typedef tut::test_group<string_data> test_group;
-typedef test_group::object object;
+typedef tut::test_group<string_data> string_test_group;
+typedef string_test_group::object object;
 
-test_group g("1. string");
+string_test_group str_g("1. string");
 
 
 template<>template<>
@@ -49,4 +48,4 @@ void object::test<3>()
 	ensure("empty", s.empty());
 }
 
-} // namespace
+} // namespace tut {
