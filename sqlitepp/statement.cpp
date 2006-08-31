@@ -87,7 +87,7 @@ void statement::prepare()
 {
 	try
 	{
-		typedef meta::if_<sizeof char_t == sizeof utf8_char, char const*, void const*>::type tail_type;
+		typedef meta::if_<sizeof(char_t) == sizeof(utf8_char), char const*, void const*>::type tail_type;
 		char_t const* tail;
 		string_t const sql = q_.sql();
 		s_.check_error(

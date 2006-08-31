@@ -7,11 +7,12 @@ variant utf16d : debug : <define>SQLITEPP_UTF16 ;
 
 # project 
 project sqlitepp
-	: requirements
+    : requirements
         <tag>@$(__name__).tag # Used to encode variant in target name. See the 'tag' rule below.
         <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
-	: build-dir bin
-	: default-build utf8 <link>static
+        <toolset>gcc:<define>_GLIBCXX_USE_WCHAR_T
+    : build-dir bin
+    : default-build utf8 <link>static
 ;
 
 build-project sqlite ;
@@ -30,19 +31,19 @@ rule tag ( name : type ? : property-set )
     {        
         if $(layout) = versioned
         {
-			if $(name) != sqlite
-			{
-				switch [ $(property-set).get <variant> ]
-				{
-					case utf8* :  name = $(name)-utf8 ;
-					case utf16* : name = $(name)-utf16 ;
-				}
-			}
+            if $(name) != sqlite
+            {
+                switch [ $(property-set).get <variant> ]
+                {
+                    case utf8* :  name = $(name)-utf8 ;
+                    case utf16* : name = $(name)-utf16 ;
+                }
+            }
             name = [ stage.add-variant-and-compiler $(name) 
               : $(type) : $(property-set) ] ;
             
             local version-tag = [ $(property-set).get <version> ] ;
-			version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(version-tag) ] ;
+            version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(version-tag) ] ;
             version-tag = $(version-tag:J="_") ;
             
             # On NT, library with version suffix won't be recognized

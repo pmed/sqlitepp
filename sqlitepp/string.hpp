@@ -29,22 +29,15 @@ struct if_ { typedef T1 type; };
 template<typename T1, typename T2>
 struct if_<false, T1, T2> { typedef T2 type; };
 
-struct utf16_char_selector
+template<size_t Size>
+struct utf_char_selector
 {
-	class unknown_utf16_char_type;
-	typedef if_<sizeof(wchar_t) == 2, wchar_t,
-		if_<sizeof(unsigned short) == 2, unsigned short,
-		if_<sizeof(unsigned int) == 2, unsigned int, 
-			unknown_utf16_char_type>::type>::type>::type type;
-};
-
-struct utf32_char_selector
-{
-	class unknown_utf32_char_type;
-	typedef if_<sizeof(wchar_t) == 4, wchar_t,
-		if_<sizeof(unsigned short) == 4, unsigned short,
-		if_<sizeof(unsigned int) == 4, unsigned int, 
-			unknown_utf32_char_type>::type>::type>::type type;
+	class unknown_char_type;
+	typedef 
+		typename if_<sizeof(wchar_t) == Size, wchar_t,
+		typename if_<sizeof(unsigned short) == Size, unsigned short,
+		typename if_<sizeof(unsigned int) == Size, unsigned int, 
+			unknown_char_type>::type>::type>::type type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -59,8 +52,8 @@ using std::size_t;
 
 //typedef unsigned char                   utf8_char;
 typedef char							utf8_char;
-typedef meta::utf16_char_selector::type utf16_char;
-typedef meta::utf32_char_selector::type utf32_char;
+typedef meta::utf_char_selector<2>::type utf16_char;
+typedef meta::utf_char_selector<4>::type utf32_char;
 
 typedef std::basic_string<utf8_char>    utf8_string;
 typedef std::basic_string<utf16_char>   utf16_string;
@@ -303,13 +296,11 @@ inline string_t utf(utf32_string const& str)
 //////////////////////////////////////////////////////////////////////////////
 
 
-#ifdef SQLITEPP_UTF16
 //!!! TEST only!!!
-inline std::ostream& operator<<(std::ostream& os, sqlitepp::string_t const& str)
+inline std::ostream& operator<<(std::ostream& os, sqlitepp::utf16_string const& str)
 {
 	return os << sqlitepp::utf8(str);
 }
-#endif // SQLITEPP_UTF16
 
 
 #endif // SQLITEPP_STRING_HPP_INCLUDED

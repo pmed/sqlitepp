@@ -51,7 +51,8 @@ struct enable_if_c<false, T> {};
 template <class Cond, class T = void> 
 struct enable_if : public enable_if_c<Cond::value, T> {};
 
-using sqlitepp::utf8_char;
+//using sqlitepp::utf8_char;
+typedef unsigned char utf8_char;
 using sqlitepp::utf16_char;
 using sqlitepp::utf32_char;
 
@@ -378,7 +379,6 @@ inline typename enable_if<is_utf16_iterator_type<I>, O>::type
 
 		output = to_utf8(result, output);
 	}
-
 	return output;
 }
 
@@ -394,17 +394,11 @@ template <	typename I, // I models InputIterator
 inline typename enable_if<is_utf32_iterator_type<I>, O>::type
 	to_utf8(I first, I last, O output)
 {
-	if (first == last) return output;
-
-	typedef typename std::iterator_traits<I>::value_type value_type;
-
-//	adobe::for_each(first, last, boost::bind(&to_utf8<value_type, O>, _1, boost::ref(output)));
-	while ( first != last )
-	{
-		output = to_utf8<value_type, O>(*first, output);
-		++first;
-	}
-
+    while ( first != last )
+    {
+        output = to_utf8(*first, output);
+        ++first;
+    }
 	return output;
 }
 
@@ -428,7 +422,6 @@ inline typename enable_if<is_utf8_iterator_type<I>, O>::type
 
 		output = to_utf16(result, output);
 	}
-
 	return output;
 }
 
@@ -456,7 +449,6 @@ inline typename enable_if<is_utf32_type<I>, O>::type
 
 		*output = static_cast<utf16_char>((code - 0x10000) % 0x400 + implementation::utf16_low_surrogate_front_k);
 	}
-
 	return ++output;
 }
 
@@ -476,7 +468,6 @@ inline typename enable_if<is_utf32_iterator_type<I>, O>::type
 		output = to_utf16(*first, output);
 		++first;
 	}
-
 	return output;
 }
 
@@ -492,7 +483,6 @@ inline typename enable_if<is_utf8_iterator_type<I>, utf16_char>::type
 	utf32_char result;
 
 	implementation::to_utf32(first, last, result);
-
 	return static_cast<utf16_char>(result);
 }
 
@@ -521,7 +511,6 @@ inline O to_utf32(I first, I last, O output)
 
 		++output;
 	}
-
 	return output;
 }
 
@@ -536,7 +525,6 @@ inline utf32_char to_utf32(I first, I last)
 	utf32_char result;
 
 	implementation::to_utf32(first, last, result);
-
 	return result;
 }
 
