@@ -16,11 +16,14 @@
 #include <exception>
 
 // include library headers
+#include "string.hpp"
 #include "exception.hpp"
-#include "binders.hpp"
-#include "statement.hpp"
 #include "session.hpp"
+#include "statement.hpp"
 #include "transaction.hpp"
+#include "into.hpp"
+#include "use.hpp"
+#include "converters.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
