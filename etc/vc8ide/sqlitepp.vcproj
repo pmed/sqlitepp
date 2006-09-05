@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="sqlitepp"
 	ProjectGUID="{E98BEC31-73D6-4A23-9545-1EC7ECB1B926}"
 	Keyword="Win32Proj"
@@ -285,6 +285,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\sqlitepp\into.hpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\sqlitepp\query.cpp"
 			>
 		</File>
@@ -330,6 +334,10 @@
 		</File>
 		<File
 			RelativePath="..\..\sqlitepp\unicode.hpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlitepp\use.hpp"
 			>
 		</File>
 	</Files>
