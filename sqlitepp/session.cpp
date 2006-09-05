@@ -93,12 +93,6 @@ void session::close()
 }
 //----------------------------------------------------------------------------
 
-bool session::is_autocommit() const // throw()
-{
-	return ::sqlite3_get_autocommit(impl_) != 0;
-}
-//----------------------------------------------------------------------------
-
 void session::check_error(int code) const
 {
 	if ( code != SQLITE_OK && code != SQLITE_ROW && code != SQLITE_DONE )

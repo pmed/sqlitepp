@@ -27,9 +27,6 @@ public:
 	// End transaction with rollback if it is not commited.
 	~transaction();
 
-	// Rollback transaction.
-	void rollback(); //throw()
-
 	// Commit transaction.
 	void commit();
 private:

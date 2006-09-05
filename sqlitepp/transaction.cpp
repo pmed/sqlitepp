@@ -34,36 +34,16 @@ transaction::~transaction()
 {
 	if ( do_rollback_ )
 	{
-		rollback();
-	}
-	try
-	{
-		s_ << utf(L"end");
-	}
-	catch(std::exception const&)
-	{
-		// eat exception!!!
-	}
-	s_.active_txn_ = 0;
-}
-//----------------------------------------------------------------------------
-
-void transaction::rollback() // throw()
-{
-	try
-	{
 		s_ << utf(L"rollback");
 	}
-	catch(std::exception const&)
-	{
-		// eat exception!!!
-	}
+	s_.active_txn_ = 0;
 }
 //----------------------------------------------------------------------------
 
 void transaction::commit()
 {
 	s_ << utf(L"commit");
+    do_rollback_ = false;
 }
 //----------------------------------------------------------------------------
 
