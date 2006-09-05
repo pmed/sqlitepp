@@ -152,7 +152,7 @@ void statement::finalize() // throw
 {
 	if ( is_prepared() )
 	{
-		::sqlite3_finalize(impl_);
+		s_.check_error( ::sqlite3_finalize(impl_) );
 		impl_ = 0;
 	}
 }

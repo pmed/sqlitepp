@@ -22,7 +22,7 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-// SQL sql_query base class. Noncopyable.
+// SQL query base class. Noncopyable.
 class query
 {
 public:
@@ -45,7 +45,7 @@ public:
 	// Set new SQL statement.
 	void sql(string_t const& text);
 
-	// Clear sql_query sql, into and use bindings.
+	// Clear sql text, into and use bindings.
 	void clear(); // throw()
 	
 	// Is query empty?

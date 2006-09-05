@@ -45,10 +45,10 @@ public:
 	void prepare();
 
 	// Finalize statement.
-	void finalize(); // throw()
+	void finalize();
 
 	// Is statement prepared.
-	bool is_prepared() const throw() 
+	bool is_prepared() const // throw() 
 	{
 		return impl_ != 0; 
 	}
