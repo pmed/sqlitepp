@@ -71,6 +71,25 @@ struct converter<blob>
 	}
 };
 
+template<typename T>
+struct converter<std::vector<T> >
+{
+	typedef blob base_type;
+	static std::vector<T> to(blob const& b)
+	{
+        T const* f = reinterpret_cast<T const*>(b.data);
+        T const* l = f + b.size / sizeof(T);
+		return std::vector<T>(f, l);
+	}
+	static blob from(std::vector<T> const& t)
+	{
+        blob b;
+        b.data = t.empty()? 0 : &t[0];
+        b.size = t.size() * sizeof(T);
+        return b;
+	}
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace sqlitepp

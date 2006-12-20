@@ -3,6 +3,8 @@
 #ifndef SQLITEPP_TEST_STATEMENT_DATA_HPP_INCLUDED
 #define SQLITEPP_TEST_STATEMENT_DATA_HPP_INCLUDED
 
+#include <vector>
+
 #include <sqlitepp/string.hpp>
 #include <sqlitepp/statement.hpp>
 
@@ -22,7 +24,9 @@ struct statement_data : session_data
 		int id;
 		string_t name;
 		double salary;
-		sqlitepp::blob data;
+		
+		typedef std::vector<char> blob_data;
+		blob_data data;
 
 		record() {}
 

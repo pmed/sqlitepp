@@ -232,11 +232,10 @@ void statement::column_value(int column, string_t& value) const
 
 void statement::column_value(int column, blob& value) const
 {
-	unsigned char const* data = static_cast<unsigned char const*>(::sqlite3_column_blob(impl_, column));
+    value.data = ::sqlite3_column_blob(impl_, column);
 	s_.check_last_error();
-	size_t const size = sqlite3_column_bytes(impl_, column);
+    value.size = sqlite3_column_bytes(impl_, column);
 	s_.check_last_error();
-	value.assign(data, data + size);
 }
 //----------------------------------------------------------------------------
 
@@ -280,9 +279,8 @@ void statement::use_value(int pos, string_t const& value)
 
 void statement::use_value(int pos, blob const& value)
 {
-	s_.check_error( ::sqlite3_bind_blob(impl_, pos, 
-		value.empty()? 0 : &value[0], 
-		static_cast<int>(value.size()), SQLITE_STATIC) );
+    s_.check_error( ::sqlite3_bind_blob(impl_, pos, value.data,
+        static_cast<int>(value.size), SQLITE_STATIC) );
 }
 
 //////////////////////////////////////////////////////////////////////////////

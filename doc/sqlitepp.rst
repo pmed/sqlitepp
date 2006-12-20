@@ -532,15 +532,22 @@ You should call ``transaction::commit`` to explicitly make a commit. ::
 BLOB
 ----
 
-BLOB isn't used in real applications so it's just stub::
+SQLite tables can contain BLOB columns. BLOB is a simple struct::
 
-    typedef std::vector<unsigned char> blob;
+    struct blob
+    {
+        void const* data; // raw data pointer
+        size_t size;      // data size in bytes
+    };
     
+SQLite++ supports conversion between template ``std::vector<T>`` and blob value.
+See "Data Conversion" section below.
+
 
 Binders
 -------
 
-Binders are used to bind value into the statement query. There two types
+Binders are used to bind value into the statement query. There are two types
 of binders:
   
   * into binders
@@ -661,7 +668,24 @@ and vice versa a set of specialized templates is used::
         static base_type from(T const& t) { return t; }
     };
 
-There are all arithmetic C++ types and ``string_t`` specializations exist.
+There are all arithmetic C++ types, ``string_t`` and ``blob`` specializations exist.
+The ``blob`` converter is partially specialized template for the ``std::vector<T>``
+so it is possible to use ``std::vector`` in statement binders::
+
+    db << "create table employee(id integer primary key, name text,"
+                  " age integer, salary real, photo blob)";
+
+    statement st(db);
+    employee e;
+    std::vector<char> image = e.photo.pixels;
+    st << "insert into employee values(null, :name, :age, :salary :photo)",
+                use(e.name), use(e.age), use(e.salary), use(image);
+    // ...
+    
+    st << "select name, age, salary, photo from employee", 
+                into(e.name), into(e.age), into(e.salary), into(image);
+
+
 You can define convert for some custom type, if it fits to SQLite column type
 (``int``, ``long long``, ``double``, ``string_t``, ``blob``). For example::
 

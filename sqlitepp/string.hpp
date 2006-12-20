@@ -10,8 +10,8 @@
 #define SQLITEPP_STRING_HPP_INCLUDED
 
 #include <string>
-#include <vector>
-#include <iostream>
+//#include <vector>
+//#include <iostream>
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -46,9 +46,13 @@ struct utf_char_selector
 
 //////////////////////////////////////////////////////////////////////////////
 
-typedef std::vector<unsigned char> blob;
-
 using std::size_t;
+
+struct blob
+{
+    void const* data;
+    size_t size;
+};
 
 //typedef unsigned char                   utf8_char;
 typedef char							utf8_char;
@@ -296,12 +300,14 @@ inline string_t utf(utf32_string const& str)
 //////////////////////////////////////////////////////////////////////////////
 
 
+#if defined(SQLITEPP_UTF16) && defined(SQLITEPP_TEST)
 //!!! TEST only!!!
+#include <iostream>
 inline std::ostream& operator<<(std::ostream& os, sqlitepp::utf16_string const& str)
 {
 	return os << sqlitepp::utf8(str);
 }
-
+#endif
 
 #endif // SQLITEPP_STRING_HPP_INCLUDED
 

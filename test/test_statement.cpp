@@ -9,10 +9,12 @@
 
 using namespace sqlitepp;
 
-std::ostream& operator<<(std::ostream& os, sqlitepp::blob const& b)
+// for tut::ensure_equals
+std::ostream& operator<<(std::ostream& os, statement_data::record::blob_data const& blob)
 {
-	os << '[' << b.size() << "] = (";
-	std::copy(b.begin(), b.end(), std::ostream_iterator<sqlitepp::blob::value_type>(os, ", "));
+	os << '[' << blob.size() << "] = (";
+	std::copy(blob.begin(), blob.end(),
+        std::ostream_iterator<statement_data::record::blob_data::value_type>(os, ", "));
 	return os;
 }
 
