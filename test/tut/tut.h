@@ -60,6 +60,16 @@ namespace tut
   };
 
   /**
+   * Internal exception to be throwed when 
+   * test constructor has failed.
+   */
+  struct bad_ctor : public std::logic_error
+  {
+    bad_ctor(const std::string& msg) : 
+      std::logic_error(msg){};
+  };
+
+  /**
    * Exception to be throwed when ensure() fails or fail() called.
    */
   class failure : public std::logic_error
@@ -111,7 +121,7 @@ namespace tut
      * warn - test finished successfully, but test destructor throwed
      * term - test forced test application to terminate abnormally
      */
-    typedef enum { ok, fail, ex, warn, term } result_type;
+    typedef enum { ok, fail, ex, warn, term, ex_ctor } result_type;
     result_type result;
 
     /**
@@ -184,10 +194,22 @@ namespace tut
     virtual void run_started(){};
 
     /**
+     * Called when a group started
+     * @param name Name of the group
+     */
+    virtual void group_started(const std::string& /*name*/){};
+
+    /**
      * Called when a test finished.
      * @param tr Test results.
      */
     virtual void test_completed(const test_result& /*tr*/){};
+
+    /**
+     * Called when a group is completed
+     * @param name Name of the group
+     */
+    virtual void group_completed(const std::string& /*name*/){};
 
     /**
      * Called when all tests in run completed.
@@ -288,19 +310,14 @@ namespace tut
       const_iterator e = groups_.end();
       while( i != e )
       {
+        callback_->group_started(i->first);
         try
         {
-          // iterate all tests
-          i->second->rewind();
-          for( ;; )
-          {
-            test_result tr = i->second->run_next();
-            callback_->test_completed(tr);
-          }
+          run_all_tests_in_group_(i);
         }
         catch( const no_more_tests& )
         {
-          // ok
+          callback_->group_completed(i->first);
         }
 
         ++i;
@@ -319,24 +336,21 @@ namespace tut
       const_iterator i = groups_.find(group_name);
       if( i == groups_.end() )
       {
+        callback_->run_completed();
         throw no_such_group(group_name);
       }
 
+      callback_->group_started(group_name);
       try
       {
-        // iterate all tests
-        i->second->rewind();
-        for(;;)
-        {
-          test_result tr = i->second->run_next();
-          callback_->test_completed(tr);
-        }
+        run_all_tests_in_group_(i);
       }
       catch( const no_more_tests& )
       {
         // ok
       }
 
+      callback_->group_completed(group_name);
       callback_->run_completed();
     }
 
@@ -350,25 +364,46 @@ namespace tut
       const_iterator i = groups_.find(group_name);
       if( i == groups_.end() )
       {
+        callback_->run_completed();
         throw no_such_group(group_name);
       }
 
+      callback_->group_started(group_name);
       try
       {
         test_result tr = i->second->run_test(n);
         callback_->test_completed(tr);
+        callback_->group_completed(group_name);
         callback_->run_completed();
         return tr;
       }
       catch( const beyond_last_test& )
       {
+        callback_->group_completed(group_name);
         callback_->run_completed();
         throw;
       }      
       catch( const no_such_test& )
       {
+        callback_->group_completed(group_name);
         callback_->run_completed();
         throw;
+      }
+    }
+
+    private:
+    void run_all_tests_in_group_(const_iterator i) const
+    {
+      i->second->rewind();
+      for( ;; )
+      {
+        test_result tr = i->second->run_next();
+        callback_->test_completed(tr);
+
+	if( tr.result == test_result::ex_ctor )
+	{
+          throw no_more_tests();
+        }
       }
     }
   };
@@ -437,7 +472,8 @@ namespace tut
      * Tests provided condition.
      * Throws if false.
      */
-    void ensure(const char* msg,bool cond)
+    template<typename T>
+    void ensure(const T msg,bool cond)
     {
        if( !cond ) throw failure(msg);
     }
@@ -475,8 +511,8 @@ namespace tut
      * client code will not compile at all! Also, T shall have
      * operators + and -, and be comparable.
      */
-    template <class T>
-    void ensure_distance(const char* msg,const T& actual,const T& expected,const T& distance)
+    template <class T, class U>
+    void ensure_distance(const char* msg,const T& actual,const T& expected,const U& distance)
     {
       if( expected-distance >= actual || expected+distance <= actual )
       {
@@ -487,8 +523,8 @@ namespace tut
       }
     }
 
-    template <class T>
-    void ensure_distance(const T& actual,const T& expected,const T& distance)
+    template <class T, class U>
+    void ensure_distance(const T& actual,const T& expected,const U& distance)
     {
       ensure_distance<>(0,actual,expected,distance);
     }
@@ -765,6 +801,12 @@ namespace tut
         test_result tr(name_,ti->first,test_result::term,ex);
         return tr;
       }
+      catch(const bad_ctor& ex)
+      {
+        // test failed because test ctor failed; stop the whole group
+        test_result tr(name_,ti->first,test_result::ex_ctor,ex);
+        return tr;
+      }
       catch(const std::exception& ex)
       {
         // test failed with std::exception
@@ -792,7 +834,10 @@ namespace tut
       __try
       {
 #endif
-        if( obj.get() == 0 ) obj.reset();
+        if( obj.get() == 0 ) 
+	{
+          reset_holder_(obj);
+	}
         obj->called_method_was_a_dummy_test_ = false;
 
 #if defined(TUT_USE_SEH)
@@ -821,14 +866,28 @@ namespace tut
       }
       __except(handle_seh_(::GetExceptionCode()))
       {
-        // throw seh("SEH");
         return false;
       }
 #endif
       return true;
     }
-  };
 
+    void reset_holder_(safe_holder<object>& obj)
+    {
+      try 
+      {
+        obj.reset();
+      }
+      catch(const std::exception& ex)
+      {
+        throw bad_ctor(ex.what());
+      }
+      catch(...)
+      {
+        throw bad_ctor("test constructor has generated an exception; group execution is terminated");
+      }
+    }
+  };
 
 #if defined(TUT_USE_SEH)
   /**

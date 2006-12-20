@@ -23,6 +23,10 @@ namespace
       os << '[' << tr.test << "=F]";
       break;
 
+      case tut::test_result::ex_ctor: 
+      os << '[' << tr.test << "=C]";
+      break;
+
       case tut::test_result::ex: 
       os << '[' << tr.test << "=X]";
       break;
@@ -85,6 +89,7 @@ namespace tut
       os << tr << std::flush;
       if( tr.result == tut::test_result::ok ) ok_count++;
       else if( tr.result == tut::test_result::ex ) exceptions_count++;
+      else if( tr.result == tut::test_result::ex_ctor ) exceptions_count++;
       else if( tr.result == tut::test_result::fail ) failures_count++;
       else if( tr.result == tut::test_result::warn ) warnings_count++;
       else terminations_count++;
@@ -108,7 +113,7 @@ namespace tut
 
            os << std::endl;
 
-           os << "---> " << "test: " << tr.group << ", test<" << tr.test << ">" << std::endl;
+           os << "---> " << "group: " << tr.group << ", test: test<" << tr.test << ">" << std::endl;
 
            os << "     problem: ";
            switch(tr.result)
@@ -117,6 +122,7 @@ namespace tut
                os << "assertion failed" << std::endl; 
                break;
              case test_result::ex: 
+             case test_result::ex_ctor: 
                os << "unexpected exception" << std::endl;
                if( tr.exception_typeid != "" )
                { 
@@ -176,6 +182,10 @@ namespace tut
 
       not_passed.clear();
     }    
+
+  private:
+    // suppress M$ compiler warning
+    reporter& operator=(reporter const&);
   };
 };
 
