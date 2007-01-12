@@ -14,10 +14,13 @@ C++ wrapper to SQLite library
 .. contents:: Table of Contents
 .. section-numbering::
 
+
 Overview
 ========
 
 SQLite++ is an object-oriented wrapper library of SQLite_ version 3.0. 
+The latest sources are available from `Subversion repository`_
+
 The main idea is to use simple variable binding with SQL statements::
 
     int count;
@@ -26,14 +29,17 @@ The main idea is to use simple variable binding with SQL statements::
 
 The library is distributed under Boost Software License (see accompanying 
 file LICENSE_1_0.txt_ in the project root). Additional information about 
-Boost Software License is available at http://boost.org/more/license_info.html
+Boost Software License is available at `Boost site`_
 
 Approaches with binding variables to SQL queries were inspired by 
-Maciej Sobczak` SOCI wrapper`_.
+Maciej Sobczak' `SOCI wrapper`_.
 
-.. _SQLite:         http://sqlite.org
-.. _`SOCI wrapper`: http://www.msobczak.com/prog/soci/
-.. _LICENSE_1_0.txt: ../LICENSE_1_0.txt
+.. _SQLite:                  http://sqlite.org
+.. _`SOCI wrapper`:          http://www.msobczak.com/prog/soci/
+.. _LICENSE_1_0.txt:         ../LICENSE_1_0.txt
+.. _`Boost site`:            http://boost.org/more/license_info.html
+.. _`Subversion repository`: https://svn.berlios.de/svnroot/repos/sqlitepp/trunk
+
 
 Installation
 ============
@@ -52,7 +58,7 @@ and invoke
 Where build-variant is an optional predefined build variant name.
 There are several predefined variants:
 
-.. table::Build variants
+.. table:: Build variants
 
     +-------------+-----------------------------------------+
     |  ``utf8``   | UTF-8 encoding support. Defaul variant. |
