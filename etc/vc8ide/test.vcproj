@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="test"
 	ProjectGUID="{9526682B-A4F5-4E65-B4FE-2FC167732B38}"
 	RootNamespace="test"
@@ -191,7 +191,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../..;../../test/tut"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SQLITEPP_UTF16"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;SQLITEPP_UTF16;SQLITEPP_TEST"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -266,7 +266,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../..;../../test/tut"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SQLITEPP_UTF16"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;SQLITEPP_UTF16;SQLITEPP_TEST"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="4"

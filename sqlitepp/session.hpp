@@ -58,6 +58,9 @@ public:
 		return active_txn_; 
 	}
 
+	// Last insert row ID
+	long long last_insert_rowid() const;
+
 	// Execute SQL query immediately.
 	// It might be useful for resultless statements like INSERT, UPDATE etc.
 	// T is any output-stream-shiftable type.
@@ -67,6 +70,12 @@ public:
 		once_query q(*this);
 		q << t;
 		return q;
+	}
+
+	friend void swap(session& lhs, session& rhs)
+	{
+		std::swap(lhs.impl_, rhs.impl_);
+		std::swap(lhs.active_txn_, rhs.active_txn_);
 	}
 private:
 	// Noncopyable.

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include <sqlite3.h>
+#include "../sqlite/sqlite3.h"
 
 #include "statement.hpp"
 #include "exception.hpp"
@@ -122,18 +122,21 @@ bool statement::exec()
 	// update into holders.
 	// If statement done (insert, create table for ex.)
 	// finalize it becase transaction object doesn't end itself
-	// if there statements exist in sqlite database.	
-	int r = ::sqlite3_step(impl_);
+	// if there statements exist in sqlite database.
+	int const r = ::sqlite3_step(impl_);
 	switch ( r )
 	{
 	case SQLITE_ROW:
 		std::for_each(q_.intos().begin(), q_.intos().end(), update(*this));
 		return true;
 	case SQLITE_DONE:
-		finalize(); 
+		finalize();
 		return false;
 	default:
+		::sqlite3_finalize(impl_);
+		impl_ = 0;
 		s_.check_error(r);
+		// should never return this
 		return false;
 	}
 }
@@ -152,8 +155,10 @@ void statement::finalize() // throw
 {
 	if ( is_prepared() )
 	{
-		s_.check_error( ::sqlite3_finalize(impl_) );
+		// reset impl_ before check_error
+		sqlite3_stmt* st = impl_;
 		impl_ = 0;
+		s_.check_error( ::sqlite3_finalize(st) );
 	}
 }
 //----------------------------------------------------------------------------

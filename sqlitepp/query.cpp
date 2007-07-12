@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include <sqlite3.h>
+#include "../sqlite/sqlite3.h"
 
 #include "query.hpp"
 #include "binders.hpp"

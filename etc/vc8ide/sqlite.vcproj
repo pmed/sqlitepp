@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="sqlite"
 	ProjectGUID="{87445C62-280C-4919-B8B4-177EC276137B}"
 	RootNamespace="sqlite"
@@ -171,6 +171,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\sqlite\btreeInt.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\sqlite\build.c"
 			>
 		</File>
@@ -219,11 +223,19 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\sqlite\limits.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\sqlite\loadext.c"
 			>
 		</File>
 		<File
 			RelativePath="..\..\sqlite\main.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlite\malloc.c"
 			>
 		</File>
 		<File
@@ -248,6 +260,10 @@
 		</File>
 		<File
 			RelativePath="..\..\sqlite\os_os2.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlite\os_os2.h"
 			>
 		</File>
 		<File
@@ -292,6 +308,10 @@
 		</File>
 		<File
 			RelativePath="..\..\sqlite\select.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlite\shell.c"
 			>
 		</File>
 		<File
@@ -348,6 +368,10 @@
 		</File>
 		<File
 			RelativePath="..\..\sqlite\vdbeaux.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sqlite\vdbeblob.c"
 			>
 		</File>
 		<File

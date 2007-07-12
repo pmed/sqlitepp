@@ -318,35 +318,6 @@ inline typename enable_if<is_utf8_iterator_type<InputIterator>, InputIterator>::
 
 /*************************************************************************************************/
 /*
-	Precondition: [ first, last ) must convert to exactly one UTF-16 character
-*/
-
-template <typename I>
-inline typename enable_if<is_utf8_iterator_type<I>, utf16_char>::type
-	to_utf16(I first, I last)
-{
-	utf32_char result;
-
-	implementation::to_utf32(first, last, result);
-	return static_cast<utf16_char>(result);
-}
-
-/*************************************************************************************************/
-/*
-	Precondition: [ first, last ) must convert to exactly one UTF-32 character
-*/
-
-template <typename I> // I models InputIterator
-inline utf32_char to_utf32(I first, I last)
-{
-	utf32_char result;
-
-	implementation::to_utf32(first, last, result);
-	return result;
-}
-
-/*************************************************************************************************/
-/*
 		utf32 -> utf8
 			- 1 source value
 			- n output values
@@ -431,6 +402,7 @@ inline typename enable_if<is_utf32_iterator_type<I>, O>::type
 	return output;
 }
 
+
 /*************************************************************************************************/
 /*
 		utf8 -> utf16
@@ -501,6 +473,21 @@ inline typename enable_if<is_utf32_iterator_type<I>, O>::type
 
 /*************************************************************************************************/
 /*
+	Precondition: [ first, last ) must convert to exactly one UTF-16 character
+*/
+
+template <typename I>
+inline typename enable_if<is_utf8_iterator_type<I>, utf16_char>::type
+	to_utf16(I first, I last)
+{
+	utf32_char result;
+
+	implementation::to_utf32(first, last, result);
+	return static_cast<utf16_char>(result);
+}
+
+/*************************************************************************************************/
+/*
 		utf16 -> utf32
 			- n source values
 			- m output values
@@ -525,6 +512,20 @@ inline O to_utf32(I first, I last, O output)
 		++output;
 	}
 	return output;
+}
+
+/*************************************************************************************************/
+/*
+	Precondition: [ first, last ) must convert to exactly one UTF-32 character
+*/
+
+template <typename I> // I models InputIterator
+inline utf32_char to_utf32(I first, I last)
+{
+	utf32_char result;
+
+	implementation::to_utf32(first, last, result);
+	return result;
 }
 
 /*************************************************************************************************/

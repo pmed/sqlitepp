@@ -6,7 +6,7 @@
 // Boost Software License, Version 1.0. (See accompanying file 
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <sqlite3.h>
+#include "../sqlite/sqlite3.h"
 
 #include "session.hpp"
 #include "exception.hpp"
@@ -90,6 +90,12 @@ void session::close()
 		impl_ = 0;
 		check_error(r);
 	}
+}
+//----------------------------------------------------------------------------
+
+long long session::last_insert_rowid() const
+{
+	return is_open()? sqlite3_last_insert_rowid(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 
