@@ -60,6 +60,14 @@ public:
 
 	// Last insert row ID
 	long long last_insert_rowid() const;
+	
+	// The number of rows that were changed (or inserted or deleted)
+	// by the most recent SQL statement
+	size_t last_changes() const;
+
+	// The number of rows that were changed (or inserted or deleted)
+	// since the database was opened
+	size_t total_changes() const;
 
 	// Execute SQL query immediately.
 	// It might be useful for resultless statements like INSERT, UPDATE etc.
@@ -72,6 +80,7 @@ public:
 		return q;
 	}
 
+    // Swap session instances
 	friend void swap(session& lhs, session& rhs)
 	{
 		std::swap(lhs.impl_, rhs.impl_);

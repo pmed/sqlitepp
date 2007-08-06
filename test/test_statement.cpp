@@ -54,8 +54,17 @@ statement_test_group st_g("4. statement");
 template<>template<>
 void object::test<1>()
 {
-	record r(1, utf(L"Janet"), 345.2);
-	r.insert(se);
+	record r1(1, utf(L"Janet"), 345.2);
+	r1.insert(se);
+	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 1);
+	ensure_equals("last changes", se.last_changes(), 1);	
+	ensure_equals("total changes", se.total_changes(), 1);	
+
+	record r2(2, utf(L"Mary"), 563.4);
+	r2.insert(se);
+	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 2);
+	ensure_equals("last changes", se.last_changes(), 1);	
+	ensure_equals("total changes", se.total_changes(), 2);
 }
 
 // test query
