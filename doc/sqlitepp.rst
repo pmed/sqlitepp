@@ -9,7 +9,7 @@ C++ wrapper to SQLite library
 :Contact: pmedvedev@gmail.com
 :date: $Date$
 :revision: $Rev$
-:copyright: Copyright (c) 2004-2007 Pavel Medvedev
+:copyright: Copyright (c) 2004-2008 Pavel Medvedev
 
 .. contents:: Table of Contents
 .. section-numbering::
@@ -18,7 +18,7 @@ C++ wrapper to SQLite library
 Overview
 ========
 
-SQLite++ is an object-oriented wrapper library of SQLite_ version 3.0. 
+SQLite++ is an object-oriented wrapper library of SQLite_ version 3. 
 The latest sources are available from `Subversion repository`_
 
 The main idea is to use simple variable binding with SQL statements::
@@ -458,8 +458,8 @@ Database statement::
         // Is statement prepared.
         bool is_prepared() const; // throw() 
     
-        // Reset statement. Return to prepared state.
-        void reset();
+        // Reset statement. Return to prepared state. Optionally rebind values
+        void reset(bool rebind = false);
     
         // Start statement preparing by collection query data.
         // T is any output-stream-shiftable type.
@@ -728,6 +728,12 @@ You can define convert for some custom type, if it fits to SQLite column type
             }
         };
     } // namespace sqlitepp 
+
+It is possible to convert C++ enumeration types. You should have boost_ library installed and 
+``#define SQLITEPP_ENUM_CONVERTER`` macro in your project.
+
+.. _boost: http://boost.org
+
 
 Query
 -----
