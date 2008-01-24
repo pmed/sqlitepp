@@ -18,53 +18,37 @@ project sqlitepp
 build-project sqlite ;
 build-project sqlitepp ;
 
-# This rule is called by Boost.Build to determine the name of 
-# target. We use it to encode build variant, compiler name and
-# library version in the target name
 import stage ; 
+import common ;
 
 layout = versioned ;
 
+# This rule is called by Boost.Build to determine the name of
+# target. We use it to encode build variant, compiler name and
+# version in the target name
 rule tag ( name : type ? : property-set )
 {
     if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB
-    {        
+    {
+        local version-tag ;
+        local encoding-tag ;
+
         if $(layout) = versioned
         {
-            if $(name) != sqlite
-            {
-                switch [ $(property-set).get <variant> ]
-                {
-                    case utf8* :  name = $(name)-utf8 ;
-                    case utf16* : name = $(name)-utf16 ;
-                }
-            }
-            name = [ stage.add-variant-and-compiler $(name) 
-              : $(type) : $(property-set) ] ;
-            
-            local version-tag = [ $(property-set).get <version> ] ;
+            version-tag = [ $(property-set).get <version> ] ;
             version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(version-tag) ] ;
             version-tag = $(version-tag:J="_") ;
-            
-            # On NT, library with version suffix won't be recognized
-            # by linkers. On CYGWIN, we get strage duplicate symbol
-            # errors when library is generated with version suffix.
-            # On OSX, version suffix is not needed -- the linker expets
-            # libFoo.1.2.3.dylib format.
-            # AIX linkers don't accept version suffixes either.
-            if [ $(property-set).get <os> ] in NT CYGWIN MACOSX AIX
-            {
-                return $(name:B)-$(version-tag)$(name:S) ;
-            }
-            else
-            {
-                return $(name:B)-$(version-tag)$(name:S).$(version-tag)  ;
-            }
         }
-        else
+
+        if $(name) != sqlite
         {
-            return [ stage.add-variant-and-compiler $(name) 
-              : $(type) : $(property-set) ] ;
+            encoding-tag = [ $(property-set).get <variant> ] ; 
+            encoding-tag = [ MATCH "(utf8|utf16)" :  $(encoding-tag) ] ;
         }
+
+        return [ common.format-name 
+                <base> <toolset> <threading> <runtime> -$(version-tag) -$(encoding-tag)
+                : $(name) : $(type) : $(property-set) ] ;
+        
     }
 }
