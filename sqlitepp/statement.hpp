@@ -53,8 +53,8 @@ public:
 		return impl_ != 0; 
 	}
 
-	// Reset statement. Return to prepared state.
-	void reset();
+	// Reset statement. Return to prepared state. Optionally rebind values
+	void reset(bool rebind = false);
 
 	// Start statement preparing.
 	template<typename T>

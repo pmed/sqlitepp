@@ -142,11 +142,15 @@ bool statement::exec()
 }
 //----------------------------------------------------------------------------
 
-void statement::reset()
+void statement::reset(bool rebind)
 {
 	if ( is_prepared() )
 	{
 		s_.check_error( ::sqlite3_reset(impl_) );
+		if ( rebind )
+		{
+			std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
+		}
 	}
 }
 //----------------------------------------------------------------------------

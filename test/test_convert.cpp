@@ -100,4 +100,25 @@ void object::test<3>()
 	ensure("tm equal", memcmp(&t1, &t2, sizeof(tm)) == 0);
 }
 
+template<>template<>
+void object::test<4>()
+{
+#ifdef SQLITEPP_ENUM_CONVERTER
+	enum enum_type { VAL1, VAL2, VAL3 } val;
+	transaction txn(se);
+
+	se << utf(L"create table enum_test(val integer)");
+	
+	val = VAL2;
+	se << utf(L"insert into enum_test(val) values(:val)"), use(val);
+	se << utf(L"select val from enum_test"), into(val);
+	ensure_equals("enum", val, VAL2);
+	
+	se << utf(L"delete from enum_test");
+	se << utf(L"insert into enum_test(val) values(:val)"), use(1000);
+	se << utf(L"select val from enum_test"), into(val);
+	ensure_equals("out of enum", val, 1000);
+#endif
+}
+
 } // namespace tut {

@@ -9,6 +9,11 @@
 #ifndef SQLITEPP_CONVERTERS_HPP_INCLUDED
 #define SQLITEPP_CONVERTERS_HPP_INCLUDED
 
+#ifdef SQLITEPP_ENUM_CONVERTER
+	#include <boost/utility/enable_if.hpp>
+	#include <boost/type_traits/is_enum.hpp>
+#endif
+
 #include "string.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -17,7 +22,7 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename T>
+template<typename T, typename Enable = void>
 struct converter;
 
 template<typename T, typename U>
@@ -28,6 +33,7 @@ struct converter_base
 	static U from(T const& t) { return static_cast<U>(t); }
 };
 
+template<> struct converter<bool> : converter_base<bool, int> {};
 template<> struct converter<char> : converter_base<char, int> {};
 template<> struct converter<signed char> : converter_base<signed char, int> {};
 template<> struct converter<unsigned char> : converter_base<unsigned char, int> {};
@@ -42,6 +48,11 @@ template<> struct converter<long long> : converter_base<long long, long long> {}
 template<> struct converter<unsigned long long> : converter_base<unsigned long long, long long> {};
 template<> struct converter<float> : converter_base<float, double> {};
 template<> struct converter<double> : converter_base<double, double> {};
+
+#ifdef SQLITEPP_ENUM_CONVERTER
+template<typename T>
+struct converter<T, typename boost::enable_if<boost::is_enum<T> >::type> : converter_base<T, int> {};
+#endif
 
 template<>
 struct converter<string_t>
@@ -77,16 +88,16 @@ struct converter<std::vector<T> >
 	typedef blob base_type;
 	static std::vector<T> to(blob const& b)
 	{
-        T const* f = reinterpret_cast<T const*>(b.data);
-        T const* l = f + b.size / sizeof(T);
+		T const* f = reinterpret_cast<T const*>(b.data);
+		T const* l = f + b.size / sizeof(T);
 		return std::vector<T>(f, l);
 	}
 	static blob from(std::vector<T> const& t)
 	{
-        blob b;
-        b.data = t.empty()? 0 : &t[0];
-        b.size = t.size() * sizeof(T);
-        return b;
+		blob b;
+		b.data = t.empty()? 0 : &t[0];
+		b.size = t.size() * sizeof(T);
+		return b;
 	}
 };
 
