@@ -402,29 +402,6 @@ inline typename enable_if<is_utf32_iterator_type<I>, O>::type
 	return output;
 }
 
-
-/*************************************************************************************************/
-/*
-		utf8 -> utf16
-			- n source values
-			- m output values
-*/
-template <	typename I, // I models InputIterator
-			typename O> // O models OutputIterator
-inline typename enable_if<is_utf8_iterator_type<I>, O>::type
-	to_utf16(I first, I last, O output)
-{
-	while (first != last)
-	{
-		utf32_char	result;
-
-		first = implementation::to_utf32(first, last, result);
-
-		output = to_utf16(result, output);
-	}
-	return output;
-}
-
 /*************************************************************************************************/
 /*
 		utf32 -> utf16
@@ -450,6 +427,28 @@ inline typename enable_if<is_utf32_type<I>, O>::type
 		*output = static_cast<utf16_char>((code - 0x10000) % 0x400 + implementation::utf16_low_surrogate_front_k);
 	}
 	return ++output;
+}
+
+/*************************************************************************************************/
+/*
+		utf8 -> utf16
+			- n source values
+			- m output values
+*/
+template <	typename I, // I models InputIterator
+			typename O> // O models OutputIterator
+inline typename enable_if<is_utf8_iterator_type<I>, O>::type
+	to_utf16(I first, I last, O output)
+{
+	while (first != last)
+	{
+		utf32_char	result;
+
+		first = implementation::to_utf32(first, last, result);
+
+		output = to_utf16(result, output);
+	}
+	return output;
 }
 
 /*************************************************************************************************/
