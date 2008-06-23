@@ -8,47 +8,12 @@ variant utf16d : debug : <define>SQLITEPP_UTF16 ;
 # project 
 project sqlitepp
     : requirements
-        <tag>@$(__name__).tag # Used to encode variant in target name. See the 'tag' rule below.
         <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
         <toolset>gcc:<define>_GLIBCXX_USE_WCHAR_T
     : build-dir bin
-    : default-build utf8 <link>static
+    : default-build utf8
 ;
 
 build-project sqlite ;
 build-project sqlitepp ;
 
-import stage ; 
-import common ;
-
-layout = versioned ;
-
-# This rule is called by Boost.Build to determine the name of
-# target. We use it to encode build variant, compiler name and
-# version in the target name
-rule tag ( name : type ? : property-set )
-{
-    if $(type) in STATIC_LIB SHARED_LIB IMPORT_LIB
-    {
-        local version-tag ;
-        local encoding-tag ;
-
-        if $(layout) = versioned
-        {
-            version-tag = [ $(property-set).get <version> ] ;
-            version-tag = [ MATCH "^([^.]+)[.]([^.]+)[.]([^.]+)" : $(version-tag) ] ;
-            version-tag = $(version-tag:J="_") ;
-        }
-
-        if $(name) != sqlite
-        {
-            encoding-tag = [ $(property-set).get <variant> ] ; 
-            encoding-tag = [ MATCH "(utf8|utf16)" :  $(encoding-tag) ] ;
-        }
-
-        return [ common.format-name 
-                <base> <toolset> <threading> <runtime> -$(version-tag) -$(encoding-tag)
-                : $(name) : $(type) : $(property-set) ] ;
-        
-    }
-}
