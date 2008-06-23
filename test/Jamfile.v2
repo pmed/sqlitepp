@@ -2,5 +2,5 @@ import testing ;
 
 unit-test test
     : [ glob *.cpp ] ..//sqlitepp 
-	: <include>tut <include>.. <define>SQLITEPP_TEST <toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+	: <include>tut <include>.. <define>SQLITEPP_TEST
 ;
