@@ -143,6 +143,7 @@ prepare_query::~prepare_query()
 	{
 		// move query to statement.
 		swap(st_->q(), *this); 
+		st_->finalize();
 	}
 }
 //----------------------------------------------------------------------------

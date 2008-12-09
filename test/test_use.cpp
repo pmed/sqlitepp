@@ -128,4 +128,37 @@ void object::test<4>()
 	ensure( "single row", !st.exec() );
 }
 
+
+// insert loop
+template<>template<>
+void object::test<5>()
+{
+	int id = 1;
+	int MAX_RECORD = 100;
+
+	st << utf("insert into some_table(id) values(:id)"), use(id);
+	
+	st.prepare();
+
+	se << utf(L"begin");
+	for (int i = 0; i != MAX_RECORD; ++i)
+	{
+		st.exec();
+		++id;
+		st.reset(true);		
+	}
+	se << utf(L"commit");
+
+	int id2;
+	st << utf(L"select id from some_table"), into(id2);
+
+	id = 1;
+	for (id = 1; st.exec(); ++id)
+	{
+		ensure_equals("id", id2, id);
+	}
+	ensure_equals("MAX_RECORD", id - 1, MAX_RECORD);
+	ensure_equals("MAX_RECORD", id2, MAX_RECORD);
+}
+
 } // namespace

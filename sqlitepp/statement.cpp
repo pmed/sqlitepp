@@ -120,9 +120,6 @@ bool statement::exec()
 	}
 	// If statement has result (select for ex.)
 	// update into holders.
-	// If statement done (insert, create table for ex.)
-	// finalize it becase transaction object doesn't end itself
-	// if there statements exist in sqlite database.
 	int const r = ::sqlite3_step(impl_);
 	switch ( r )
 	{
@@ -130,7 +127,6 @@ bool statement::exec()
 		std::for_each(q_.intos().begin(), q_.intos().end(), update(*this));
 		return true;
 	case SQLITE_DONE:
-		finalize();
 		return false;
 	default:
 		::sqlite3_finalize(impl_);
