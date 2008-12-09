@@ -128,7 +128,6 @@ void object::test<4>()
 	ensure( "single row", !st.exec() );
 }
 
-
 // insert loop
 template<>template<>
 void object::test<5>()
@@ -138,21 +137,16 @@ void object::test<5>()
 
 	st << utf("insert into some_table(id) values(:id)"), use(id);
 	
-	st.prepare();
-
 	se << utf(L"begin");
-	for (int i = 0; i != MAX_RECORD; ++i)
+	for (; id <= MAX_RECORD; ++id)
 	{
 		st.exec();
-		++id;
-		st.reset(true);		
 	}
 	se << utf(L"commit");
 
 	int id2;
 	st << utf(L"select id from some_table"), into(id2);
 
-	id = 1;
 	for (id = 1; st.exec(); ++id)
 	{
 		ensure_equals("id", id2, id);

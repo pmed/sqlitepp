@@ -79,7 +79,7 @@ statement::statement(session& s, string_t const& sql)
 
 statement::~statement()
 {
-	finalize();
+	finalize(false);
 }
 //----------------------------------------------------------------------------
 
@@ -99,14 +99,13 @@ void statement::prepare()
 			throw multi_stmt_not_supported();
 		}
 
-		// bind into and use binders
+		// bind into binders
 		std::accumulate(q_.intos().begin(), q_.intos().end(), 0, bind(*this));
-		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
 	}
 	catch(std::exception const&)
 	{
 		// statement stays not prepared
-		finalize();
+		finalize(false);
 		throw;
 	}
 }
@@ -118,22 +117,31 @@ bool statement::exec()
 	{
 		prepare();
 	}
-	// If statement has result (select for ex.)
-	// update into holders.
-	int const r = ::sqlite3_step(impl_);
-	switch ( r )
+	try
 	{
-	case SQLITE_ROW:
-		std::for_each(q_.intos().begin(), q_.intos().end(), update(*this));
-		return true;
-	case SQLITE_DONE:
-		return false;
-	default:
-		::sqlite3_finalize(impl_);
-		impl_ = 0;
-		s_.check_error(r);
-		// should never return this
-		return false;
+		// [re]bind use binders before execution
+		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
+		int const r = ::sqlite3_step(impl_);
+		switch ( r )
+		{
+		case SQLITE_ROW:
+			// statement has result (select for ex.) - update into holders
+			std::for_each(q_.intos().begin(), q_.intos().end(), update(*this));
+			return true;
+		case SQLITE_DONE:
+			// reset statement to be ready for the next exec
+			s_.check_error( ::sqlite3_reset(impl_) );
+			return false;
+		default:
+			s_.check_error(r);
+			// should never return this
+			return false;
+		}
+	}
+	catch (std::exception const&)
+	{
+		finalize(false);
+		throw;
 	}
 }
 //----------------------------------------------------------------------------
@@ -151,14 +159,13 @@ void statement::reset(bool rebind)
 }
 //----------------------------------------------------------------------------
 
-void statement::finalize() // throw
+void statement::finalize(bool check_error) // throw
 {
 	if ( is_prepared() )
 	{
-		// reset impl_ before check_error
-		sqlite3_stmt* st = impl_;
+		int const r = ::sqlite3_finalize(impl_);
 		impl_ = 0;
-		s_.check_error( ::sqlite3_finalize(st) );
+		if ( check_error ) s_.check_error(r);
 	}
 }
 //----------------------------------------------------------------------------

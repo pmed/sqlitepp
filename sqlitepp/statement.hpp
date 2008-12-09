@@ -45,7 +45,7 @@ public:
 	void prepare();
 
 	// Finalize statement.
-	void finalize();
+	void finalize(bool check_error = true);
 
 	// Is statement prepared.
 	bool is_prepared() const // throw() 
