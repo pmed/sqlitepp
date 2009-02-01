@@ -28,8 +28,7 @@ use_test_group u_g("8. use");
 template<>template<>
 void object::test<1>()
 {
-	
-	record recs[2] = { record(1, utf(L"Natalia"), 123.45), record(2, utf(L"Anastasia"), 678.90) };
+	record recs[2] = { record(1, utf(L"Petya"), 123.45), record(2, utf(L"Vasya"), 678.90) };
 
 	// insert records
 	for (size_t i = 0; i < dimof(recs); ++i)
@@ -59,7 +58,7 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 {
-	record recs[2] = { record(1, utf(L"Masha"), 123.45), record(2, utf(L"Luba"), 678.90) };
+	record recs[2] = { record(1, utf(L"Vova"), 123.45), record(2, utf(L"Serega"), 678.90) };
 
 	// insert records
 	for (size_t i = 0; i < dimof(recs); ++i)
@@ -120,8 +119,8 @@ void object::test<4>()
 	ensure("row inserted", !st.exec() );
 
 	record r2;
-	st << utf(L"select * from some_table where id = 1"),
-		into(r2.id), into(r2.name), into(r2.salary), into(r2.data);
+	st << utf(L"select * from some_table where id = :1"),
+		into(r2.id), into(r2.name), into(r2.salary), into(r2.data), use(r1.id);
 
 	ensure("select completed", st.exec());
 	ensure_equals(r2, r1);
@@ -140,6 +139,7 @@ void object::test<5>()
 	se << utf(L"begin");
 	for (; id <= MAX_RECORD; ++id)
 	{
+		st.reset(true);
 		st.exec();
 	}
 	se << utf(L"commit");

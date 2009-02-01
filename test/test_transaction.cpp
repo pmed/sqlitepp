@@ -31,7 +31,7 @@ void object::test<1>()
 		transaction t(se);
 		ensure_equals( "this active txn", se.active_txn(), &t );
 		
-		record r1(1, utf(L"Eugenia"), 566.24);
+		record r1(1, utf(L"Dima"), 566.24);
 		r1.insert(se);
 
 		se << utf(L"select count(*) from some_table"), into(rows);
@@ -48,7 +48,7 @@ void object::test<2>()
 {
 	{
 		transaction t(se);
-		record r1(1, utf(L"Eugenia"), 566.24);
+		record r1(1, utf(L"Eugeny"), 566.24);
 		r1.insert(se);
 		t.commit();
 	}

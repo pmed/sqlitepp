@@ -39,8 +39,10 @@ struct statement_data : session_data
 	};
 };
 
+namespace tut {
 void ensure_equals(statement_data::record const& r1, 
 				   statement_data::record const& r2);
+} // namespace tut {
 
 
 template<typename T, size_t N>

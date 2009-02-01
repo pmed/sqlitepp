@@ -34,17 +34,18 @@ void statement_data::record::insert(sqlitepp::session& se)
 		utf(L"(") << id << utf(L", \'") << name << utf(L"\', ") << salary << utf(L")");
 }
 
+
+namespace tut {
+
 void ensure_equals(statement_data::record const& r1, 
 				   statement_data::record const& r2)
 {
-	tut::ensure_equals("id", r1.id, r2.id);
-	tut::ensure_equals("name", r1.name, r2.name);
-	tut::ensure_distance("salary", r1.salary, r2.salary, 0.01);
-	tut::ensure_equals("data", r1.data, r2.data);
+	ensure_equals("id", r1.id, r2.id);
+	ensure_equals("name", r1.name, r2.name);
+	ensure_distance("salary", r1.salary, r2.salary, 0.01);
+	ensure_equals("data", r1.data, r2.data);
 }
 
-namespace tut {
-	
 typedef tut::test_group<statement_data> statement_test_group;
 typedef statement_test_group::object object;
 
@@ -54,13 +55,13 @@ statement_test_group st_g("4. statement");
 template<>template<>
 void object::test<1>()
 {
-	record r1(1, utf(L"Janet"), 345.2);
+	record r1(1, utf(L"Oleg"), 345.2);
 	r1.insert(se);
 	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 1);
 	ensure_equals("last changes", se.last_changes(), 1);	
 	ensure_equals("total changes", se.total_changes(), 1);	
 
-	record r2(2, utf(L"Mary"), 563.4);
+	record r2(2, utf(L"Slava"), 563.4);
 	r2.insert(se);
 	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 2);
 	ensure_equals("last changes", se.last_changes(), 1);	
@@ -112,7 +113,7 @@ void object::test<4>()
 template<>template<>
 void object::test<5>()
 {
-	record r(1, utf(L"Daria"), 123.45);
+	record r(1, utf(L"Alesha"), 123.45);
 	r.insert(se);
 	
 	st << utf(L"select * from some_table");

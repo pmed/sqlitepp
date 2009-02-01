@@ -101,6 +101,8 @@ void statement::prepare()
 
 		// bind into binders
 		std::accumulate(q_.intos().begin(), q_.intos().end(), 0, bind(*this));
+		// bind use binders
+		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
 	}
 	catch(std::exception const&)
 	{
@@ -119,8 +121,6 @@ bool statement::exec()
 	}
 	try
 	{
-		// [re]bind use binders before execution
-		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
 		int const r = ::sqlite3_step(impl_);
 		switch ( r )
 		{
