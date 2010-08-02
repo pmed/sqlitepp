@@ -17,6 +17,12 @@ struct use_data : statement_data
 	use_data()
 	{
 	}
+
+	string_t const& str() const
+	{
+		static string_t const result(utf(L"string"));
+		return result;
+	}
 };
 
 typedef tut::test_group<use_data> use_test_group;
@@ -31,16 +37,19 @@ void object::test<1>()
 	record recs[2] = { record(1, utf(L"Petya"), 123.45), record(2, utf(L"Vasya"), 678.90) };
 
 	// insert records
+
 	for (size_t i = 0; i < dimof(recs); ++i)
 	{
 		st << utf(L"insert into some_table values( :id, :name, :salary, NULL)"),
 			use(recs[i].id), use(recs[i].name), use(recs[i].salary);
 		ensure("row inserted", !st.exec() );
+		ensure("no data", !se.last_exec());
 	}
 
 	// count inserted record
 	int count;
 	se << utf(L"select count(*) from some_table"), into(count);
+	ensure("row", se.last_exec());
 	ensure_equals("row count", count, static_cast<int>(dimof(recs)) ); 
 
 	// check inserted records
@@ -49,6 +58,7 @@ void object::test<1>()
 		into(r.id, utf(L"id")), into(r.name, utf(L"name")), into(r.salary, utf(L"salary"));
 	for (count = 0; st.exec(); ++count)
 	{
+		ensure("row", se.last_exec());
 		ensure_equals(r, recs[count]);
 	}
 	ensure_equals("row count", count, static_cast<int>(dimof(recs))); 
@@ -68,11 +78,13 @@ void object::test<2>()
 			use(recs[i].name, utf(L":name")),
 			use(recs[i].salary, utf(L":salary"));
 		ensure("row inserted", !st.exec() );
+		ensure("no row", !se.last_exec());
 	}
 
 	// count inserted record
 	int count;
 	se << utf(L"select count(*) from some_table"), into(count);
+	ensure("row", se.last_exec());
 	ensure_equals("row count", count, static_cast<int>(dimof(recs)) ); 
 
 	// check inserted records
@@ -81,6 +93,7 @@ void object::test<2>()
 		into(r.id, utf(L"id")), into(r.name, utf(L"name")), into(r.salary, utf(L"salary"));
 	for (count = 0; st.exec(); ++count)
 	{
+		ensure("row", se.last_exec());
 		ensure_equals(r, recs[count]);
 	}
 	ensure_equals(count, static_cast<int>(dimof(recs))); 
@@ -117,14 +130,17 @@ void object::test<4>()
 		use(r1.data, utf(L":data")), use(r1.id, utf(L":id")),
 		use(r1.name, utf(L":name")), use(r1.salary, utf(L":salary"));
 	ensure("row inserted", !st.exec() );
+	ensure("no row", !se.last_exec());
 
 	record r2;
 	st << utf(L"select * from some_table where id = :1"),
 		into(r2.id), into(r2.name), into(r2.salary), into(r2.data), use(r1.id);
 
 	ensure("select completed", st.exec());
+	ensure("row", se.last_exec());
 	ensure_equals(r2, r1);
 	ensure( "single row", !st.exec() );
+	ensure("no row", !se.last_exec());
 }
 
 // insert loop
@@ -135,12 +151,14 @@ void object::test<5>()
 	int MAX_RECORD = 100;
 
 	st << utf("insert into some_table(id) values(:id)"), use(id);
+	ensure("no row", !se.last_exec());
 	
 	se << utf(L"begin");
 	for (; id <= MAX_RECORD; ++id)
 	{
 		st.reset(true);
 		st.exec();
+		ensure("row", !se.last_exec());
 	}
 	se << utf(L"commit");
 
@@ -149,6 +167,7 @@ void object::test<5>()
 
 	for (id = 1; st.exec(); ++id)
 	{
+		ensure("row", se.last_exec());
 		ensure_equals("id", id2, id);
 	}
 	ensure_equals("MAX_RECORD", id - 1, MAX_RECORD);

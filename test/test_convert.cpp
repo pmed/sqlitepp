@@ -12,6 +12,11 @@
 
 using namespace sqlitepp;
 
+struct my_data
+{
+	int value;
+};
+
 namespace sqlitepp {
 
 // specialize convert for the tm struct
@@ -25,8 +30,28 @@ struct converter<tm>
 	}
 	static tm to(long long src)
 	{
-        time_t tt = src;
+		time_t tt = src;
 		return *localtime(&tt);
+	}
+};
+
+template<>
+struct converter<my_data>
+{
+	typedef string_t base_type;
+	
+	static string_t from(my_data const& src)
+	{
+		char buf[20];
+		itoa(src.value, buf, 10);
+		return utf(buf);
+	}
+	
+	static my_data to(string_t const& src)
+	{
+		my_data result;
+		result.value = atoi(utf8(src).c_str());
+		return result;
 	}
 };
 
@@ -119,6 +144,20 @@ void object::test<4>()
 	se << utf(L"select val from enum_test"), into(val);
 	ensure_equals("out of enum", val, 1000);
 #endif
+}
+
+template<>template<>
+void object::test<5>()
+{
+	transaction txn(se);
+
+	se << utf(L"create table my_data(val text)");
+	
+	my_data data, data2;
+	data.value = 99;
+	se << utf(L"insert into my_data(val) values(:val)"), use(data);
+	se << utf(L"select val from my_data"), into(data2);
+	ensure_equals("my_data", data2.value, data.value);
 }
 
 } // namespace tut {

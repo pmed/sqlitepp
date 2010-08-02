@@ -57,12 +57,14 @@ void object::test<1>()
 {
 	record r1(1, utf(L"Oleg"), 345.2);
 	r1.insert(se);
+	ensure("no rows", !se.last_exec());
 	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 1);
-	ensure_equals("last changes", se.last_changes(), 1);	
-	ensure_equals("total changes", se.total_changes(), 1);	
+	ensure_equals("last changes", se.last_changes(), 1);
+	ensure_equals("total changes", se.total_changes(), 1);
 
 	record r2(2, utf(L"Slava"), 563.4);
 	r2.insert(se);
+	ensure("no rows", !se.last_exec());
 	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 2);
 	ensure_equals("last changes", se.last_changes(), 1);	
 	ensure_equals("total changes", se.total_changes(), 2);
@@ -117,7 +119,8 @@ void object::test<5>()
 	r.insert(se);
 	
 	st << utf(L"select * from some_table");
-	ensure ( "select executed", st.exec() );
+	ensure( "select executed", st.exec() );
+	ensure("row", se.last_exec());
 
 	ensure_equals("col count", st.column_count(), 4);
 

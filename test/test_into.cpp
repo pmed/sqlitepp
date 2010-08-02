@@ -29,6 +29,7 @@ void object::test<1>()
 		into(r2.id), into(r2.name), into(r2.salary);
 
 	ensure("select completed", st.exec());
+	ensure("row", se.last_exec());
 	ensure_equals(r1, r2);
 	ensure( "single row", !st.exec() );
 }
@@ -45,6 +46,7 @@ void object::test<2>()
 		into(r2.salary, utf(L"salary")), into(r2.id, utf(L"id")), into(r2.name, utf(L"name"));
 
 	ensure( "row selected", st.exec() );
+	ensure("row", se.last_exec());
 	ensure_equals(r1, r2);
 	ensure("single row", !st.exec() );
 }
@@ -78,6 +80,7 @@ void object::test<4>()
 		into(r2.id), into(r2.name), into(r2.salary), into(r2.data);
 
 	ensure("select completed", st.exec());
+	ensure("row", se.last_exec());
 	ensure_equals(r1, r2);
 	ensure("empty blob", r2.data.empty());
 	ensure( "single row", !st.exec() );

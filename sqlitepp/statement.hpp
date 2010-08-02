@@ -115,9 +115,9 @@ public:
 	// Use double value in query.
 	void use_value(int pos, double value);
 	// Use string value in query.
-	void use_value(int pos, string_t const& value);
+	void use_value(int pos, string_t const& value, bool make_copy = true);
 	// Use BLOB value in query.
-	void use_value(int pos, blob const& value);
+	void use_value(int pos, blob const& value, bool make_copy = true);
 
 	// Get use position by name in query.
 	int use_pos(string_t const& name) const;

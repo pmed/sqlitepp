@@ -127,11 +127,11 @@ bool statement::exec()
 		case SQLITE_ROW:
 			// statement has result (select for ex.) - update into holders
 			std::for_each(q_.intos().begin(), q_.intos().end(), update(*this));
-			return true;
+			return s_.last_exec_ = true;
 		case SQLITE_DONE:
 			// reset statement to be ready for the next exec
 			s_.check_error( ::sqlite3_reset(impl_) );
-			return false;
+			return s_.last_exec_ = false;
 		default:
 			s_.check_error(r);
 			// should never return this
@@ -280,19 +280,19 @@ void statement::use_value(int pos, long long value)
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, string_t const& value)
+void statement::use_value(int pos, string_t const& value, bool make_copy)
 {
 	s_.check_error( aux::select(::sqlite3_bind_text, ::sqlite3_bind_text16)
 		(impl_, pos, value.empty()? 0 : value.c_str(), 
-		static_cast<int>(value.size() * sizeof(char_t)), SQLITE_STATIC) 
+		static_cast<int>(value.size() * sizeof(char_t)), make_copy? SQLITE_TRANSIENT : SQLITE_STATIC)
 	);
 }
 //----------------------------------------------------------------------------
 
-void statement::use_value(int pos, blob const& value)
+void statement::use_value(int pos, blob const& value, bool make_copy)
 {
-    s_.check_error( ::sqlite3_bind_blob(impl_, pos, value.data,
-        static_cast<int>(value.size), SQLITE_STATIC) );
+	s_.check_error( ::sqlite3_bind_blob(impl_, pos, value.data,
+		static_cast<int>(value.size), make_copy? SQLITE_TRANSIENT : SQLITE_STATIC) );
 }
 
 //////////////////////////////////////////////////////////////////////////////

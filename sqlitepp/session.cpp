@@ -42,6 +42,7 @@ string_t last_error_msg(sqlite3* impl)
 session::session() 
 	: impl_(0)
 	, active_txn_(0)
+	, last_exec_(false)
 {
 }
 //----------------------------------------------------------------------------
@@ -49,6 +50,7 @@ session::session()
 session::session(string_t const& file_name)
 	: impl_(0)
 	, active_txn_(0)
+	, last_exec_(false)
 {
 	open(file_name);
 }
@@ -93,6 +95,12 @@ void session::close()
 }
 //----------------------------------------------------------------------------
 
+int session::last_error() const
+{
+	return ::sqlite3_errcode(impl_);
+}
+//----------------------------------------------------------------------------
+
 long long session::last_insert_rowid() const
 {
 	return is_open()? sqlite3_last_insert_rowid(impl_) : 0;
@@ -122,7 +130,7 @@ void session::check_error(int code) const
 
 void session::check_last_error() const
 {
-	check_error(::sqlite3_errcode(impl_));
+	check_error(last_error());
 }
 
 //////////////////////////////////////////////////////////////////////////////

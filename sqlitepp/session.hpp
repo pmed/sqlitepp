@@ -58,6 +58,12 @@ public:
 		return active_txn_; 
 	}
 
+	// Last session error
+	int last_error() const;
+
+	// Last statement::exec result
+	bool last_exec() const { return last_exec_; }
+
 	// Last insert row ID
 	long long last_insert_rowid() const;
 	
@@ -80,7 +86,7 @@ public:
 		return q;
 	}
 
-    // Swap session instances
+	// Swap session instances
 	friend void swap(session& lhs, session& rhs)
 	{
 		std::swap(lhs.impl_, rhs.impl_);
@@ -98,6 +104,7 @@ private:
 
 	sqlite3* impl_;
 	transaction* active_txn_;
+	bool last_exec_;
 };
 
 //////////////////////////////////////////////////////////////////////////////
