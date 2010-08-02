@@ -47,7 +47,7 @@ public:
 	{
 	}
 protected:
-	T const& value_;
+	T const value_;
 private:
 	void do_bind(statement& st, int pos)
 	{
@@ -97,6 +97,7 @@ inline use_binder_ptr use(T& t)
 {
 	return use_binder_ptr(new use_pos_binder<T>(t));
 }
+
 template<typename T>
 inline use_binder_ptr use(T const& t)
 {
@@ -110,6 +111,7 @@ inline use_binder_ptr use(T& t, string_t const& name)
 {
 	return use_binder_ptr(new use_name_binder<T>(t, name));
 }
+
 template<typename T>
 inline use_binder_ptr use(T const& t, string_t const& name)
 {
