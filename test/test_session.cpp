@@ -10,9 +10,9 @@ using namespace sqlitepp;
 
 session_data::session_data(sqlitepp::string_t const& name) : name_(name)
 {
-	se.open(name_);
 	// ensure remove previously used database
 	remove(utf8(name_).c_str()); 
+	se.open(name_);
 }
 
 session_data::~session_data()
