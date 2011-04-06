@@ -1,5 +1,6 @@
 // $Id$
 
+#include <cstdlib>
 #include <iostream>
 
 #include <sqlitepp/string.hpp>

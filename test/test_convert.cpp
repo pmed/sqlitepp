@@ -1,7 +1,10 @@
 // $Id$
 
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
 #include <tut.h>
-#include <time.h>
 
 #include <sqlitepp/string.hpp>
 #include <sqlitepp/transaction.hpp>
@@ -43,7 +46,7 @@ struct converter<my_data>
 	static string_t from(my_data const& src)
 	{
 		char buf[20];
-		itoa(src.value, buf, 10);
+		sprintf(buf, "%d", src.value);
 		return utf(buf);
 	}
 	

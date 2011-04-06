@@ -1,7 +1,6 @@
 // $Id$
 
 #include <stdio.h>
-#include <tchar.h>
 #include <tut.h>
 
 #include "session_data.hpp"
