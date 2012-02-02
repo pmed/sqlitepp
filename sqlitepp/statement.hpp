@@ -53,6 +53,9 @@ public:
 		return impl_ != 0; 
 	}
 
+	/// SQLite statement implementation for sqlite3 functions
+	sqlite3_stmt* impl() const { return impl_; }
+
 	// Reset statement. Return to prepared state. Optionally rebind values
 	void reset(bool rebind = false);
 

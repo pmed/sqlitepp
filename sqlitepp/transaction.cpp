@@ -41,7 +41,7 @@ transaction::~transaction()
 void transaction::commit()
 {
 	s_ << utf(L"commit");
-    do_rollback_ = false;
+	do_rollback_ = false;
 }
 //----------------------------------------------------------------------------
 

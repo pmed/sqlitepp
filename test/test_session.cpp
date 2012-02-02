@@ -6,6 +6,8 @@
 #include "session_data.hpp"
 #include <sqlitepp/exception.hpp>
 
+#include "../sqlite/sqlite3.h"
+
 using namespace sqlitepp;
 
 session_data::session_data(sqlitepp::string_t const& name) : name_(name)
@@ -35,6 +37,9 @@ void object::test<1>()
 {
 	ensure( "open", se.is_open() );
 	ensure( "no active txn", !se.active_txn() );
+	ensure( "impl", se.impl() != 0 );
+
+	sqlite3_changes(se.impl()); // test native function call
 }
 
 // test close session

@@ -91,7 +91,7 @@ void statement::prepare()
 		char_t const* tail;
 		string_t const sql = q_.sql();
 		s_.check_error(
-			aux::select(::sqlite3_prepare, ::sqlite3_prepare16)(s_.impl_, sql.c_str(),
+			aux::select(::sqlite3_prepare, ::sqlite3_prepare16)(s_.impl(), sql.c_str(),
 				static_cast<int>(sql.size() * sizeof(char_t)),
 				&impl_, reinterpret_cast<tail_type*>(&tail)) );
 		if ( tail && *tail )

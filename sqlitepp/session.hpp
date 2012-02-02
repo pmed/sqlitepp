@@ -25,8 +25,8 @@ class transaction;
 // Database session. Noncopyable.
 class session
 {
-	friend class transaction; // access to active_txn_ and impl_
-	friend class statement;   // access to impl_ and check_error
+	friend class transaction; // access to active_txn_
+	friend class statement;   // access to last_exec_
 public:
 	// Create a session.
 	session();
@@ -57,6 +57,13 @@ public:
 	{
 		return active_txn_; 
 	}
+
+	/// SQLite implementation for native sqlite3 functions.
+	sqlite3* impl() const { return impl_; }
+
+	/// Check error code. If code is not ok, throws exception.
+	void check_error(int code) const;
+	void check_last_error() const { check_error(last_error()); }
 
 	// Last session error
 	int last_error() const;
@@ -97,10 +104,6 @@ private:
 	session(session const&);
 	// Nonassignable.
 	session& operator=(session const&);
-
-	/// Check error code. If code is not ok, throws exception.
-	void check_error(int code) const;
-	void check_last_error() const;
 
 	sqlite3* impl_;
 	transaction* active_txn_;
