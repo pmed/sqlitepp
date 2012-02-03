@@ -32,13 +32,17 @@ public:
 	session();
 	
 	// Create and open session.
-	explicit session(string_t const& file_name);
+	// Optional parameter flags for file open operations
+	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+	explicit session(string_t const& file_name, int flags = 0);
 	
 	// Close session on destroy.
 	~session();
 
 	// Open database session. Previous one will be closed.
-	void open(string_t const& file_name);
+	// Optional parameter flags for file open operations
+	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+	void open(string_t const& file_name, int flags = 0);
 	
 	// Close database session.
 	void close();

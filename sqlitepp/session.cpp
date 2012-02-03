@@ -47,12 +47,12 @@ session::session()
 }
 //----------------------------------------------------------------------------
 
-session::session(string_t const& file_name)
+session::session(string_t const& file_name, int flags)
 	: impl_(0)
 	, active_txn_(0)
 	, last_exec_(false)
 {
-	open(file_name);
+	open(file_name, flags);
 }
 //----------------------------------------------------------------------------
 
@@ -68,12 +68,17 @@ session::~session()
 }
 //----------------------------------------------------------------------------
 
-void session::open(string_t const& file_name)
+void session::open(string_t const& file_name, int flags)
 {
-	// close previouse session
+	// close previous session
 	close();
 
-	int const r = aux::select(::sqlite3_open, ::sqlite3_open16)(file_name.c_str(), &impl_);
+	if ( !flags )
+	{
+		flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE;
+	}
+
+	int const r = sqlite3_open_v2(utf8(file_name).c_str(), &impl_, flags, 0);
 	if ( r != SQLITE_OK )
 	{
 		string_t const msg( last_error_msg(impl_) );
