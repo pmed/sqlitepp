@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\sqlitepp\binders.cpp" />
+    <ClCompile Include="..\..\sqlitepp\exception.cpp" />
+    <ClCompile Include="..\..\sqlitepp\query.cpp" />
+    <ClCompile Include="..\..\sqlitepp\session.cpp" />
+    <ClCompile Include="..\..\sqlitepp\statement.cpp" />
+    <ClCompile Include="..\..\sqlitepp\string.cpp" />
+    <ClCompile Include="..\..\sqlitepp\transaction.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\sqlitepp\binders.hpp" />
+    <ClInclude Include="..\..\sqlitepp\converters.hpp" />
+    <ClInclude Include="..\..\sqlitepp\exception.hpp" />
+    <ClInclude Include="..\..\sqlitepp\into.hpp" />
+    <ClInclude Include="..\..\sqlitepp\query.hpp" />
+    <ClInclude Include="..\..\sqlitepp\session.hpp" />
+    <ClInclude Include="..\..\sqlitepp\sqlitepp.hpp" />
+    <ClInclude Include="..\..\sqlitepp\statement.hpp" />
+    <ClInclude Include="..\..\sqlitepp\string.hpp" />
+    <ClInclude Include="..\..\sqlitepp\transaction.hpp" />
+    <ClInclude Include="..\..\sqlitepp\unicode.hpp" />
+    <ClInclude Include="..\..\sqlitepp\use.hpp" />
+  </ItemGroup>
+</Project>
