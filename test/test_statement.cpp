@@ -59,15 +59,15 @@ void object::test<1>()
 	r1.insert(se);
 	ensure("no rows", !se.last_exec());
 	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 1);
-	ensure_equals("last changes", se.last_changes(), 1);
-	ensure_equals("total changes", se.total_changes(), 1);
+	ensure_equals("last changes", se.last_changes(), 1U);
+	ensure_equals("total changes", se.total_changes(), 1U);
 
 	record r2(2, utf(L"Slava"), 563.4);
 	r2.insert(se);
 	ensure("no rows", !se.last_exec());
 	ensure_equals("last_insert_rowid", se.last_insert_rowid(), 2);
-	ensure_equals("last changes", se.last_changes(), 1);	
-	ensure_equals("total changes", se.total_changes(), 2);
+	ensure_equals("last changes", se.last_changes(), 1U);
+	ensure_equals("total changes", se.total_changes(), 2U);
 }
 
 // test query
