@@ -124,7 +124,8 @@ const utf16_char	utf16_low_surrogate_front_k(0xdc00);
 const utf16_char	utf16_low_surrogate_back_k(0xdfff);
 
 /*************************************************************************************************/
-
+#pragma warning(push)
+#pragma warning(disable: 4310)
 template <std::size_t NumBytes> struct utf8_header_t	{ };
 template <>						struct utf8_header_t<0>	{ enum { value = char(0x80) }; }; // nonheader
 //template <>					struct utf8_header_t<1>	{ enum { value = char(0x00) }; }; // illegal
@@ -133,7 +134,7 @@ template <>						struct utf8_header_t<3>	{ enum { value = char(0xE0) }; };
 template <>						struct utf8_header_t<4>	{ enum { value = char(0xF0) }; };
 template <>						struct utf8_header_t<5>	{ enum { value = char(0xF8) }; };
 template <>						struct utf8_header_t<6>	{ enum { value = char(0xFC) }; };
-
+#pragma warning(pop)
 /*************************************************************************************************/
 
 template <char Mask, typename BinaryInteger>
