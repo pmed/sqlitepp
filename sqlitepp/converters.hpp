@@ -48,6 +48,8 @@ template<> struct converter<long long> : converter_base<long long, long long> {}
 template<> struct converter<unsigned long long> : converter_base<unsigned long long, long long> {};
 template<> struct converter<float> : converter_base<float, double> {};
 template<> struct converter<double> : converter_base<double, double> {};
+template<> struct converter<utf8_char const*> : converter_base<utf8_char const*, utf8_char const*> {};
+template<> struct converter<utf16_char const*> : converter_base<utf16_char const*, utf16_char const*> {};
 
 #ifdef SQLITEPP_ENUM_CONVERTER
 template<typename T>

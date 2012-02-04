@@ -280,6 +280,18 @@ void statement::use_value(int pos, long long value)
 }
 //----------------------------------------------------------------------------
 
+void statement::use_value(int pos, utf8_char const* value)
+{
+	s_.check_error( ::sqlite3_bind_text(impl_, pos, value, -1, SQLITE_STATIC) );
+}
+//----------------------------------------------------------------------------
+
+void statement::use_value(int pos, utf16_char const* value)
+{
+	s_.check_error( ::sqlite3_bind_text16(impl_, pos, value, -1, SQLITE_STATIC) );
+}
+//----------------------------------------------------------------------------
+
 void statement::use_value(int pos, string_t const& value, bool make_copy)
 {
 	s_.check_error( aux::select(::sqlite3_bind_text, ::sqlite3_bind_text16)

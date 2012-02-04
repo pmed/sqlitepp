@@ -50,7 +50,7 @@ void object::test<1>()
 	int count;
 	se << utf(L"select count(*) from some_table"), into(count);
 	ensure("row", se.last_exec());
-	ensure_equals("row count", count, static_cast<int>(dimof(recs)) ); 
+	ensure_equals("row count", count, static_cast<int>(dimof(recs)) );
 
 	// check inserted records
 	record r;
@@ -61,7 +61,7 @@ void object::test<1>()
 		ensure("row", se.last_exec());
 		ensure_equals(r, recs[count]);
 	}
-	ensure_equals("row count", count, static_cast<int>(dimof(recs))); 
+	ensure_equals("row count", count, static_cast<int>(dimof(recs)));
 }
 
 // use by name binding
@@ -85,7 +85,7 @@ void object::test<2>()
 	int count;
 	se << utf(L"select count(*) from some_table"), into(count);
 	ensure("row", se.last_exec());
-	ensure_equals("row count", count, static_cast<int>(dimof(recs)) ); 
+	ensure_equals("row count", count, static_cast<int>(dimof(recs)) );
 
 	// check inserted records
 	record r;
@@ -172,6 +172,25 @@ void object::test<5>()
 	}
 	ensure_equals("MAX_RECORD", id - 1, MAX_RECORD);
 	ensure_equals("MAX_RECORD", id2, MAX_RECORD);
+}
+
+// Use char_t const*
+template<>template<>
+void object::test<6>()
+{
+	se << "insert into some_table values(:id, :name, :salary, NULL)",
+		use(1), use("zzz"), use(999);
+	se << "insert into some_table values(:id, :name, :salary, NULL)",
+		use(2), use(L"aaa"), use(111);
+
+	se << "insert into some_table values(:id, :name, :salary, NULL)",
+		use(3), use("ddd", utf(L":name")), use(333);
+	se << "insert into some_table values(:id, :name, :salary, NULL)",
+		use(4), use(L"qqq", utf(L":name")), use(222);
+
+	int count;
+	se << utf(L"select count(*) from some_table"), into(count);
+	ensure_equals("row count", count, 4);
 }
 
 } // namespace

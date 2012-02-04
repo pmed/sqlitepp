@@ -103,6 +103,16 @@ inline use_binder_ptr use(T const& t)
 {
 	return use_binder_ptr(new use_pos_binder_const<T>(t));
 }
+
+inline use_binder_ptr use(utf8_char const* t)
+{
+	return use_binder_ptr(new use_pos_binder_const<utf8_char const*>(t));
+}
+
+inline use_binder_ptr use(utf16_char const* t)
+{
+	return use_binder_ptr(new use_pos_binder_const<utf16_char const*>(t));
+}
 //----------------------------------------------------------------------------
 
 // Create named use binding for reference t.
@@ -116,6 +126,17 @@ template<typename T>
 inline use_binder_ptr use(T const& t, string_t const& name)
 {
 	return use_binder_ptr(new use_name_binder_const<T>(t, name));
+}
+//----------------------------------------------------------------------------
+
+inline use_binder_ptr use(utf8_char const* t, string_t const& name)
+{
+	return use_binder_ptr(new use_name_binder_const<utf8_char const*>(t, name));
+}
+
+inline use_binder_ptr use(utf16_char const* t, string_t const& name)
+{
+	return use_binder_ptr(new use_name_binder_const<utf16_char const*>(t, name));
 }
 //----------------------------------------------------------------------------
 

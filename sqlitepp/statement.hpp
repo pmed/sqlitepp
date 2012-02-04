@@ -117,6 +117,10 @@ public:
 	void use_value(int pos, long long value);
 	// Use double value in query.
 	void use_value(int pos, double value);
+	// Use UTF-8 character string in query.
+	void use_value(int pos, utf8_char const* value);
+	// Use UTF-16 character string in query.
+	void use_value(int pos, utf16_char const* value);
 	// Use string value in query.
 	void use_value(int pos, string_t const& value, bool make_copy = true);
 	// Use BLOB value in query.
