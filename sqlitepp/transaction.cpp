@@ -6,6 +6,8 @@
 // Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <cassert>
+
 #include "transaction.hpp"
 #include "exception.hpp"
 #include "session.hpp"
@@ -16,19 +18,40 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-transaction::transaction(session& s) : s_(s), do_rollback_(false)
+transaction::transaction(session& s, type t)
+	: s_(s)
+	, do_rollback_(false)
 {
 	if ( s_.active_txn() )
 	{
 		throw nested_txn_not_supported();
 	}
-	s_ << utf(L"begin");
+
+	char const* begin_cmd;
+	switch ( t )
+	{
+	case deferred:
+		begin_cmd = "begin deferred";
+		break;
+	case immediate:
+		begin_cmd = "begin immediate";
+		break;
+	case exclusive:
+		begin_cmd = "begin exclusive";
+		break;
+	default:
+		assert(false && "unknown transaction type");
+		begin_cmd = "begin";
+		break;
+	}
+
+	s_ << utf(begin_cmd);
 	s_.active_txn_ = this;
 	do_rollback_ = true;
 }
 //----------------------------------------------------------------------------
 
-transaction::~transaction() 
+transaction::~transaction()
 {
 	if ( do_rollback_ )
 	{

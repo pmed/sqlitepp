@@ -21,8 +21,11 @@ class session;
 class transaction
 {
 public:
+	// Transaction type
+	enum type { deferred, immediate, exclusive };
+
 	// Begin transaction in context of session.
-	transaction(session& s);
+	transaction(session& s, type t = deferred);
 
 	// End transaction with rollback if it is not commited.
 	~transaction();

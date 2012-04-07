@@ -63,10 +63,10 @@ void object::test<2>()
 template<>template<>
 void object::test<3>()
 {
-	transaction t1(se);
+	transaction t1(se, transaction::immediate);
 	try
 	{
-		transaction t2(se);
+		transaction t2(se, transaction::exclusive);
 		fail("nested_txn_exception expected");
 	}
 	catch(nested_txn_not_supported const&)
