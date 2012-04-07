@@ -40,7 +40,7 @@ int use_binder::bind(statement& st, int pos)
 	do_bind(st, pos);
 	return pos + 1;
 }
-    
+
 //////////////////////////////////////////////////////////////////////////////
 
 } // namespace sqlitepp

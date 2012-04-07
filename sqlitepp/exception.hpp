@@ -25,7 +25,7 @@ class session;
 class exception : public std::runtime_error
 {
 public:
-    // create exception with UTF-8 encoded message
+	// create exception with UTF-8 encoded message
 	exception(int code, string_t const& msg);
 
 	// SQLite library error code.

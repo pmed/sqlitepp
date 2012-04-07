@@ -25,7 +25,7 @@ template<typename T>
 class into_pos_binder : public into_binder
 {
 public:
-	into_pos_binder(T& value) 
+	explicit into_pos_binder(T& value)
 		: pos_(-1)
 		, value_(value)
 	{
@@ -53,7 +53,7 @@ template<typename T>
 class into_name_binder : public into_pos_binder<T>
 {
 public:
-	into_name_binder(T& value, string_t const& name) 
+	into_name_binder(T& value, string_t const& name)
 		: into_pos_binder<T>(value)
 		, name_(name)
 	{

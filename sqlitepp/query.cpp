@@ -121,7 +121,7 @@ void swap(query& q1, query& q2)
 
 //////////////////////////////////////////////////////////////////////////////
 // 
-// prepare_query 
+// prepare_query
 //
 
 prepare_query::prepare_query(statement& st)

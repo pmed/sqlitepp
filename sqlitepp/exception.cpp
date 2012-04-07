@@ -18,8 +18,8 @@ namespace sqlitepp {
 //////////////////////////////////////////////////////////////////////////////
 
 exception::exception(int code, string_t const& msg)
-    : std::runtime_error(reinterpret_cast<char const*>(utf8(msg).c_str()))
-    , code_(code)
+	: std::runtime_error(reinterpret_cast<char const*>(utf8(msg).c_str()))
+	, code_(code)
 {
 }
 

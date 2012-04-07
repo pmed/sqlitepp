@@ -25,8 +25,10 @@ class into_binder
 public:
 	into_binder() {}
 	virtual ~into_binder() {}
+
 	// Bind value to statement st in positin pos.
 	int bind(statement& st, int pos);
+
 	// Update bound value.
 	void update(statement& st);
 private:
@@ -47,6 +49,7 @@ class use_binder
 public:
 	use_binder() {}
 	virtual ~use_binder() {}
+
 	/// Bind value to statement st in position pos
 	int bind(statement& st, int pos);
 private:

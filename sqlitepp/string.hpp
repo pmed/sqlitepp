@@ -50,12 +50,12 @@ using std::size_t;
 
 struct blob
 {
-    void const* data;
-    size_t size;
+	void const* data;
+	size_t size;
 };
 
 //typedef unsigned char                   utf8_char;
-typedef char							utf8_char;
+typedef char                             utf8_char;
 typedef meta::utf_char_selector<2>::type utf16_char;
 typedef meta::utf_char_selector<4>::type utf32_char;
 

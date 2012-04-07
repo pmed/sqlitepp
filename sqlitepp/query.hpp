@@ -147,7 +147,7 @@ private:
 	once_query(session& s);
 
 	// Assignment not allowed.
-	once_query& operator=(once_query const&); 
+	once_query& operator=(once_query const&);
 
 	session* s_;
 };

@@ -39,7 +39,7 @@ string_t last_error_msg(sqlite3* impl)
 //////////////////////////////////////////////////////////////////////////////
 
 	// Create an empty session.
-session::session() 
+session::session()
 	: impl_(0)
 	, active_txn_(0)
 	, last_exec_(false)
@@ -114,13 +114,13 @@ long long session::last_insert_rowid() const
 
 size_t session::last_changes() const
 {
-    return is_open()? sqlite3_changes(impl_) : 0;
+	return is_open()? sqlite3_changes(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 
 size_t session::total_changes() const
 {
-    return is_open()? sqlite3_total_changes(impl_) : 0;
+	return is_open()? sqlite3_total_changes(impl_) : 0;
 }
 //----------------------------------------------------------------------------
 

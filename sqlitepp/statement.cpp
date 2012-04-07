@@ -192,14 +192,16 @@ int statement::column_index(string_t const& name) const
 	for (int c = 0, cc = column_count(); c < cc; ++c)
 	{
 		if ( name == column_name(c) )
+		{
 			return c;
+		}
 	}
 	throw no_such_column(name);
 }
 
 statement::col_type statement::column_type(int column) const
 {
-	int type = ::sqlite3_column_type(impl_, column);
+	int const type = ::sqlite3_column_type(impl_, column);
 	s_.check_last_error();
 	return static_cast<col_type>(type);
 }
@@ -244,9 +246,10 @@ void statement::column_value(int column, string_t& value) const
 
 void statement::column_value(int column, blob& value) const
 {
-    value.data = ::sqlite3_column_blob(impl_, column);
+	value.data = ::sqlite3_column_blob(impl_, column);
 	s_.check_last_error();
-    value.size = sqlite3_column_bytes(impl_, column);
+
+	value.size = sqlite3_column_bytes(impl_, column);
 	s_.check_last_error();
 }
 //----------------------------------------------------------------------------

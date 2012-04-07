@@ -25,7 +25,7 @@ template<typename T>
 class use_pos_binder : public use_binder
 {
 public:
-	use_pos_binder(T& value)
+	explicit use_pos_binder(T& value)
 		: value_(value)
 	{
 	}
@@ -42,7 +42,7 @@ template<typename T>
 class use_pos_binder_const : public use_binder
 {
 public:
-	use_pos_binder_const(T const& value)
+	explicit use_pos_binder_const(T const& value)
 		: value_(value)
 	{
 	}
