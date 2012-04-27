@@ -113,9 +113,9 @@ void swap(query& q1, query& q2)
 	swap(q1.intos_, q2.intos_);
 	swap(q1.uses_, q2.uses_);
 	// swap sql streams
-	string_t tmp = q1.sql();
-	q1.sql(q2.sql());
-	q2.sql(tmp);
+	swap(q1.sql_, q2.sql_);
+	q1.sql_.clear();
+	q2.sql_.clear();
 }
 //----------------------------------------------------------------------------
 
