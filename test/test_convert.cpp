@@ -94,6 +94,7 @@ conv_test_group conv_tests("9. conversion");
 template<>template<>
 void object::test<1>()
 {
+	select_id<bool>();
 	select_id<char>();
 	select_id<unsigned char>();
 	select_id<signed char>();

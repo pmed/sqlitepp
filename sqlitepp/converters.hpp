@@ -29,11 +29,17 @@ template<typename T, typename U>
 struct converter_base
 {
 	typedef U base_type;
-	static T to(U const& u) { return static_cast<T>(u); }
-	static U from(T const& t) { return static_cast<U>(t); }
+	static T to(U u) { return static_cast<T>(u); }
+	static U from(T t) { return static_cast<U>(t); }
 };
 
-template<> struct converter<bool> : converter_base<bool, int> {};
+template<> struct converter<bool> : converter_base<bool, int>
+{
+	// resolve Visual C++ warning C4800
+	static bool to(int u) { return u != 0; }
+	static int from(bool t) { return t; }
+};
+
 template<> struct converter<char> : converter_base<char, int> {};
 template<> struct converter<signed char> : converter_base<signed char, int> {};
 template<> struct converter<unsigned char> : converter_base<unsigned char, int> {};
