@@ -1,5 +1,3 @@
-// $Id$
-
 #include <cstdlib>
 #include <iostream>
 
@@ -29,7 +27,7 @@ int main(int argc, char** argv)
 			// run all tests
 			tut::runner.get().run_tests();
 			break;
-		case 2: 
+		case 2:
 			// run a test group
 			tut::runner.get().run_tests(argv[1]);
 			break;
@@ -42,7 +40,7 @@ int main(int argc, char** argv)
 			return -1;
 		}
 	}
-	catch( std::exception const& ex )
+	catch (std::exception const& ex)
 	{
 		std::cerr << "tut raised ex: " << ex.what() << std::endl;
 		return -999;

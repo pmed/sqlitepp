@@ -1,5 +1,3 @@
-// $Id$
-
 #include <tut.h>
 
 #include <sqlitepp/exception.hpp>
@@ -9,7 +7,7 @@
 using namespace sqlitepp;
 
 namespace tut {
-	
+
 struct into_data : statement_data {};
 
 typedef test_group<into_data> into_test_group;
@@ -25,7 +23,7 @@ void object::test<1>()
 	r1.insert(se);
 
 	record r2;
-	st << utf(L"select * from some_table where id = 1"), 
+	st << utf(L"select * from some_table where id = 1"),
 		into(r2.id), into(r2.name), into(r2.salary);
 
 	ensure("select completed", st.exec());
@@ -62,7 +60,7 @@ void object::test<3>()
 		st.exec();
 		fail( "exception expected" );
 	}
-	catch(sqlitepp::exception const&)
+	catch (sqlitepp::exception const&)
 	{
 		ensure( "statement not prepared", !st.is_prepared() );
 	}
@@ -76,7 +74,7 @@ void object::test<4>()
 	r1.insert(se);
 
 	record r2;
-	st << utf(L"select * from some_table where id = 1"), 
+	st << utf(L"select * from some_table where id = 1"),
 		into(r2.id), into(r2.name), into(r2.salary), into(r2.data);
 
 	ensure("select completed", st.exec());

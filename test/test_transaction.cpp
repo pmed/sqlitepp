@@ -1,5 +1,3 @@
-// $Id$
-
 #include <tut.h>
 
 #include <sqlitepp/transaction.hpp>
@@ -36,7 +34,7 @@ void object::test<1>()
 
 		se << utf(L"select count(*) from some_table"), into(rows);
 		ensure_equals("row inserted", rows, 1);
-	}	
+	}
 	ensure( "no active txn", !se.active_txn() );
 	se << utf(L"select count(*) from some_table"), into(rows);
 	ensure_equals("rollback", rows, 0);
@@ -69,10 +67,10 @@ void object::test<3>()
 		transaction t2(se, transaction::exclusive);
 		fail("nested_txn_exception expected");
 	}
-	catch(nested_txn_not_supported const&)
+	catch (nested_txn_not_supported const&)
 	{
 	}
-	catch(...)
+	catch (...)
 	{
 		fail("nested_txn_not_supported expected");
 	}

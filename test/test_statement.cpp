@@ -1,5 +1,3 @@
-// $Id$
-
 #include <cmath>
 #include <iterator>
 #include <tut.h>
@@ -14,7 +12,7 @@ std::ostream& operator<<(std::ostream& os, statement_data::record::blob_data con
 {
 	os << '[' << blob.size() << "] = (";
 	std::copy(blob.begin(), blob.end(),
-        std::ostream_iterator<statement_data::record::blob_data::value_type>(os, ", "));
+		std::ostream_iterator<statement_data::record::blob_data::value_type>(os, ", "));
 	return os;
 }
 
@@ -30,15 +28,14 @@ statement_data::~statement_data()
 
 void statement_data::record::insert(sqlitepp::session& se)
 {
-	se << utf(L"insert into some_table(id, name, salary) values") << 
+	se << utf(L"insert into some_table(id, name, salary) values") <<
 		utf(L"(") << id << utf(L", \'") << name << utf(L"\', ") << salary << utf(L")");
 }
 
 
 namespace tut {
 
-void ensure_equals(statement_data::record const& r1, 
-				   statement_data::record const& r2)
+void ensure_equals(statement_data::record const& r1, statement_data::record const& r2)
 {
 	ensure_equals("id", r1.id, r2.id);
 	ensure_equals("name", r1.name, r2.name);
@@ -90,7 +87,7 @@ void object::test<3>()
 		st.exec();
 		fail( "exception expected" );
 	}
-	catch(sqlitepp::exception const&)
+	catch (sqlitepp::exception const&)
 	{
 		ensure("not prepared", !st.is_prepared());
 	}
@@ -148,7 +145,7 @@ void object::test<5>()
 		st.column_index(utf(L"zz"));
 		fail( "exception expected" );
 	}
-	catch(sqlitepp::exception const&)
+	catch (sqlitepp::exception const&)
 	{
 	}
 	try
@@ -156,7 +153,7 @@ void object::test<5>()
 		st.get<double>(200);
 		fail( "bind range exception expected" );
 	}
-	catch(sqlitepp::exception const&)
+	catch (sqlitepp::exception const&)
 	{
 	}
 

@@ -1,9 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////
-// $Id$
 //
 // Copyright (c) 2004 Pavel Medvedev
-// Use, modification and distribution is subject to the 
-// Boost Software License, Version 1.0. (See accompanying file 
+// Use, modification and distribution is subject to the
+// Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <algorithm>
@@ -39,8 +38,8 @@ inline void delete_object(T* obj)
 } // namespace { // implementation details
 
 //////////////////////////////////////////////////////////////////////////////
-// 
-// query 
+//
+// query
 //
 
 query::query()
@@ -120,7 +119,7 @@ void swap(query& q1, query& q2)
 //----------------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////////
-// 
+//
 // prepare_query
 //
 
@@ -142,14 +141,14 @@ prepare_query::~prepare_query()
 	if ( st_ )
 	{
 		// move query to statement.
-		swap(st_->q(), *this); 
+		swap(st_->q(), *this);
 		st_->finalize();
 	}
 }
 //----------------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////////
-// 
+//
 // once_query
 //
 

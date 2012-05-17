@@ -1,5 +1,4 @@
 //////////////////////////////////////////////////////////////////////////////
-// $Id$
 //
 // Copyright (c) 2005 Pavel Medvedev
 // Use, modification and distribution is subject to the
@@ -96,9 +95,9 @@ struct converter<std::vector<T> >
 	typedef blob base_type;
 	static std::vector<T> to(blob const& b)
 	{
-		T const* f = reinterpret_cast<T const*>(b.data);
-		T const* l = f + b.size / sizeof(T);
-		return std::vector<T>(f, l);
+		T const* begin = reinterpret_cast<T const*>(b.data);
+		T const* end = begin + b.size / sizeof(T);
+		return std::vector<T>(begin, end);
 	}
 	static blob from(std::vector<T> const& t)
 	{

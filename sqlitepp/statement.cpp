@@ -1,9 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////
-// $Id$
 //
 // Copyright (c) 2004 Pavel Medvedev
-// Use, modification and distribution is subject to the 
-// Boost Software License, Version 1.0. (See accompanying file 
+// Use, modification and distribution is subject to the
+// Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <algorithm>
@@ -27,31 +26,44 @@ namespace { // implementation details
 //////////////////////////////////////////////////////////////////////////////
 
 // Update into_binder functor
-struct update
+class update
 {
-	update(statement& st) : st_(st) {}
-	update& operator=(update const&);
-
-	void operator() (into_binder* b) const
+public:
+	explicit update(statement& st)
+		: st_(st)
 	{
-		b->update(st_);
 	}
+
+	void operator()(into_binder* into) const
+	{
+		into->update(st_);
+	}
+
+private:
+	update& operator=(update const&);
 
 	statement& st_;
 };
 //----------------------------------------------------------------------------
 
 // Do bindings to statement functor
-struct bind
+class bind
 {
-	bind(statement& st) : st_(st) {}
-	bind& operator=(bind const&);
+public:
+	explicit bind(statement& st) : st_(st) {}
 
-	template<typename T>
-	int operator()(int pos, T* binder) const
+	int operator()(int pos, into_binder* into) const
 	{
-		return binder->bind(st_, pos);
+		return into->bind(st_, pos);
 	}
+
+	int operator()(int pos, use_binder* use) const
+	{
+		return use->bind(st_, pos);
+	}
+
+private:
+	bind& operator=(bind const&);
 
 	statement& st_;
 };
@@ -104,7 +116,7 @@ void statement::prepare()
 		// bind use binders
 		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
 	}
-	catch(std::exception const&)
+	catch (std::exception const&)
 	{
 		// statement stays not prepared
 		finalize(false);
@@ -165,7 +177,10 @@ void statement::finalize(bool check_error) // throw
 	{
 		int const r = ::sqlite3_finalize(impl_);
 		impl_ = 0;
-		if ( check_error ) s_.check_error(r);
+		if ( check_error )
+		{
+			s_.check_error(r);
+		}
 	}
 }
 //----------------------------------------------------------------------------
@@ -298,7 +313,7 @@ void statement::use_value(int pos, utf16_char const* value)
 void statement::use_value(int pos, string_t const& value, bool make_copy)
 {
 	s_.check_error( aux::select(::sqlite3_bind_text, ::sqlite3_bind_text16)
-		(impl_, pos, value.empty()? 0 : value.c_str(), 
+		(impl_, pos, value.empty()? 0 : value.c_str(),
 		static_cast<int>(value.size() * sizeof(char_t)), make_copy? SQLITE_TRANSIENT : SQLITE_STATIC)
 	);
 }

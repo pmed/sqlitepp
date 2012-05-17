@@ -1,5 +1,3 @@
-// $Id$
-
 #include <tut.h>
 
 #include <sqlitepp/exception.hpp>
@@ -11,7 +9,7 @@
 using namespace sqlitepp;
 
 namespace tut {
-	
+
 struct use_data : statement_data
 {
 	use_data()
@@ -96,7 +94,7 @@ void object::test<2>()
 		ensure("row", se.last_exec());
 		ensure_equals(r, recs[count]);
 	}
-	ensure_equals(count, static_cast<int>(dimof(recs))); 
+	ensure_equals(count, static_cast<int>(dimof(recs)));
 }
 
 // use by invalid name binding
@@ -111,7 +109,7 @@ void object::test<3>()
 		st.exec();
 		fail( "exception expected" );
 	}
-	catch(sqlitepp::no_such_column const&)
+	catch (sqlitepp::no_such_column const&)
 	{
 		ensure( "statement not prepared", !st.is_prepared() );
 	}

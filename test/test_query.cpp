@@ -1,5 +1,3 @@
-// $Id$
-
 #include <tut.h>
 
 #include <locale>
@@ -47,7 +45,7 @@ void object::test<6>()
 		q.put(i);
 		fail("exception expected");
 	}
-	catch(std::invalid_argument const&)
+	catch (std::invalid_argument const&)
 	{
 	}
 	ensure("intos empty", q.intos().empty());
@@ -57,7 +55,7 @@ void object::test<6>()
 		q.put(u);
 		fail("exception expected");
 	}
-	catch(std::invalid_argument const&)
+	catch (std::invalid_argument const&)
 	{
 	}
 	ensure("uses empty", q.uses().empty());

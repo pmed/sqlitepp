@@ -17,7 +17,7 @@
 	FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 	COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 	IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.	
+	CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	
 */
 
@@ -48,7 +48,7 @@ struct enable_if_c { typedef T type; };
 template <class T>
 struct enable_if_c<false, T> {};
 
-template <class Cond, class T = void> 
+template <class Cond, class T = void>
 struct enable_if : public enable_if_c<Cond::value, T> {};
 
 //using sqlitepp::utf8_char;
@@ -224,7 +224,10 @@ struct promotion_engine_t
 
 		++first;
 
-		if (first == last) throw std::runtime_error("unicode: utf32 conversion ran out of input");
+		if (first == last)
+		{
+			throw std::runtime_error("unicode: utf32 conversion ran out of input");
+		}
 
 		return shifted | promotion_engine_t<ByteCount - 1, false>()(first, last);
 	}
@@ -260,7 +263,9 @@ inline typename enable_if<is_utf16_iterator_type<InputIterator>, InputIterator>:
 		result = 0;
 
 		if (first == last)
-			throw std::runtime_error("unicode: utf16 high surrogate found without low surrogate"); 
+		{
+			throw std::runtime_error("unicode: utf16 high surrogate found without low surrogate");
+		}
 
 		utf16_char low(static_cast<utf16_char>(*first));
 
@@ -290,21 +295,38 @@ inline typename enable_if<is_utf8_iterator_type<InputIterator>, InputIterator>::
 	unsigned char n(static_cast<unsigned char>(*first));
 
 	if (n < implementation::to_utf32_pivot_1_k)
-		{ result = static_cast<DestInteger>(n); ++first; }
+	{
+		result = static_cast<DestInteger>(n);
+		++first;
+	}
 	else if (n < implementation::to_utf32_pivot_2_k)
-		{ throw std::runtime_error("unicode: ill-defined utf8 (< 192)"); }
+	{
+		throw std::runtime_error("unicode: ill-defined utf8 (< 192)");
+	}
 	else if (n < implementation::to_utf32_pivot_3_k)
+	{
 		result = implementation::promotion_engine_t<2>()(first, last);
+	}
 	else if (n < implementation::to_utf32_pivot_4_k)
+	{
 		result = implementation::promotion_engine_t<3>()(first, last);
+	}
 	else if (n < implementation::to_utf32_pivot_5_k)
+	{
 		result = implementation::promotion_engine_t<4>()(first, last);
+	}
 	else if (n < implementation::to_utf32_pivot_6_k)
+	{
 		result = implementation::promotion_engine_t<5>()(first, last);
+	}
 	else if (n < implementation::to_utf32_pivot_7_k)
+	{
 		result = implementation::promotion_engine_t<6>()(first, last);
+	}
 	else
-		{ throw std::runtime_error("unicode: ill-defined utf8 (>= 254)"); }
+	{
+		throw std::runtime_error("unicode: ill-defined utf8 (>= 254)");
+	}
 
 	return first;
 }
@@ -330,17 +352,30 @@ inline typename enable_if<is_utf32_type<I>, O>::type
 	to_utf8(I code, O output)
 {
 	if (code < implementation::to_utf8_pivot_1_k) // UTF-8 is 1 byte long
-		{ *output = static_cast<char>(code); ++output; }
+	{
+		*output = static_cast<char>(code);
+		++output;
+	}
 	else if (code < implementation::to_utf8_pivot_2_k) // UTF-8 is 2 bytes long
+	{
 		output = implementation::demotion_engine_t<2>()(code, output);
+	}
 	else if (code < implementation::to_utf8_pivot_3_k) // UTF-8 is 3 bytes long
+	{
 		output = implementation::demotion_engine_t<3>()(code, output);
+	}
 	else if (code < implementation::to_utf8_pivot_4_k) // UTF-8 is 4 bytes long
+	{
 		output = implementation::demotion_engine_t<4>()(code, output);
+	}
 	else if (code < implementation::to_utf8_pivot_5_k) // UTF-8 is 5 bytes long
+	{
 		output = implementation::demotion_engine_t<5>()(code, output);
+	}
 	else // UTF-8 is 6 bytes long
+	{
 		output = implementation::demotion_engine_t<6>()(code, output);
+	}
 
 	return output;
 }
@@ -535,5 +570,5 @@ inline utf32_char to_utf32(I first, I last)
 /*************************************************************************************************/
 
 #endif
-	
+
 /*************************************************************************************************/

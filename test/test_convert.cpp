@@ -1,5 +1,3 @@
-// $Id$
-
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -58,7 +56,7 @@ struct converter<my_data>
 	}
 };
 
-} // namespace sqlitepp 
+} // namespace sqlitepp
 
 namespace tut {
 

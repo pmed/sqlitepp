@@ -1,5 +1,3 @@
-// $Id$
-
 #include <tut.h>
 
 #include <sqlitepp/string.hpp>
@@ -12,7 +10,7 @@ struct string_data
 {
 	string_t str_;
 };
-	
+
 typedef tut::test_group<string_data> string_test_group;
 typedef string_test_group::object object;
 

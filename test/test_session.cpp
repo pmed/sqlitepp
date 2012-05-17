@@ -1,5 +1,3 @@
-// $Id$
-
 #include <stdio.h>
 #include <tut.h>
 
@@ -13,7 +11,7 @@ using namespace sqlitepp;
 session_data::session_data(sqlitepp::string_t const& name) : name_(name)
 {
 	// ensure remove previously used database
-	remove(utf8(name_).c_str()); 
+	remove(utf8(name_).c_str());
 	se.open(name_);
 }
 
@@ -21,11 +19,11 @@ session_data::~session_data()
 {
 	se.close();
 	// ensure remove database
-	remove(utf8(name_).c_str()); 
+	remove(utf8(name_).c_str());
 }
 
 namespace tut {
-	
+
 typedef tut::test_group<session_data> session_test_group;
 typedef session_test_group::object object;
 
@@ -59,7 +57,7 @@ void object::test<3>()
 		se << utf(L"select * from undefined_table");
 		fail( "exception expected" );
 	}
-	catch(sqlitepp::exception const&)
+	catch (sqlitepp::exception const&)
 	{
 	}
 }
