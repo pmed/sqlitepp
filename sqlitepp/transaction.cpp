@@ -56,7 +56,7 @@ transaction::~transaction()
 	{
 		s_ << utf(L"rollback");
 	}
-	s_.active_txn_ = 0;
+	s_.active_txn_ = nullptr;
 }
 //----------------------------------------------------------------------------
 

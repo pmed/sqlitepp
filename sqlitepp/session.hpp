@@ -49,7 +49,7 @@ public:
 	// Is session opened?
 	bool is_open() const // throw()
 	{
-		return impl_ != 0;
+		return impl_ != nullptr;
 	}
 
 	// Is there an active transaction?

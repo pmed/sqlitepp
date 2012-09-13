@@ -39,16 +39,16 @@ string_t last_error_msg(sqlite3* impl)
 
 	// Create an empty session.
 session::session()
-	: impl_(0)
-	, active_txn_(0)
+	: impl_(nullptr)
+	, active_txn_(nullptr)
 	, last_exec_(false)
 {
 }
 //----------------------------------------------------------------------------
 
 session::session(string_t const& file_name, int flags)
-	: impl_(0)
-	, active_txn_(0)
+	: impl_(nullptr)
+	, active_txn_(nullptr)
 	, last_exec_(false)
 {
 	open(file_name, flags);
@@ -77,7 +77,7 @@ void session::open(string_t const& file_name, int flags)
 		flags = SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE;
 	}
 
-	int const r = sqlite3_open_v2(utf8(file_name).c_str(), &impl_, flags, 0);
+	int const r = sqlite3_open_v2(utf8(file_name).c_str(), &impl_, flags, nullptr);
 	if ( r != SQLITE_OK )
 	{
 		string_t const msg( last_error_msg(impl_) );
@@ -93,7 +93,7 @@ void session::close()
 	if ( is_open() )
 	{
 		int const r = sqlite3_close(impl_);
-		impl_ = 0;
+		impl_ = nullptr;
 		check_error(r);
 	}
 }

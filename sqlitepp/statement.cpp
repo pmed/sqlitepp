@@ -76,7 +76,7 @@ private:
 
 statement::statement(session& s)
 	: s_(s)
-	, impl_(0)
+	, impl_(nullptr)
 {
 }
 //----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ statement::statement(session& s)
 statement::statement(session& s, string_t const& sql)
 	: s_(s)
 	, q_(sql)
-	, impl_(0)
+	, impl_(nullptr)
 {
 }
 //----------------------------------------------------------------------------
@@ -100,7 +100,7 @@ void statement::prepare()
 	try
 	{
 		typedef meta::if_<sizeof(char_t) == sizeof(utf8_char), char const*, void const*>::type tail_type;
-		char_t const* tail;
+		char_t const* tail = nullptr;
 		string_t const sql = q_.sql();
 		s_.check_error(
 			aux::select(::sqlite3_prepare, ::sqlite3_prepare16)(s_.impl(), sql.c_str(),
@@ -176,7 +176,7 @@ void statement::finalize(bool check_error) // throw
 	if ( is_prepared() )
 	{
 		int const r = ::sqlite3_finalize(impl_);
-		impl_ = 0;
+		impl_ = nullptr;
 		if ( check_error )
 		{
 			s_.check_error(r);
@@ -313,7 +313,7 @@ void statement::use_value(int pos, utf16_char const* value)
 void statement::use_value(int pos, string_t const& value, bool make_copy)
 {
 	s_.check_error( aux::select(::sqlite3_bind_text, ::sqlite3_bind_text16)
-		(impl_, pos, value.empty()? 0 : value.c_str(),
+		(impl_, pos, value.empty()? nullptr : value.c_str(),
 		static_cast<int>(value.size() * sizeof(char_t)), make_copy? SQLITE_TRANSIENT : SQLITE_STATIC)
 	);
 }

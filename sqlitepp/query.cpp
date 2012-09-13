@@ -132,7 +132,7 @@ prepare_query::prepare_query(statement& st)
 prepare_query::prepare_query(prepare_query& src)
 {
 	swap(*this, src);
-	st_ = src.st_; src.st_ = 0;
+	st_ = src.st_; src.st_ = nullptr;
 }
 //----------------------------------------------------------------------------
 
@@ -161,7 +161,7 @@ once_query::once_query(session& s)
 once_query::once_query(once_query& src)
 {
 	swap(*this, src);
-	s_ = src.s_; src.s_ = 0;
+	s_ = src.s_; src.s_ = nullptr;
 }
 //----------------------------------------------------------------------------
 

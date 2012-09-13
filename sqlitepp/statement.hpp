@@ -49,7 +49,7 @@ public:
 	// Is statement prepared.
 	bool is_prepared() const // throw()
 	{
-		return impl_ != 0;
+		return impl_ != nullptr;
 	}
 
 	/// SQLite statement implementation for sqlite3 functions

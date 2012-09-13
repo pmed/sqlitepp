@@ -102,7 +102,7 @@ struct converter<std::vector<T> >
 	static blob from(std::vector<T> const& t)
 	{
 		blob b;
-		b.data = t.empty()? 0 : &t[0];
+		b.data = t.empty()? nullptr : &t[0];
 		b.size = t.size() * sizeof(T);
 		return b;
 	}
