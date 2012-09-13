@@ -1,7 +1,7 @@
 import set ;
 
 lib sqlite : sqlite3.c
-    : <version>3.7.11 <include>.
+    : <version>3.7.14 <include>.
       <threading>single : <define>SQLITE_THREADSAFE=0
 ;
 
