@@ -29,14 +29,14 @@ void object::test<1>()
 		transaction t(se);
 		ensure_equals( "this active txn", se.active_txn(), &t );
 		
-		record r1(1, utf(L"Dima"), 566.24);
+		record r1(1, utf("Dima"), 566.24);
 		r1.insert(se);
 
-		se << utf(L"select count(*) from some_table"), into(rows);
+		se << utf("select count(*) from some_table"), into(rows);
 		ensure_equals("row inserted", rows, 1);
 	}
 	ensure( "no active txn", !se.active_txn() );
-	se << utf(L"select count(*) from some_table"), into(rows);
+	se << utf("select count(*) from some_table"), into(rows);
 	ensure_equals("rollback", rows, 0);
 }
 
@@ -46,14 +46,14 @@ void object::test<2>()
 {
 	{
 		transaction t(se);
-		record r1(1, utf(L"Eugeny"), 566.24);
+		record r1(1, utf("Eugeny"), 566.24);
 		r1.insert(se);
 		t.commit();
 	}
 	ensure( "no active txn", !se.active_txn() );
 
 	int rows;
-	se << utf(L"select count(*) from some_table"), into(rows);
+	se << utf("select count(*) from some_table"), into(rows);
 	ensure_equals("commit", rows, 1);
 }
 

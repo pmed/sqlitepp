@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <type_traits>
 
 #include "../sqlite/sqlite3.h"
 
@@ -99,7 +100,7 @@ void statement::prepare()
 {
 	try
 	{
-		typedef meta::if_<sizeof(char_t) == sizeof(utf8_char), char const*, void const*>::type tail_type;
+		typedef std::conditional<sizeof(char_t) == sizeof(utf8_char), char const*, void const*>::type tail_type;
 		char_t const* tail = nullptr;
 		string_t const sql = q_.sql();
 		s_.check_error(

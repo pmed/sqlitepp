@@ -54,7 +54,7 @@ transaction::~transaction()
 {
 	if ( do_rollback_ )
 	{
-		s_ << utf(L"rollback");
+		s_ << utf("rollback");
 	}
 	s_.active_txn_ = nullptr;
 }
@@ -62,7 +62,7 @@ transaction::~transaction()
 
 void transaction::commit()
 {
-	s_ << utf(L"commit");
+	s_ << utf("commit");
 	do_rollback_ = false;
 }
 //----------------------------------------------------------------------------

@@ -54,7 +54,7 @@ void object::test<3>()
 {
 	try
 	{
-		se << utf(L"select * from undefined_table");
+		se << utf("select * from undefined_table");
 		fail( "exception expected" );
 	}
 	catch (sqlitepp::exception const&)

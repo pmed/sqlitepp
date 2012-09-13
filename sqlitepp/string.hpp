@@ -9,41 +9,11 @@
 #define SQLITEPP_STRING_HPP_INCLUDED
 
 #include <string>
-//#include <vector>
-//#include <iostream>
+#include <type_traits>
 
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
-
-//////////////////////////////////////////////////////////////////////////////
-
-namespace meta {
-
-//////////////////////////////////////////////////////////////////////////////
-
-// Meta if
-template<bool C, typename T1, typename T2>
-struct if_ { typedef T1 type; };
-template<typename T1, typename T2>
-struct if_<false, T1, T2> { typedef T2 type; };
-
-template<size_t Size>
-struct utf_char_selector
-{
-	class unknown_char_type;
-	typedef
-		typename if_<sizeof(wchar_t) == Size, wchar_t,
-		typename if_<sizeof(unsigned short) == Size, unsigned short,
-		typename if_<sizeof(unsigned int) == Size, unsigned int,
-			unknown_char_type>::type>::type>::type type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-} // namespace meta
-
-//////////////////////////////////////////////////////////////////////////////
 
 using std::size_t;
 
@@ -53,10 +23,21 @@ struct blob
 	size_t size;
 };
 
-//typedef unsigned char                   utf8_char;
+template<size_t Size>
+struct utf_char_selector
+{
+	class unknown_char_type;
+	typedef
+		typename std::conditional<sizeof(wchar_t) == Size, wchar_t,
+		typename std::conditional<sizeof(unsigned short) == Size, unsigned short,
+		typename std::conditional<sizeof(unsigned int) == Size, unsigned int,
+			unknown_char_type>::type>::type>::type type;
+};
+
+typedef char utf8_char;
 typedef char                             utf8_char;
-typedef meta::utf_char_selector<2>::type utf16_char;
-typedef meta::utf_char_selector<4>::type utf32_char;
+typedef utf_char_selector<2>::type utf16_char;
+typedef utf_char_selector<4>::type utf32_char;
 
 typedef std::basic_string<utf8_char>    utf8_string;
 typedef std::basic_string<utf16_char>   utf16_string;
@@ -70,7 +51,7 @@ typedef std::basic_string<utf32_char>   utf32_string;
 	typedef utf8_string  string_t;
 #endif // SQLITEPP_UTF16
 
-size_t const npos = (size_t)-1;
+size_t const npos = string_t::npos;
 
 utf8_string  utf16_to_utf8(utf16_char const* str, size_t size = npos);
 utf8_string  utf32_to_utf8(utf32_char const* str, size_t size = npos);

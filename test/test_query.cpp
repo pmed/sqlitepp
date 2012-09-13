@@ -24,16 +24,16 @@ void object::test<1>()
 {
 	ensure("empty query", q.empty() );
 
-	q.sql(utf(L"qaz"));
-	ensure_equals("q.sql() == qaz", q.sql(), utf(L"qaz") );
+	q.sql(utf("qaz"));
+	ensure_equals("q.sql() == qaz", q.sql(), utf("qaz") );
 }
 
 template<>template<>
 void object::test<2>()
 {
 	int z = 100;
-	q << utf(L"qaz") << z;
-	ensure_equals("q.sql() == qaz100", q.sql(), utf(L"qaz100"));
+	q << "qaz" << z;
+	ensure_equals("q.sql() == qaz100", q.sql(), utf("qaz100"));
 }
 
 template<>template<>

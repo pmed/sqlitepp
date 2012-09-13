@@ -19,11 +19,11 @@ into_test_group into_g("7. into");
 template<>template<>
 void object::test<1>()
 {
-	record r1(1, utf(L"Ignat"), 345.2);
+	record r1(1, utf("Ignat"), 345.2);
 	r1.insert(se);
 
 	record r2;
-	st << utf(L"select * from some_table where id = 1"),
+	st << utf("select * from some_table where id = 1"),
 		into(r2.id), into(r2.name), into(r2.salary);
 
 	ensure("select completed", st.exec());
@@ -36,12 +36,12 @@ void object::test<1>()
 template<>template<>
 void object::test<2>()
 {
-	record r1(1, utf(L"Egor"), 345.2);
+	record r1(1, utf("Egor"), 345.2);
 	r1.insert(se);
 
 	record r2;
-	st << utf(L"select id, name, salary from some_table"),
-		into(r2.salary, utf(L"salary")), into(r2.id, utf(L"id")), into(r2.name, utf(L"name"));
+	st << utf("select id, name, salary from some_table"),
+		into(r2.salary, utf("salary")), into(r2.id, utf("id")), into(r2.name, utf("name"));
 
 	ensure( "row selected", st.exec() );
 	ensure("row", se.last_exec());
@@ -56,7 +56,7 @@ void object::test<3>()
 	try
 	{
 		int id;
-		st << utf(L"select id from some_table"), into(id, utf(L"id_ZZZ"));
+		st << utf("select id from some_table"), into(id, utf("id_ZZZ"));
 		st.exec();
 		fail( "exception expected" );
 	}
@@ -70,11 +70,11 @@ void object::test<3>()
 template<>template<>
 void object::test<4>()
 {
-	record r1(1, utf(L"Gosha"), 634.4);
+	record r1(1, utf("Gosha"), 634.4);
 	r1.insert(se);
 
 	record r2;
-	st << utf(L"select * from some_table where id = 1"),
+	st << utf("select * from some_table where id = 1"),
 		into(r2.id), into(r2.name), into(r2.salary), into(r2.data);
 
 	ensure("select completed", st.exec());

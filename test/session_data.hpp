@@ -6,7 +6,7 @@
 
 struct session_data
 {
-	session_data(sqlitepp::string_t const& name = sqlitepp::utf(L"test.db"));
+	session_data(sqlitepp::string_t const& name = sqlitepp::utf("test.db"));
 	~session_data();
 
 	sqlitepp::string_t name_;

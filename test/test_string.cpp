@@ -34,11 +34,11 @@ void object::test<2>()
 template<>template<>
 void object::test<3>()
 {
-	str_ = utf(L"1");
+	str_ = utf("1");
 	sqlitepp::string_t s(str_);
 	ensure_equals("strings", str_, s);
 
-	str_ = utf(L"2");
+	str_ = utf("2");
 	s = str_;
 	ensure_equals("strings", str_, s);
 	

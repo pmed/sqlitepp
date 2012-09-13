@@ -23,22 +23,22 @@ exception::exception(int code, string_t const& msg)
 }
 
 nested_txn_not_supported::nested_txn_not_supported()
-	: exception(-1, utf(L"nested transactions are not supported"))
+	: exception(-1, utf("nested transactions are not supported"))
 {
 }
 
 no_such_column::no_such_column(string_t const& col_name)
-	: exception(-2, utf(L"no such column '") + col_name + utf(L"'"))
+	: exception(-2, utf("no such column '") + col_name + utf("'"))
 {
 }
 
 session_not_open::session_not_open()
-	: exception(-3, utf(L"session not open"))
+	: exception(-3, utf("session not open"))
 {
 }
 
 multi_stmt_not_supported::multi_stmt_not_supported()
-	: exception(-4, utf(L"only one statement is supported"))
+	: exception(-4, utf("only one statement is supported"))
 {
 }
 

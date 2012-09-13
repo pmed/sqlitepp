@@ -64,14 +64,14 @@ struct conv_data : statement_data
 {
 	conv_data()
 	{
-		se << utf(L"insert into some_table(id, name, salary) values(100, 'qaqa', 0.1)");
+		se << utf("insert into some_table(id, name, salary) values(100, 'qaqa', 0.1)");
 	}
 
 	template<typename T>
 	void select_id()
 	{
 		T id;
-		se << utf(L"select id from some_table"), into(id);
+		se << utf("select id from some_table"), into(id);
 		ensure_equals("id", id, T(100));
 	}
 
@@ -79,7 +79,7 @@ struct conv_data : statement_data
 	void select_salary(T const& expected, T const& dist)
 	{
 		T salary;
-		se << utf(L"select salary from some_table"), into(salary);
+		se << utf("select salary from some_table"), into(salary);
 		ensure_distance("salary", salary, expected, dist);
 	}
 };
@@ -115,14 +115,14 @@ void object::test<3>()
 {
 	transaction txn(se);
 
-	se << utf(L"create table timer(t integer)");
+	se << utf("create table timer(t integer)");
 	
 	time_t now = time(0);
 	tm t1 = *localtime(&now);
-	se << utf(L"insert into timer(t) values(:t)"), use(t1);
+	se << utf("insert into timer(t) values(:t)"), use(t1);
 	
 	tm t2;
-	se << utf(L"select t from timer"), into(t2);
+	se << utf("select t from timer"), into(t2);
 
 	ensure("tm equal", memcmp(&t1, &t2, sizeof(tm)) == 0);
 }
@@ -134,16 +134,16 @@ void object::test<4>()
 	enum enum_type { VAL1, VAL2, VAL3 } val;
 	transaction txn(se);
 
-	se << utf(L"create table enum_test(val integer)");
+	se << utf("create table enum_test(val integer)");
 	
 	val = VAL2;
-	se << utf(L"insert into enum_test(val) values(:val)"), use(val);
-	se << utf(L"select val from enum_test"), into(val);
+	se << utf("insert into enum_test(val) values(:val)"), use(val);
+	se << utf("select val from enum_test"), into(val);
 	ensure_equals("enum", val, VAL2);
 	
-	se << utf(L"delete from enum_test");
-	se << utf(L"insert into enum_test(val) values(:val)"), use(1000);
-	se << utf(L"select val from enum_test"), into(val);
+	se << utf("delete from enum_test");
+	se << utf("insert into enum_test(val) values(:val)"), use(1000);
+	se << utf("select val from enum_test"), into(val);
 	ensure_equals("out of enum", val, 1000);
 #endif
 }
@@ -153,12 +153,12 @@ void object::test<5>()
 {
 	transaction txn(se);
 
-	se << utf(L"create table my_data(val text)");
+	se << utf("create table my_data(val text)");
 	
 	my_data data, data2;
 	data.value = 99;
-	se << utf(L"insert into my_data(val) values(:val)"), use(data);
-	se << utf(L"select val from my_data"), into(data2);
+	se << utf("insert into my_data(val) values(:val)"), use(data);
+	se << utf("select val from my_data"), into(data2);
 	ensure_equals("my_data", data2.value, data.value);
 }
 
