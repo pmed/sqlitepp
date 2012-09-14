@@ -41,24 +41,22 @@ void object::test<6>()
 {
 	try
 	{
-		into_binder_ptr i;
-		q.put(i);
+		q.put(into_binder_ptr());
 		fail("exception expected");
 	}
 	catch (std::invalid_argument const&)
 	{
 	}
-	ensure("intos empty", q.intos().empty());
+	ensure("q empty", q.empty());
 	try
 	{
-		use_binder_ptr u;
-		q.put(u);
+		q.put(use_binder_ptr());
 		fail("exception expected");
 	}
 	catch (std::invalid_argument const&)
 	{
 	}
-	ensure("uses empty", q.uses().empty());
+	ensure("q empty", q.empty());
 }
 
 } // namespace tut {

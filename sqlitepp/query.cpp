@@ -5,13 +5,7 @@
 // Boost Software License, Version 1.0. (See accompanying file
 // LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#include <algorithm>
-#include <stdexcept>
-
-#include "../sqlite/sqlite3.h"
-
 #include "query.hpp"
-#include "binders.hpp"
 #include "exception.hpp"
 #include "statement.hpp"
 #include "session.hpp"
@@ -21,43 +15,27 @@
 namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
-
-namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-inline void delete_object(T* obj)
-{
-	delete obj;
-}
-//----------------------------------------------------------------------------
-
-//////////////////////////////////////////////////////////////////////////////
-
-} // namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
 //
 // query
 //
 
-query::query()
+query::query(query&& src)
 {
+	*this = std::move(src);
 }
-//----------------------------------------------------------------------------
 
-query::query(string_t const& sql)
+query& query::operator=(query&& src)
 {
-	sql_ << sql;
+	if ( this != &src )
+	{
+		intos_ = std::move(src.intos_);
+		uses_ = std::move(src.uses_);
+		swap(sql_, src.sql_);
+		sql_.clear();
+		src.sql_.clear();
+	}
+	return *this;
 }
-//----------------------------------------------------------------------------
-
-query::~query()
-{
-	clear();
-}
-//----------------------------------------------------------------------------
 
 void query::sql(string_t const& text)
 {
@@ -68,12 +46,8 @@ void query::sql(string_t const& text)
 
 void query::clear() // throw()
 {
-	// clear binders
-	std::for_each(intos_.begin(), intos_.end(), delete_object<into_binder>);
 	intos_.clear();
-	std::for_each(uses_.begin(), uses_.end(), delete_object<use_binder>);
 	uses_.clear();
-	// clear sql
 	sql(string_t());
 }
 //----------------------------------------------------------------------------
@@ -86,66 +60,51 @@ bool query::empty() const // throw()
 
 query& query::put(into_binder_ptr i)
 {
-	if ( !i.get() )
+	if ( !i )
 	{
 		throw std::invalid_argument("null into binder");
 	}
-	intos_.push_back(i.release());
+	intos_.emplace_back(std::move(i));
 	return *this;
 }
 //----------------------------------------------------------------------------
 
 query& query::put(use_binder_ptr u)
 {
-	if ( !u.get() )
+	if ( !u )
 	{
 		throw std::invalid_argument("null use binder");
 	}
-	uses_.push_back(u.release());
+	uses_.emplace_back(std::move(u));
 	return *this;
 }
 //----------------------------------------------------------------------------
 
-void swap(query& q1, query& q2)
-{
-	// swap binders
-	swap(q1.intos_, q2.intos_);
-	swap(q1.uses_, q2.uses_);
-	// swap sql streams
-	swap(q1.sql_, q2.sql_);
-	q1.sql_.clear();
-	q2.sql_.clear();
-}
-//----------------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////////
 //
 // prepare_query
 //
-
 prepare_query::prepare_query(statement& st)
 	: st_(&st)
 {
 }
-//----------------------------------------------------------------------------
 
-prepare_query::prepare_query(prepare_query& src)
+prepare_query::prepare_query(prepare_query&& src)
+	: query(std::move(src))
+	, st_(src.st_)
 {
-	swap(*this, src);
-	st_ = src.st_; src.st_ = nullptr;
+	src.st_ = nullptr;
 }
-//----------------------------------------------------------------------------
 
 prepare_query::~prepare_query()
 {
 	if ( st_ )
 	{
-		// move query to statement.
-		swap(st_->q(), *this);
+		st_->q() = std::move(*this);
 		st_->finalize();
 	}
 }
-//----------------------------------------------------------------------------
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -158,10 +117,11 @@ once_query::once_query(session& s)
 }
 //----------------------------------------------------------------------------
 
-once_query::once_query(once_query& src)
+once_query::once_query(once_query&& src)
+	: query(std::move(src))
+	, s_(src.s_)
 {
-	swap(*this, src);
-	s_ = src.s_; src.s_ = nullptr;
+	src.s_ = nullptr;
 }
 //----------------------------------------------------------------------------
 
@@ -175,7 +135,7 @@ once_query::~once_query()
 		}
 		// execute statement in session.
 		statement st(*s_);
-		swap(st.q(), *this);
+		st.q() = std::move(*this);
 		st.exec();
 	}
 }

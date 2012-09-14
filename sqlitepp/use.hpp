@@ -28,8 +28,10 @@ public:
 		: value_(value)
 	{
 	}
+
 protected:
 	T& value_;
+
 private:
 	void do_bind(statement& st, int pos)
 	{
@@ -45,8 +47,10 @@ public:
 		: value_(value)
 	{
 	}
+
 protected:
 	T const value_;
+
 private:
 	void do_bind(statement& st, int pos)
 	{
@@ -64,13 +68,14 @@ public:
 		, name_(name)
 	{
 	}
+
 private:
 	void do_bind(statement& st, int)
 	{
 		st.use_value(st.use_pos(this->name_), converter<T>::from(this->value_));
 	}
 
-	string_t name_;
+	string_t const name_;
 };
 template<typename T>
 class use_name_binder_const : public use_pos_binder_const<T>
@@ -81,13 +86,14 @@ public:
 		, name_(name)
 	{
 	}
+
 private:
 	void do_bind(statement& st, int)
 	{
 		st.use_value(st.use_pos(this->name_), converter<T>::from(this->value_));
 	}
 
-	string_t name_;
+	string_t const name_;
 };
 
 // Create position use binding for reference t.

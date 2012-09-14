@@ -29,13 +29,12 @@ public:
 		, value_(value)
 	{
 	}
+
 protected:
 	int pos_;
+
 private:
-	void do_bind(statement&, int pos)
-	{
-		this->pos_ = pos;
-	}
+	void do_bind(statement&, int pos) { this->pos_ = pos; }
 
 	void do_update(statement& st)
 	{
@@ -57,6 +56,7 @@ public:
 		, name_(name)
 	{
 	}
+
 private:
 	void do_bind(statement& st, int)
 	{
@@ -66,7 +66,7 @@ private:
 		}
 	}
 
-	string_t name_;
+	string_t const name_;
 };
 
 // Create position into binding for reference t.

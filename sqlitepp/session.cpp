@@ -7,6 +7,8 @@
 
 #include "../sqlite/sqlite3.h"
 
+#include <cassert>
+
 #include "session.hpp"
 #include "exception.hpp"
 
@@ -37,7 +39,7 @@ string_t last_error_msg(sqlite3* impl)
 
 //////////////////////////////////////////////////////////////////////////////
 
-	// Create an empty session.
+// Create an empty session.
 session::session()
 	: impl_(nullptr)
 	, active_txn_(nullptr)
@@ -63,6 +65,7 @@ session::~session()
 	}
 	catch (...)
 	{
+		assert(false);
 	}
 }
 //----------------------------------------------------------------------------

@@ -22,59 +22,6 @@ namespace sqlitepp {
 
 //////////////////////////////////////////////////////////////////////////////
 
-namespace { // implementation details
-
-//////////////////////////////////////////////////////////////////////////////
-
-// Update into_binder functor
-class update
-{
-public:
-	explicit update(statement& st)
-		: st_(st)
-	{
-	}
-
-	void operator()(into_binder* into) const
-	{
-		into->update(st_);
-	}
-
-private:
-	update& operator=(update const&);
-
-	statement& st_;
-};
-//----------------------------------------------------------------------------
-
-// Do bindings to statement functor
-class bind
-{
-public:
-	explicit bind(statement& st) : st_(st) {}
-
-	int operator()(int pos, into_binder* into) const
-	{
-		return into->bind(st_, pos);
-	}
-
-	int operator()(int pos, use_binder* use) const
-	{
-		return use->bind(st_, pos);
-	}
-
-private:
-	bind& operator=(bind const&);
-
-	statement& st_;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-} // namespace { // implenetation details
-
-//////////////////////////////////////////////////////////////////////////////
-
 statement::statement(session& s)
 	: s_(s)
 	, impl_(nullptr)
@@ -113,9 +60,12 @@ void statement::prepare()
 		}
 
 		// bind into binders
-		std::accumulate(q_.intos().begin(), q_.intos().end(), 0, bind(*this));
+		std::accumulate(q_.intos_.begin(), q_.intos_.end(), 0,
+			[this](int pos, into_binder_ptr& i) { return i->bind(*this, pos); });
+
 		// bind use binders
-		std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
+		std::accumulate(q_.uses_.begin(), q_.uses_.end(), 1,
+			[this](int pos, use_binder_ptr& u) { return u->bind(*this, pos); });
 	}
 	catch (std::exception const&)
 	{
@@ -139,7 +89,8 @@ bool statement::exec()
 		{
 		case SQLITE_ROW:
 			// statement has result (select for ex.) - update into holders
-			std::for_each(q_.intos().begin(), q_.intos().end(), update(*this));
+			std::for_each(q_.intos_.begin(), q_.intos_.end(),
+				[this](into_binder_ptr& i) { i->update(*this); });
 			return s_.last_exec_ = true;
 		case SQLITE_DONE:
 			// reset statement to be ready for the next exec
@@ -166,7 +117,8 @@ void statement::reset(bool rebind)
 		s_.check_error( ::sqlite3_reset(impl_) );
 		if ( rebind )
 		{
-			std::accumulate(q_.uses().begin(), q_.uses().end(), 1, bind(*this));
+			std::accumulate(q_.uses_.begin(), q_.uses_.end(), 1,
+				[this](int pos, use_binder_ptr& u) { return u->bind(*this, pos); });
 		}
 	}
 }

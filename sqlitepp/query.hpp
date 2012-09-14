@@ -27,16 +27,18 @@ class statement;
 // SQL query base class. Noncopyable.
 class query
 {
+	friend class statement; // access to intos_ and uses_
 public:
 	// Create an empty query.
-	query();
-	
+	query() {}
 	// Create a query with SQL text.
-	explicit query(string_t const& sql);
-	
+	explicit query(string_t const& sql) { sql_ << sql; }
+
+	query(query&& src);
+	query& operator=(query&& src);
 
 	// Clear query on destroy.
-	~query();
+	~query() { clear(); }
 
 	// Current SQL statement.
 	string_t sql() const // throw()
@@ -53,24 +55,6 @@ public:
 	// Is query empty?
 	bool empty() const; // throw()
 
-	// Into binders container type.
-	typedef std::vector<into_binder*> into_binders;
-	
-	// Into binders.
-	into_binders const& intos() const // throw()
-	{
-		return intos_;
-	}
-
-	// Use binders container type.
-	typedef std::vector<use_binder*> use_binders;
-
-	// Use binders.
-	use_binders const& uses() const // throw()
-	{
-		return uses_;
-	}
-
 	// Collect SQL text.
 	template<typename T>
 	query& operator<<(T const& t)
@@ -85,7 +69,7 @@ public:
 	// Add into binder.
 	query& operator,(into_binder_ptr i)
 	{
-		return put(i);
+		return put(std::move(i));
 	}
 	
 	// Add use binder.
@@ -94,21 +78,15 @@ public:
 	// Add use binder.
 	query& operator,(use_binder_ptr u)
 	{
-		return put(u);
+		return put(std::move(u));
 	}
 
-	// Swap queries.
-	friend void swap(query& lhs, query& rhs);
-
-protected:
-	// Noncopyable.
-	query(query const& src);
-	// Nonassignable.
-	query& operator=(query const& src);
-
 private:
-	into_binders intos_;
-	use_binders  uses_;
+	query(query const& src); // = delete
+	query& operator=(query const& src); // = delete
+
+	std::vector<into_binder_ptr> intos_;
+	std::vector<use_binder_ptr> uses_;
 
 	std::basic_ostringstream<char_t> sql_;
 };
@@ -118,17 +96,18 @@ class prepare_query : public query
 {
 	friend class statement; // access to ctor
 public:
-	// Transfer execution responsibiblty from src to this object.
-	prepare_query(prepare_query& src);
+	// Transfer execution responsibility from src to this object.
+	prepare_query(prepare_query&& src);
 
 	// Move query to statement on destroy.
 	~prepare_query();
+
 private:
 	// Create preparing proxy for statement.
 	prepare_query(statement& st);
-	
-	// Assignment not allowed.
-	prepare_query& operator=(prepare_query const&);
+
+	prepare_query(prepare_query const& src); // = delete
+	prepare_query& operator=(prepare_query const& src); // = delete
 
 	statement* st_;
 };
@@ -139,16 +118,17 @@ class once_query : public query
 	friend class session; // access to ctor
 public:
 	// Transfer execution responsibiblty from src to this object.
-	once_query(once_query& src);
+	once_query(once_query&& src);
 
 	// Execute statement on destroy.
 	~once_query();
+
 private:
 	// Create proxy for session.
 	once_query(session& s);
 
-	// Assignment not allowed.
-	once_query& operator=(once_query const&);
+	once_query(once_query const& src); // = delete;
+	once_query& operator=(once_query const& src); // = delete;
 
 	session* s_;
 };

@@ -103,10 +103,8 @@ public:
 		std::swap(lhs.active_txn_, rhs.active_txn_);
 	}
 private:
-	// Noncopyable.
-	session(session const&);
-	// Nonassignable.
-	session& operator=(session const&);
+	session(session const&); // = delete;
+	session& operator=(session const&); // = delete;
 
 	sqlite3* impl_;
 	transaction* active_txn_;

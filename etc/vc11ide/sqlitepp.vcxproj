@@ -254,7 +254,6 @@
     <Lib />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\sqlitepp\binders.cpp" />
     <ClCompile Include="..\..\sqlitepp\exception.cpp" />
     <ClCompile Include="..\..\sqlitepp\query.cpp" />
     <ClCompile Include="..\..\sqlitepp\session.cpp" />

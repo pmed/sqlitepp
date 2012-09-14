@@ -24,16 +24,17 @@ public:
 	enum type { deferred, immediate, exclusive };
 
 	// Begin transaction in context of session.
-	transaction(session& s, type t = deferred);
+	explicit transaction(session& s, type t = deferred);
 
 	// End transaction with rollback if it is not commited.
 	~transaction();
 
 	// Commit transaction.
 	void commit();
+
 private:
-	transaction(transaction const&);
-	transaction& operator=(transaction const&);
+	transaction(transaction const&); // = delete
+	transaction& operator=(transaction const&); // = delete
 
 	session& s_;
 	bool do_rollback_;
