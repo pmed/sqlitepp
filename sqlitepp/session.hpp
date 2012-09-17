@@ -34,7 +34,10 @@ public:
 	// Optional parameter flags for file open operations
 	// (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
 	explicit session(string_t const& file_name, int flags = 0);
-	
+
+	session(session&& src);
+	session& operator=(session&& src);
+
 	// Close session on destroy.
 	~session();
 

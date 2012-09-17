@@ -37,6 +37,28 @@ statement::statement(session& s, string_t const& sql)
 }
 //----------------------------------------------------------------------------
 
+statement::statement(statement&& src)
+	: s_(src.s_)
+	, q_(std::move(src.q_))
+	, impl_(std::move(src.impl_))
+{
+	src.impl_ = nullptr;
+}
+//----------------------------------------------------------------------------
+
+statement& statement::operator=(statement&& src)
+{
+	if ( &src != this )
+	{
+		s_ = std::move(src.s_);
+		q_ = std::move(src.q_);
+		impl_ = std::move(src.impl_);
+		src.impl_ = nullptr;
+	}
+	return *this;
+}
+//----------------------------------------------------------------------------
+
 statement::~statement()
 {
 	finalize(false);

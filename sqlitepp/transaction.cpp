@@ -18,10 +18,10 @@ namespace sqlitepp {
 //////////////////////////////////////////////////////////////////////////////
 
 transaction::transaction(session& s, type t)
-	: s_(s)
+	: s_(&s)
 	, do_rollback_(false)
 {
-	if ( s_.active_txn() )
+	if ( s_->active_txn() )
 	{
 		throw nested_txn_not_supported();
 	}
@@ -44,25 +44,72 @@ transaction::transaction(session& s, type t)
 		break;
 	}
 
-	s_ << utf(begin_cmd);
-	s_.active_txn_ = this;
+	*s_ << utf(begin_cmd);
+	s_->active_txn_ = this;
 	do_rollback_ = true;
+}
+//----------------------------------------------------------------------------
+
+transaction::transaction(transaction&& src)
+	: s_(src.s_)
+	, do_rollback_(src.do_rollback_)
+{
+	*this = std::move(src);
+}
+//----------------------------------------------------------------------------
+
+transaction& transaction::operator=(transaction&& src)
+{
+	if ( &src != this )
+	{
+		s_ = src.s_;
+		src.s_ = nullptr;
+
+		do_rollback_ = src.do_rollback_;
+		src.do_rollback_ = false;
+
+		if ( s_ )
+		{
+			s_->active_txn_ = this;
+		}
+	}
+	return *this;
 }
 //----------------------------------------------------------------------------
 
 transaction::~transaction()
 {
-	if ( do_rollback_ )
+	try
 	{
-		s_ << utf("rollback");
+		rollback();
 	}
-	s_.active_txn_ = nullptr;
+	catch (...)
+	{
+		assert(false);
+	}
+}
+//----------------------------------------------------------------------------
+
+void transaction::rollback()
+{
+	if ( do_rollback_ && s_ )
+	{
+		*s_ << utf("rollback");
+	}
+	if ( s_ )
+	{
+		s_->active_txn_ = nullptr;
+	}
+	do_rollback_ = false;
 }
 //----------------------------------------------------------------------------
 
 void transaction::commit()
 {
-	s_ << utf("commit");
+	if ( s_ )
+	{
+		*s_ << utf("commit");
+	}
 	do_rollback_ = false;
 }
 //----------------------------------------------------------------------------

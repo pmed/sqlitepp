@@ -11,6 +11,7 @@
 
 #include "session.hpp"
 #include "exception.hpp"
+#include "transaction.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -54,6 +55,28 @@ session::session(string_t const& file_name, int flags)
 	, last_exec_(false)
 {
 	open(file_name, flags);
+}
+//----------------------------------------------------------------------------
+
+session::session(session&& src)
+{
+	*this = std::move(src);
+}
+//----------------------------------------------------------------------------
+
+session& session::operator=(session&& src)
+{
+	if ( &src != this )
+	{
+		impl_ = src.impl_;
+		src.impl_ = nullptr;
+		if ( src.active_txn_ )
+		{
+			*active_txn_ = std::move(*src.active_txn_);
+		}
+		last_exec_ = src.last_exec_;
+	}
+	return *this;
 }
 //----------------------------------------------------------------------------
 

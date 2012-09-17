@@ -34,6 +34,9 @@ public:
 	// Create statement with SQL query text.
 	statement(session& s, string_t const& sql);
 
+	statement(statement&& src);
+	statement& operator=(statement&& src);
+
 	// Finalize statement on destroy.
 	~statement();
 
@@ -128,11 +131,9 @@ public:
 	// Get use position by name in query.
 	int use_pos(string_t const& name) const;
 private:
-	// Copy not allowed.
-	statement(statement const&);
-	// Assignment not allowed.
-	statement& operator=(statement const&);
-	
+	statement(statement const&); // = delete;
+	statement& operator=(statement const&); // = delete;
+
 	session& s_;
 	query q_;
 	sqlite3_stmt* impl_;
