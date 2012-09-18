@@ -7,9 +7,7 @@ C++ wrapper to SQLite library
 
 :Author: Pavel Medvedev
 :Contact: pmedvedev@gmail.com
-:date: $Date$
-:revision: $Rev$
-:copyright: Copyright (c) 2004-2008 Pavel Medvedev
+:copyright: Copyright (c) 2004-2012 Pavel Medvedev
 
 .. contents:: Table of Contents
 .. section-numbering::
@@ -202,7 +200,8 @@ Next example.
                use(e.name), use(e.age), use(e.salary);
             while ( std::cin >> e )
             {
-                st.exec(); // **(1.1)**
+                st.reset(true); // **(1.1)**
+                st.exec();      // **(1.2)**
             }
 
             // **(2)**
@@ -226,8 +225,10 @@ Again usual things happen - we create session and table. Then we create
 statement object ``st``. It is executing in context of database ``db``. In the
 code block marked as (1) we prepare SQL query and bind variable e members to
 SQL values(:name, :age, :salary) of the same name. Next, in loop we ask user
-to enter employee data. In line marked (1.1) the statement is executed and
-data of members``e`` are inserted into the table ``employee``.
+to enter employee data. At line (1.1) the statement is reset after previous
+execution step and use values for ``e`` are rebound. At the next line (1.2)
+the statement is executed and data of members``e`` are inserted into
+the table ``employee``.
 
 But let's check contents of the ``employee``. The code block marked as (2)
 demonstrates it. Statement ``st`` is preparing with new SQL select query. Note
@@ -387,13 +388,17 @@ Session is a SQLite database abstraction::
         session();
 
         // Create and open session.
-        explicit session(string_t const& file_name);
-        
+        // Optional parameter flags for file open operations
+        // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+        explicit session(string_t const& file_name, int flags = 0);
+ 
         // Close session on destroy.
         ~session();
 
         // Open database session. Previous one will be closed.
-        void open(string_t const& file_name);
+        // Optional parameter flags for file open operations
+        // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+        void open(string_t const& file_name, int flags = 0);
 
         // Close database session.
         void close();
@@ -406,6 +411,19 @@ Session is a SQLite database abstraction::
         // So we can test, is there any transaction in session.
         // If we have the transaction, we get it or null otherwise.
         transaction* active_txn() const; // throw()
+
+        /// SQLite implementation for native sqlite3 functions.
+        sqlite3* impl() const;
+
+        /// Check error code. If code is not ok, throws exception.
+        void check_error(int code) const;
+        void check_last_error() const;
+
+        // Last session error
+        int last_error() const;
+
+        // Last statement::exec result
+        bool last_exec() const;
 
         // Last insert row ID
         long long last_insert_rowid() const;
@@ -455,6 +473,9 @@ Database statement::
         // Finalize statement.
         void finalize();
     
+        /// SQLite statement implementation for sqlite3 functions
+        sqlite3_stmt* impl() const;
+
         // Is statement prepared.
         bool is_prepared() const; // throw() 
     
@@ -537,8 +558,11 @@ You should call ``transaction::commit`` to explicitly make a commit. ::
     class transaction
     {
     public:
-        // Begin transaction in context of the session s.
-        transaction(session& s);
+        // Transaction type
+        enum type { deferred, immediate, exclusive };
+
+        // Begin transaction in context of session.
+        transaction(session& s, type t = deferred);
 
         // End transaction with rollback if it is not commited.
         ~transaction();

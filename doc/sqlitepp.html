@@ -3,11 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.10: http://docutils.sourceforge.net/" />
 <title>SQLite++</title>
 <meta name="author" content="Pavel Medvedev" />
-<meta name="date" content="2008-01-24" />
-<meta name="copyright" content="Copyright (c) 2004-2008 Pavel Medvedev" />
+<meta name="copyright" content="Copyright (c) 2004-2012 Pavel Medvedev" />
 <link rel="stylesheet" href="style.css" type="text/css" />
 </head>
 <body>
@@ -21,67 +20,63 @@
 <tr><th class="docinfo-name">Author:</th>
 <td>Pavel Medvedev</td></tr>
 <tr><th class="docinfo-name">Contact:</th>
-<td><a class="first last reference" href="mailto:pmedvedev&#37;&#52;&#48;gmail&#46;com">pmedvedev<span>&#64;</span>gmail<span>&#46;</span>com</a></td></tr>
-<tr><th class="docinfo-name">Date:</th>
-<td>2008-01-24</td></tr>
-<tr><th class="docinfo-name">Revision:</th>
-<td>65</td></tr>
+<td><a class="first last reference external" href="mailto:pmedvedev&#37;&#52;&#48;gmail&#46;com">pmedvedev<span>&#64;</span>gmail<span>&#46;</span>com</a></td></tr>
 <tr><th class="docinfo-name">Copyright:</th>
-<td>Copyright (c) 2004-2008 Pavel Medvedev</td></tr>
+<td>Copyright (c) 2004-2012 Pavel Medvedev</td></tr>
 </tbody>
 </table>
-<div class="contents topic">
-<p class="topic-title first"><a id="table-of-contents" name="table-of-contents">Table of Contents</a></p>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first">Table of Contents</p>
 <ul class="auto-toc simple">
-<li><a class="reference" href="#overview" id="id2" name="id2">1&nbsp;&nbsp;&nbsp;Overview</a></li>
-<li><a class="reference" href="#installation" id="id3" name="id3">2&nbsp;&nbsp;&nbsp;Installation</a><ul class="auto-toc">
-<li><a class="reference" href="#testing" id="id4" name="id4">2.1&nbsp;&nbsp;&nbsp;Testing</a></li>
+<li><a class="reference internal" href="#overview" id="id2">1&nbsp;&nbsp;&nbsp;Overview</a></li>
+<li><a class="reference internal" href="#installation" id="id3">2&nbsp;&nbsp;&nbsp;Installation</a><ul class="auto-toc">
+<li><a class="reference internal" href="#testing" id="id4">2.1&nbsp;&nbsp;&nbsp;Testing</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#short-tutorial" id="id5" name="id5">3&nbsp;&nbsp;&nbsp;Short Tutorial</a></li>
-<li><a class="reference" href="#reference" id="id6" name="id6">4&nbsp;&nbsp;&nbsp;Reference</a><ul class="auto-toc">
-<li><a class="reference" href="#string-aha-yet-another-one" id="id7" name="id7">4.1&nbsp;&nbsp;&nbsp;String. Aha, Yet Another One</a></li>
-<li><a class="reference" href="#exceptions" id="id8" name="id8">4.2&nbsp;&nbsp;&nbsp;Exceptions</a></li>
-<li><a class="reference" href="#session" id="id9" name="id9">4.3&nbsp;&nbsp;&nbsp;Session</a></li>
-<li><a class="reference" href="#statement" id="id10" name="id10">4.4&nbsp;&nbsp;&nbsp;Statement</a></li>
-<li><a class="reference" href="#transaction" id="id11" name="id11">4.5&nbsp;&nbsp;&nbsp;Transaction</a></li>
-<li><a class="reference" href="#blob" id="id12" name="id12">4.6&nbsp;&nbsp;&nbsp;BLOB</a></li>
-<li><a class="reference" href="#binders" id="id13" name="id13">4.7&nbsp;&nbsp;&nbsp;Binders</a><ul class="auto-toc">
-<li><a class="reference" href="#into-binders" id="id14" name="id14">4.7.1&nbsp;&nbsp;&nbsp;Into binders</a></li>
-<li><a class="reference" href="#use-binders" id="id15" name="id15">4.7.2&nbsp;&nbsp;&nbsp;Use binders</a></li>
-<li><a class="reference" href="#data-conversion" id="id16" name="id16">4.7.3&nbsp;&nbsp;&nbsp;Data Conversion</a></li>
+<li><a class="reference internal" href="#short-tutorial" id="id5">3&nbsp;&nbsp;&nbsp;Short Tutorial</a></li>
+<li><a class="reference internal" href="#reference" id="id6">4&nbsp;&nbsp;&nbsp;Reference</a><ul class="auto-toc">
+<li><a class="reference internal" href="#string-aha-yet-another-one" id="id7">4.1&nbsp;&nbsp;&nbsp;String. Aha, Yet Another One</a></li>
+<li><a class="reference internal" href="#exceptions" id="id8">4.2&nbsp;&nbsp;&nbsp;Exceptions</a></li>
+<li><a class="reference internal" href="#session" id="id9">4.3&nbsp;&nbsp;&nbsp;Session</a></li>
+<li><a class="reference internal" href="#statement" id="id10">4.4&nbsp;&nbsp;&nbsp;Statement</a></li>
+<li><a class="reference internal" href="#transaction" id="id11">4.5&nbsp;&nbsp;&nbsp;Transaction</a></li>
+<li><a class="reference internal" href="#blob" id="id12">4.6&nbsp;&nbsp;&nbsp;BLOB</a></li>
+<li><a class="reference internal" href="#binders" id="id13">4.7&nbsp;&nbsp;&nbsp;Binders</a><ul class="auto-toc">
+<li><a class="reference internal" href="#into-binders" id="id14">4.7.1&nbsp;&nbsp;&nbsp;Into binders</a></li>
+<li><a class="reference internal" href="#use-binders" id="id15">4.7.2&nbsp;&nbsp;&nbsp;Use binders</a></li>
+<li><a class="reference internal" href="#data-conversion" id="id16">4.7.3&nbsp;&nbsp;&nbsp;Data Conversion</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#query" id="id17" name="id17">4.8&nbsp;&nbsp;&nbsp;Query</a></li>
+<li><a class="reference internal" href="#query" id="id17">4.8&nbsp;&nbsp;&nbsp;Query</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id2" id="overview" name="overview">1&nbsp;&nbsp;&nbsp;Overview</a></h1>
-<p>SQLite++ is an object-oriented wrapper library of <a class="reference" href="http://sqlite.org">SQLite</a> version 3.
-The latest sources are available from <a class="reference" href="https://svn.berlios.de/svnroot/repos/sqlitepp/trunk">Subversion repository</a></p>
+<div class="section" id="overview">
+<h1><a class="toc-backref" href="#id2">1&nbsp;&nbsp;&nbsp;Overview</a></h1>
+<p>SQLite++ is an object-oriented wrapper library of <a class="reference external" href="http://sqlite.org">SQLite</a> version 3.
+The latest sources are available from <a class="reference external" href="https://svn.berlios.de/svnroot/repos/sqlitepp/trunk">Subversion repository</a></p>
 <p>The main idea is to use simple variable binding with SQL statements:</p>
 <pre class="literal-block">
 int count;
 db &lt;&lt; &quot;select count(*) from employee&quot;, into(count);
 </pre>
 <p>The library is distributed under Boost Software License (see accompanying
-file <a class="reference" href="../LICENSE_1_0.txt">LICENSE_1_0.txt</a> in the project root). Additional information about
-Boost Software License is available at <a class="reference" href="http://boost.org/more/license_info.html">Boost site</a></p>
+file <a class="reference external" href="../LICENSE_1_0.txt">LICENSE_1_0.txt</a> in the project root). Additional information about
+Boost Software License is available at <a class="reference external" href="http://boost.org/more/license_info.html">Boost site</a></p>
 <p>Approaches with binding variables to SQL queries were inspired by
-Maciej Sobczak' <a class="reference" href="http://www.msobczak.com/prog/soci/">SOCI wrapper</a>.</p>
+Maciej Sobczak' <a class="reference external" href="http://www.msobczak.com/prog/soci/">SOCI wrapper</a>.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id3" id="installation" name="installation">2&nbsp;&nbsp;&nbsp;Installation</a></h1>
+<div class="section" id="installation">
+<h1><a class="toc-backref" href="#id3">2&nbsp;&nbsp;&nbsp;Installation</a></h1>
 <p>This section describes how to build and install SQLitepp from released
 source distribution.</p>
-<p>SQLite++ uses <a class="reference" href="http://sourceforge.net/project/showfiles.php?group_id=7586&amp;package_id=72941">Boost Build v2</a>. Refer to the <a class="reference" href="http://boost.org/tools/build/v2/index.html">documentation</a> how to install
+<p>SQLite++ uses <a class="reference external" href="http://sourceforge.net/project/showfiles.php?group_id=7586&amp;package_id=72941">Boost Build v2</a>. Refer to the <a class="reference external" href="http://boost.org/tools/build/v2/index.html">documentation</a> how to install
 Boost Build v2.</p>
 <p>To build SQLite++ change working dir to the root of this distribution
 and invoke</p>
 <blockquote>
-<tt class="docutils literal"><span class="pre">bjam</span> <span class="pre">[build-variant]</span></tt></blockquote>
+<tt class="docutils literal">bjam <span class="pre">[build-variant]</span></tt></blockquote>
 <p>Where build-variant is an optional predefined build variant name.
 There are several predefined variants:</p>
 <table border="1" class="docutils">
@@ -91,16 +86,16 @@ There are several predefined variants:</p>
 <col width="76%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><tt class="docutils literal"><span class="pre">utf8</span></tt></td>
+<tr><td><tt class="docutils literal">utf8</tt></td>
 <td>UTF-8 encoding support. Defaul variant.</td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">utf8d</span></tt></td>
+<tr><td><tt class="docutils literal">utf8d</tt></td>
 <td>UTF-8 encoding support, debug version.</td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">utf16</span></tt></td>
+<tr><td><tt class="docutils literal">utf16</tt></td>
 <td>UTF-16 encoding support.</td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">utf16d</span></tt></td>
+<tr><td><tt class="docutils literal">utf16d</tt></td>
 <td>UTF-16 encoding support, debug version.</td>
 </tr>
 </tbody>
@@ -108,23 +103,23 @@ There are several predefined variants:</p>
 <p>After successful building two subdirectories will be created:</p>
 <blockquote>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">lib</span></tt>      - with binary library files.</li>
-<li><tt class="docutils literal"><span class="pre">include</span></tt>  -  with header files.</li>
+<li><tt class="docutils literal">lib</tt>      - with binary library files.</li>
+<li><tt class="docutils literal">include</tt>  -  with header files.</li>
 </ul>
 </blockquote>
 <p>Make them available for a compiler in your favorite way and have fun ;-)</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id4" id="testing" name="testing">2.1&nbsp;&nbsp;&nbsp;Testing</a></h2>
+<div class="section" id="testing">
+<h2><a class="toc-backref" href="#id4">2.1&nbsp;&nbsp;&nbsp;Testing</a></h2>
 <p>You might want to run unit-tests of SQLite++. It's simple with bjam:</p>
 <blockquote>
-<tt class="docutils literal"><span class="pre">bjam</span> <span class="pre">test</span> <span class="pre">[build-variant]</span></tt></blockquote>
-<p>Test application uses excellent unit-testing library <a class="reference" href="http://tut-framework.sourceforge.net/">TUT</a></p>
+<tt class="docutils literal">bjam test <span class="pre">[build-variant]</span></tt></blockquote>
+<p>Test application uses excellent unit-testing library <a class="reference external" href="http://tut-framework.sourceforge.net/">TUT</a></p>
 </div>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id5" id="short-tutorial" name="short-tutorial">3&nbsp;&nbsp;&nbsp;Short Tutorial</a></h1>
+<div class="section" id="short-tutorial">
+<h1><a class="toc-backref" href="#id5">3&nbsp;&nbsp;&nbsp;Short Tutorial</a></h1>
 <p>Let's make simple database application. It creates database with table
-<tt class="docutils literal"><span class="pre">employee</span></tt> and adds a record.</p>
+<tt class="docutils literal">employee</tt> and adds a record.</p>
 <pre class="literal-block">
 #include &lt;iostream&gt;
 #include &lt;stdexcept&gt;
@@ -178,7 +173,7 @@ database file name. As it should be destructor closes database. SQL statements
 may be executed immediately by session. In this case implicit statement will
 be created and executed. Statement has an ostream-like interface, so an SQL
 text can be composed of many parts, involving any object that supports output
-stream shifting (i.e. custom classes with <tt class="docutils literal"><span class="pre">operator&lt;&lt;</span></tt>).</p>
+stream shifting (i.e. custom classes with <tt class="docutils literal">operator&lt;&lt;</tt>).</p>
 <p>Ok, while it seems like just yet another object-oriented database library.
 Next example.</p>
 <pre class="literal-block">
@@ -226,7 +221,8 @@ int main()
            use(e.name), use(e.age), use(e.salary);
         while ( std::cin &gt;&gt; e )
         {
-            st.exec(); // <strong>(1.1)</strong>
+            st.reset(true); // <strong>(1.1)</strong>
+            st.exec();      // <strong>(1.2)</strong>
         }
 
         // <strong>(2)</strong>
@@ -247,21 +243,23 @@ int main()
 }
 </pre>
 <p>Again usual things happen - we create session and table. Then we create
-statement object <tt class="docutils literal"><span class="pre">st</span></tt>. It is executing in context of database <tt class="docutils literal"><span class="pre">db</span></tt>. In the
+statement object <tt class="docutils literal">st</tt>. It is executing in context of database <tt class="docutils literal">db</tt>. In the
 code block marked as (1) we prepare SQL query and bind variable e members to
 SQL values(:name, :age, :salary) of the same name. Next, in loop we ask user
-to enter employee data. In line marked (1.1) the statement is executed and
-data of members``e`` are inserted into the table <tt class="docutils literal"><span class="pre">employee</span></tt>.</p>
-<p>But let's check contents of the <tt class="docutils literal"><span class="pre">employee</span></tt>. The code block marked as (2)
-demonstrates it. Statement <tt class="docutils literal"><span class="pre">st</span></tt> is preparing with new SQL select query. Note
-the members of <tt class="docutils literal"><span class="pre">e</span></tt> are bound to SQL result columns again. Loop counts until
+to enter employee data. At line (1.1) the statement is reset after previous
+execution step and use values for <tt class="docutils literal">e</tt> are rebound. At the next line (1.2)
+the statement is executed and data of members``e`` are inserted into
+the table <tt class="docutils literal">employee</tt>.</p>
+<p>But let's check contents of the <tt class="docutils literal">employee</tt>. The code block marked as (2)
+demonstrates it. Statement <tt class="docutils literal">st</tt> is preparing with new SQL select query. Note
+the members of <tt class="docutils literal">e</tt> are bound to SQL result columns again. Loop counts until
 statement select has data.</p>
 </div>
-<div class="section">
-<h1><a class="toc-backref" href="#id6" id="reference" name="reference">4&nbsp;&nbsp;&nbsp;Reference</a></h1>
+<div class="section" id="reference">
+<h1><a class="toc-backref" href="#id6">4&nbsp;&nbsp;&nbsp;Reference</a></h1>
 <p>This section provides the information how to use SQLite++.</p>
-<div class="section">
-<h2><a class="toc-backref" href="#id7" id="string-aha-yet-another-one" name="string-aha-yet-another-one">4.1&nbsp;&nbsp;&nbsp;String. Aha, Yet Another One</a></h2>
+<div class="section" id="string-aha-yet-another-one">
+<h2><a class="toc-backref" href="#id7">4.1&nbsp;&nbsp;&nbsp;String. Aha, Yet Another One</a></h2>
 <p>Internationalization, code pages, all these things may cause a big headache.
 Fortunately, SQLite stores text fields in UTF-8 or UTF-16 encoded. So,
 actually SQLite++ has to support either one or another. There are 3 types
@@ -273,13 +271,13 @@ of char type:</p>
 <col width="36%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><tt class="docutils literal"><span class="pre">utf8_char</span></tt></td>
+<tr><td><tt class="docutils literal">utf8_char</tt></td>
 <td>1 byte</td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">utf16_char</span></tt></td>
+<tr><td><tt class="docutils literal">utf16_char</tt></td>
 <td>2 byte</td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">utf32_char</span></tt></td>
+<tr><td><tt class="docutils literal">utf32_char</tt></td>
 <td>4 byte</td>
 </tr>
 </tbody>
@@ -320,9 +318,9 @@ utf32_string utf32(utf16_string const&amp; str);
 </ul>
 </blockquote>
 <p>To turn on UTF-16 encoding support define preprocessor symbol
-<tt class="docutils literal"><span class="pre">SQLITEPP_UTF16</span></tt>. Otherwise UTF-8 will be used. The common way to abstract
+<tt class="docutils literal">SQLITEPP_UTF16</tt>. Otherwise UTF-8 will be used. The common way to abstract
 from encoding used is to define generalized character type. In SQLite++ is a
-<tt class="docutils literal"><span class="pre">char_t</span></tt>:</p>
+<tt class="docutils literal">char_t</tt>:</p>
 <pre class="literal-block">
 #ifdef SQLITEPP_UTF16
     typedef utf16_char   char_t;
@@ -343,13 +341,13 @@ string_t utf(utf32_string const&amp; str);
 </pre>
 <div class="note">
 <p class="first admonition-title">Note</p>
-<p class="last"><tt class="docutils literal"><span class="pre">utf8_char</span></tt> is the C++ char type, therefore it's possible don't
+<p class="last"><tt class="docutils literal">utf8_char</tt> is the C++ char type, therefore it's possible don't
 use UTF-8 encoding at all. SQLite and SQLite++ make no checks and
 interpret a string as a raw byte sequence.</p>
 </div>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id8" id="exceptions" name="exceptions">4.2&nbsp;&nbsp;&nbsp;Exceptions</a></h2>
+<div class="section" id="exceptions">
+<h2><a class="toc-backref" href="#id8">4.2&nbsp;&nbsp;&nbsp;Exceptions</a></h2>
 <p>All SQLite errors mapped to SQLite++ exceptions.
 Base class is a <tt class="docutils literal"><span class="pre">sqlitepp::exception</span></tt>:</p>
 <pre class="literal-block">
@@ -366,7 +364,7 @@ public:
 <div class="note">
 <p class="first admonition-title">Note</p>
 <p class="last"><tt class="docutils literal"><span class="pre">sqlitepp::exception::what()</span></tt> returns UTF-8 encoded SQLite error
-message (see <a class="reference" href="http://sqlite.org/capi3ref.html#sqlite3_errmsg">sqlite3_errmsg</a>)</p>
+message (see <a class="reference external" href="http://sqlite.org/capi3ref.html#sqlite3_errmsg">sqlite3_errmsg</a>)</p>
 </div>
 <p>There are some custom SQLite++ exceptions:</p>
 <table border="1" class="docutils">
@@ -375,7 +373,7 @@ message (see <a class="reference" href="http://sqlite.org/capi3ref.html#sqlite3_
 <col width="57%" />
 </colgroup>
 <tbody valign="top">
-<tr><td><tt class="docutils literal"><span class="pre">nested_txn_not_supported</span></tt></td>
+<tr><td><tt class="docutils literal">nested_txn_not_supported</tt></td>
 <td><p class="first">This exception is thrown when the user
 tries to run nested transaction. This
 is a SQLite  limitation -  lack of
@@ -392,7 +390,7 @@ transaction txn(db);
 </pre>
 </td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">no_such_column</span></tt></td>
+<tr><td><tt class="docutils literal">no_such_column</tt></td>
 <td><p class="first">This exception is thrown when the user
 tries to get statement column by name
 (see statement::column_index):</p>
@@ -402,7 +400,7 @@ statement::column_index(&quot;qqq&quot;);
 </pre>
 </td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">session_not_open</span></tt></td>
+<tr><td><tt class="docutils literal">session_not_open</tt></td>
 <td><p class="first">This exception is thrown when the user
 tries to excecute SQL statement in not
 opened session:</p>
@@ -412,7 +410,7 @@ s &lt;&lt; &quot;drop table q&quot;;
 </pre>
 </td>
 </tr>
-<tr><td><tt class="docutils literal"><span class="pre">multi_stmt_not_supported</span></tt></td>
+<tr><td><tt class="docutils literal">multi_stmt_not_supported</tt></td>
 <td><p class="first">This excpetion is thrown when the user
 tries to excecute multiple SQL queries
 in the one statement:</p>
@@ -425,8 +423,8 @@ statement st(se, &quot;select * from t1;&quot;
 </tbody>
 </table>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id9" id="session" name="session">4.3&nbsp;&nbsp;&nbsp;Session</a></h2>
+<div class="section" id="session">
+<h2><a class="toc-backref" href="#id9">4.3&nbsp;&nbsp;&nbsp;Session</a></h2>
 <p>Session is a SQLite database abstraction:</p>
 <pre class="literal-block">
 // Database session. Noncopyable.
@@ -437,13 +435,17 @@ public:
     session();
 
     // Create and open session.
-    explicit session(string_t const&amp; file_name);
+    // Optional parameter flags for file open operations
+    // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+    explicit session(string_t const&amp; file_name, int flags = 0);
 
     // Close session on destroy.
     ~session();
 
     // Open database session. Previous one will be closed.
-    void open(string_t const&amp; file_name);
+    // Optional parameter flags for file open operations
+    // (see SQLite reference at http://sqlite.org/c3ref/c_open_autoproxy.html)
+    void open(string_t const&amp; file_name, int flags = 0);
 
     // Close database session.
     void close();
@@ -456,6 +458,19 @@ public:
     // So we can test, is there any transaction in session.
     // If we have the transaction, we get it or null otherwise.
     transaction* active_txn() const; // throw()
+
+    /// SQLite implementation for native sqlite3 functions.
+    sqlite3* impl() const;
+
+    /// Check error code. If code is not ok, throws exception.
+    void check_error(int code) const;
+    void check_last_error() const;
+
+    // Last session error
+    int last_error() const;
+
+    // Last statement::exec result
+    bool last_exec() const;
 
     // Last insert row ID
     long long last_insert_rowid() const;
@@ -479,8 +494,8 @@ public:
 };
 </pre>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id10" id="statement" name="statement">4.4&nbsp;&nbsp;&nbsp;Statement</a></h2>
+<div class="section" id="statement">
+<h2><a class="toc-backref" href="#id10">4.4&nbsp;&nbsp;&nbsp;Statement</a></h2>
 <p>Database statement:</p>
 <pre class="literal-block">
 // Database statement, noncopyable
@@ -504,6 +519,9 @@ public:
 
     // Finalize statement.
     void finalize();
+
+    /// SQLite statement implementation for sqlite3 functions
+    sqlite3_stmt* impl() const;
 
     // Is statement prepared.
     bool is_prepared() const; // throw()
@@ -577,8 +595,8 @@ public:
 };
 </pre>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id11" id="transaction" name="transaction">4.5&nbsp;&nbsp;&nbsp;Transaction</a></h2>
+<div class="section" id="transaction">
+<h2><a class="toc-backref" href="#id11">4.5&nbsp;&nbsp;&nbsp;Transaction</a></h2>
 <p>Transaction is a RAII class that starts transaction in constructor and ends
 one in destructor. By default, the transaction is finished with rollback.
 You should call <tt class="docutils literal"><span class="pre">transaction::commit</span></tt> to explicitly make a commit.</p>
@@ -587,8 +605,11 @@ You should call <tt class="docutils literal"><span class="pre">transaction::comm
 class transaction
 {
 public:
-    // Begin transaction in context of the session s.
-    transaction(session&amp; s);
+    // Transaction type
+    enum type { deferred, immediate, exclusive };
+
+    // Begin transaction in context of session.
+    transaction(session&amp; s, type t = deferred);
 
     // End transaction with rollback if it is not commited.
     ~transaction();
@@ -602,8 +623,8 @@ public:
 <p class="last">Currently SQLite doesn't support nested transactions.</p>
 </div>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id12" id="blob" name="blob">4.6&nbsp;&nbsp;&nbsp;BLOB</a></h2>
+<div class="section" id="blob">
+<h2><a class="toc-backref" href="#id12">4.6&nbsp;&nbsp;&nbsp;BLOB</a></h2>
 <p>SQLite tables can contain BLOB columns. BLOB is a simple struct:</p>
 <pre class="literal-block">
 struct blob
@@ -615,8 +636,8 @@ struct blob
 <p>SQLite++ supports conversion between template <tt class="docutils literal"><span class="pre">std::vector&lt;T&gt;</span></tt> and blob value.
 See &quot;Data Conversion&quot; section below.</p>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id13" id="binders" name="binders">4.7&nbsp;&nbsp;&nbsp;Binders</a></h2>
+<div class="section" id="binders">
+<h2><a class="toc-backref" href="#id13">4.7&nbsp;&nbsp;&nbsp;Binders</a></h2>
 <p>Binders are used to bind value into the statement query. There are two types
 of binders:</p>
 <blockquote>
@@ -625,11 +646,11 @@ of binders:</p>
 <li>use binders</li>
 </ul>
 </blockquote>
-<div class="section">
-<h3><a class="toc-backref" href="#id14" id="into-binders" name="into-binders">4.7.1&nbsp;&nbsp;&nbsp;Into binders</a></h3>
+<div class="section" id="into-binders">
+<h3><a class="toc-backref" href="#id14">4.7.1&nbsp;&nbsp;&nbsp;Into binders</a></h3>
 <p>Into binders are used for binding result set values <em>into</em> variables. In the
-following example selected value of column <tt class="docutils literal"><span class="pre">name</span></tt> from table <tt class="docutils literal"><span class="pre">employees</span></tt>
-will be stored in variable <tt class="docutils literal"><span class="pre">name</span></tt>:</p>
+following example selected value of column <tt class="docutils literal">name</tt> from table <tt class="docutils literal">employees</tt>
+will be stored in variable <tt class="docutils literal">name</tt>:</p>
 <pre class="literal-block">
 session db(&quot;test.db&quot;);
 statement st(db);
@@ -675,10 +696,10 @@ template&lt;typename T&gt;
 inline into_binder_ptr into(T&amp; t, string_t const&amp; name);
 </pre>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id15" id="use-binders" name="use-binders">4.7.2&nbsp;&nbsp;&nbsp;Use binders</a></h3>
+<div class="section" id="use-binders">
+<h3><a class="toc-backref" href="#id15">4.7.2&nbsp;&nbsp;&nbsp;Use binders</a></h3>
 <p>This binders <em>use</em> variables as parameters for SQL queries. Following code
-uses variable id to select column <tt class="docutils literal"><span class="pre">name</span></tt> from table <tt class="docutils literal"><span class="pre">employees</span></tt>:</p>
+uses variable id to select column <tt class="docutils literal">name</tt> from table <tt class="docutils literal">employees</tt>:</p>
 <pre class="literal-block">
 session db(&quot;test.db&quot;);
 statement st(db);
@@ -719,8 +740,8 @@ template&lt;typename T&gt;
 inline use_binder_ptr use(T&amp; t, string_t const&amp; name);
 </pre>
 </div>
-<div class="section">
-<h3><a class="toc-backref" href="#id16" id="data-conversion" name="data-conversion">4.7.3&nbsp;&nbsp;&nbsp;Data Conversion</a></h3>
+<div class="section" id="data-conversion">
+<h3><a class="toc-backref" href="#id16">4.7.3&nbsp;&nbsp;&nbsp;Data Conversion</a></h3>
 <p>To convert bound variable from type T into the supported SQLite column type
 and vice versa a set of specialized templates is used:</p>
 <pre class="literal-block">
@@ -737,8 +758,8 @@ struct converter&lt;T&gt;
     static base_type from(T const&amp; t) { return t; }
 };
 </pre>
-<p>There are all arithmetic C++ types, <tt class="docutils literal"><span class="pre">string_t</span></tt> and <tt class="docutils literal"><span class="pre">blob</span></tt> specializations exist.
-The <tt class="docutils literal"><span class="pre">blob</span></tt> converter is partially specialized template for the <tt class="docutils literal"><span class="pre">std::vector&lt;T&gt;</span></tt>
+<p>There are all arithmetic C++ types, <tt class="docutils literal">string_t</tt> and <tt class="docutils literal">blob</tt> specializations exist.
+The <tt class="docutils literal">blob</tt> converter is partially specialized template for the <tt class="docutils literal"><span class="pre">std::vector&lt;T&gt;</span></tt>
 so it is possible to use <tt class="docutils literal"><span class="pre">std::vector</span></tt> in statement binders:</p>
 <pre class="literal-block">
 db &lt;&lt; &quot;create table employee(id integer primary key, name text,&quot;
@@ -755,7 +776,7 @@ st &lt;&lt; &quot;select name, age, salary, photo from employee&quot;,
             into(e.name), into(e.age), into(e.salary), into(image);
 </pre>
 <p>You can define convert for some custom type, if it fits to SQLite column type
-(<tt class="docutils literal"><span class="pre">int</span></tt>, <tt class="docutils literal"><span class="pre">long</span> <span class="pre">long</span></tt>, <tt class="docutils literal"><span class="pre">double</span></tt>, <tt class="docutils literal"><span class="pre">string_t</span></tt>, <tt class="docutils literal"><span class="pre">blob</span></tt>). For example:</p>
+(<tt class="docutils literal">int</tt>, <tt class="docutils literal">long long</tt>, <tt class="docutils literal">double</tt>, <tt class="docutils literal">string_t</tt>, <tt class="docutils literal">blob</tt>). For example:</p>
 <pre class="literal-block">
 namespace sqlitepp {
     // specialize converter for the tm struct
@@ -777,12 +798,12 @@ namespace sqlitepp {
     };
 } // namespace sqlitepp
 </pre>
-<p>It is possible to convert C++ enumeration types. You should have <a class="reference" href="http://boost.org">boost</a> library installed and
-<tt class="docutils literal"><span class="pre">#define</span> <span class="pre">SQLITEPP_ENUM_CONVERTER</span></tt> macro in your project.</p>
+<p>It is possible to convert C++ enumeration types. You should have <a class="reference external" href="http://boost.org">boost</a> library installed and
+<tt class="docutils literal">#define SQLITEPP_ENUM_CONVERTER</tt> macro in your project.</p>
 </div>
 </div>
-<div class="section">
-<h2><a class="toc-backref" href="#id17" id="query" name="query">4.8&nbsp;&nbsp;&nbsp;Query</a></h2>
+<div class="section" id="query">
+<h2><a class="toc-backref" href="#id17">4.8&nbsp;&nbsp;&nbsp;Query</a></h2>
 <p>Query is a noncopyable collection of SQL text and variable binders:</p>
 <pre class="literal-block">
 // Query class. Noncopyable
@@ -848,8 +869,9 @@ public:
 </div>
 <div class="footer">
 <hr class="footer" />
-Generated on: 2008-01-24 12:11 UTC.
-Generated by <a class="reference" href="http://docutils.sourceforge.net/">Docutils</a> from <a class="reference" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a> source.
+<a class="reference external" href="c:/Projects/sqlitepp-git/doc/sqlitepp.rst">View document source</a>.
+Generated on: 2012-09-18 18:23 UTC.
+Generated by <a class="reference external" href="http://docutils.sourceforge.net/">Docutils</a> from <a class="reference external" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a> source.
 
 </div>
 </body>

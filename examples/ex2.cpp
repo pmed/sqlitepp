@@ -40,7 +40,8 @@ int main()
 				, use(e.name), use(e.age), use(e.salary);
 		while ( std::cin >> e )
 		{
-			st.exec(); // (1.1)
+			st.reset(true); // (1.1)
+			st.exec();      // (1.2)
 		}
 
 		// (2)
