@@ -26,6 +26,19 @@ namespace { // implementation details
 
 //////////////////////////////////////////////////////////////////////////////
 
+// fix: some older compliler will provide a public copy constructor for 
+//      std::basic_ostringstream<T>
+// check for Visual Studio C++ older then 2010 or GCC
+#if (defined(_MSC_VER) && (_MSC_VER < 1600)) || defined(__GNUC__)
+template <typename T>
+void swap(std::basic_ostringstream<T>& s1, std::basic_ostringstream<T>& s2)
+{
+	std::basic_string<T> const s1_str = s1.str();
+	s1.str(s2.str()); s1.clear();
+	s2.str(s1_str); s2.clear();
+}
+#endif
+
 template<typename T>
 inline void delete_object(T* obj)
 {
