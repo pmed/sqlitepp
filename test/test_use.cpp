@@ -179,12 +179,12 @@ void object::test<6>()
 	se << "insert into some_table values(:id, :name, :salary, NULL)",
 		use(1), use("zzz"), use(999);
 	se << "insert into some_table values(:id, :name, :salary, NULL)",
-		use(2), use(L"aaa"), use(111);
+		use(2), use("aaa"), use(111);
 
 	se << "insert into some_table values(:id, :name, :salary, NULL)",
-		use(3), use("ddd", utf(L":name")), use(333);
+		use(3), use("ddd", utf(":name")), use(333);
 	se << "insert into some_table values(:id, :name, :salary, NULL)",
-		use(4), use(L"qqq", utf(L":name")), use(222);
+		use(4), use("qqq", utf(":name")), use(222);
 
 	int count;
 	se << utf(L"select count(*) from some_table"), into(count);

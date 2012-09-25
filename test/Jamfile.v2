@@ -1,7 +1,7 @@
 import testing ;
 
 unit-test test
-    : [ glob *.cpp ] ..//sqlitepp 
+    : [ glob *.cpp ] ..//sqlite ..//sqlitepp 
 	: <include>tut <include>.. <define>SQLITEPP_TEST
-	  <target-os>linux,<toolset>gcc:<linkflags>"-ldl"
+	  <target-os>linux,<toolset>gcc:<linkflags>"-ldl -lpthread"
 ;
