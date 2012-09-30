@@ -33,9 +33,15 @@ namespace { // implementation details
 template <typename T>
 void swap(std::basic_ostringstream<T>& s1, std::basic_ostringstream<T>& s2)
 {
+	std::basic_ostream<T>::pos_type p1 = s1.tellp();
+	std::basic_ostream<T>::pos_type p2 = s2.tellp();
+
 	std::basic_string<T> const s1_str = s1.str();
 	s1.str(s2.str()); s1.clear();
 	s2.str(s1_str); s2.clear();
+
+	s1.seekp(p2);
+	s2.seekp(p1);
 }
 #endif
 
