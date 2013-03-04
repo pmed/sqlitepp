@@ -34,7 +34,7 @@ template <typename T>
 void swap(std::basic_ostringstream<T>& s1, std::basic_ostringstream<T>& s2)
 {
 	std::basic_string<T> const s1_str = s1.str();
-	std::basic_ostringstream<T>::pos_type const s1_pos = s1.tellp();
+	typename std::basic_ostringstream<T>::pos_type const s1_pos = s1.tellp();
 
 	s1.str(s2.str());
 	s1.seekp(s2.tellp());
