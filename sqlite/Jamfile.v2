@@ -1,5 +1,5 @@
 lib sqlite : sqlite3.c
-    : <version>3.7.14 <include>.
+    : <version>3.7.15.2 <include>.
       <threading>single : <define>SQLITE_THREADSAFE=0
 ;
 
