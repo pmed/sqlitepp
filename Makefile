@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS += -Wall -Wextra
+CFLAGS += -Wall
 
 CXX = g++
 CXXFLAGS += $(CFLAGS)
