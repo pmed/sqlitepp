@@ -51,6 +51,9 @@ transaction::transaction(session& s, type t)
 //----------------------------------------------------------------------------
 
 transaction::~transaction()
+#if __cplusplus >= 201103L
+          noexcept(false)
+#endif
 {
 	if ( do_rollback_ )
 	{

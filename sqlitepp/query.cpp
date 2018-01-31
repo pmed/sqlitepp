@@ -157,6 +157,9 @@ prepare_query::prepare_query(prepare_query& src)
 //----------------------------------------------------------------------------
 
 prepare_query::~prepare_query()
+#if __cplusplus >= 201103L
+          noexcept(false)
+#endif
 {
 	if ( st_ )
 	{
@@ -186,6 +189,9 @@ once_query::once_query(once_query& src)
 //----------------------------------------------------------------------------
 
 once_query::~once_query()
+#if __cplusplus >= 201103L
+          noexcept(false)
+#endif
 {
 	if ( s_ )
 	{

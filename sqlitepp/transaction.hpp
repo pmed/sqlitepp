@@ -27,7 +27,11 @@ public:
 	transaction(session& s, type t = deferred);
 
 	// End transaction with rollback if it is not commited.
-	~transaction();
+	~transaction()
+#if __cplusplus >= 201103L
+          noexcept(false)
+#endif
+          ;
 
 	// Commit transaction.
 	void commit();

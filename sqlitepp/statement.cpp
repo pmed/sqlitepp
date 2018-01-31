@@ -90,6 +90,9 @@ statement::statement(session& s, string_t const& sql)
 //----------------------------------------------------------------------------
 
 statement::~statement()
+#if __cplusplus >= 201103L
+          noexcept(false)
+#endif
 {
 	finalize(false);
 }

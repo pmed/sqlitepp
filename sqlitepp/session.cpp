@@ -56,6 +56,9 @@ session::session(string_t const& file_name, int flags)
 //----------------------------------------------------------------------------
 
 session::~session()
+#if __cplusplus >= 201103L
+          noexcept(false)
+#endif
 {
 	try
 	{
