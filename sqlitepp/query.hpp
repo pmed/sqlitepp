@@ -123,7 +123,7 @@ public:
 
 	// Move query to statement on destroy.
 	~prepare_query()
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
           noexcept(false)
 #endif
           ;
@@ -147,7 +147,7 @@ public:
 
 	// Execute statement on destroy.
 	~once_query()
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
           noexcept(false)
 #endif
           ;

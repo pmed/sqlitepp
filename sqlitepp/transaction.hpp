@@ -28,7 +28,7 @@ public:
 
 	// End transaction with rollback if it is not commited.
 	~transaction()
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
           noexcept(false)
 #endif
           ;

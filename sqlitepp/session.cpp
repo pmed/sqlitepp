@@ -56,7 +56,7 @@ session::session(string_t const& file_name, int flags)
 //----------------------------------------------------------------------------
 
 session::~session()
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
           noexcept(false)
 #endif
 {

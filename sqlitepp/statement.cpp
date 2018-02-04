@@ -90,7 +90,7 @@ statement::statement(session& s, string_t const& sql)
 //----------------------------------------------------------------------------
 
 statement::~statement()
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
           noexcept(false)
 #endif
 {
