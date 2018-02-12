@@ -35,11 +35,7 @@ public:
 	statement(session& s, string_t const& sql);
 
 	// Finalize statement on destroy.
-	~statement()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
-          ;
+	~statement() NOEXCEPT_FALSE;
 
 	// Execute statement. Return true if result exists.
 	bool exec();

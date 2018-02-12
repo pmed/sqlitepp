@@ -12,6 +12,7 @@
 #include <sstream>
 #include <memory>
 
+#include "config.hpp"
 #include "string.hpp"
 #include "binders.hpp"
 
@@ -122,11 +123,7 @@ public:
 	prepare_query(prepare_query& src);
 
 	// Move query to statement on destroy.
-	~prepare_query()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
-          ;
+	~prepare_query() NOEXCEPT_FALSE;
 private:
 	// Create preparing proxy for statement.
 	prepare_query(statement& st);
@@ -146,11 +143,7 @@ public:
 	once_query(once_query& src);
 
 	// Execute statement on destroy.
-	~once_query()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
-          ;
+	~once_query() NOEXCEPT_FALSE;
 private:
 	// Create proxy for session.
 	once_query(session& s);

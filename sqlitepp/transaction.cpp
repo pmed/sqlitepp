@@ -50,10 +50,7 @@ transaction::transaction(session& s, type t)
 }
 //----------------------------------------------------------------------------
 
-transaction::~transaction()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
+transaction::~transaction() NOEXCEPT_FALSE
 {
 	if ( do_rollback_ )
 	{

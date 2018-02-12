@@ -36,11 +36,7 @@ public:
 	explicit session(string_t const& file_name, int flags = 0);
 	
 	// Close session on destroy.
-	~session()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
-          ;
+	~session() NOEXCEPT_FALSE;
 
 	// Open database session. Previous one will be closed.
 	// Optional parameter flags for file open operations

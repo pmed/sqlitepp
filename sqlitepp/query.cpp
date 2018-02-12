@@ -156,10 +156,7 @@ prepare_query::prepare_query(prepare_query& src)
 }
 //----------------------------------------------------------------------------
 
-prepare_query::~prepare_query()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
+prepare_query::~prepare_query() NOEXCEPT_FALSE
 {
 	if ( st_ )
 	{
@@ -188,10 +185,7 @@ once_query::once_query(once_query& src)
 }
 //----------------------------------------------------------------------------
 
-once_query::~once_query()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
+once_query::~once_query() NOEXCEPT_FALSE
 {
 	if ( s_ )
 	{

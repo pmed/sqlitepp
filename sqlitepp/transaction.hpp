@@ -8,6 +8,8 @@
 #ifndef SQLITEPP_TRANSACTION_HPP_INCLUDED
 #define SQLITEPP_TRANSACTION_HPP_INCLUDED
 
+#include "config.hpp"
+
 //////////////////////////////////////////////////////////////////////////////
 
 namespace sqlitepp {
@@ -27,11 +29,7 @@ public:
 	transaction(session& s, type t = deferred);
 
 	// End transaction with rollback if it is not commited.
-	~transaction()
-#if __cplusplus >= 201103L || (defined(_MSC_VER) && _MSC_VER >= 1800)
-          noexcept(false)
-#endif
-          ;
+	~transaction() NOEXCEPT_FALSE;
 
 	// Commit transaction.
 	void commit();
