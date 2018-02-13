@@ -156,7 +156,7 @@ prepare_query::prepare_query(prepare_query& src)
 }
 //----------------------------------------------------------------------------
 
-prepare_query::~prepare_query()
+prepare_query::~prepare_query() NOEXCEPT_FALSE
 {
 	if ( st_ )
 	{
@@ -185,7 +185,7 @@ once_query::once_query(once_query& src)
 }
 //----------------------------------------------------------------------------
 
-once_query::~once_query()
+once_query::~once_query() NOEXCEPT_FALSE
 {
 	if ( s_ )
 	{

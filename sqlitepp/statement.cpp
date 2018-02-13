@@ -89,7 +89,7 @@ statement::statement(session& s, string_t const& sql)
 }
 //----------------------------------------------------------------------------
 
-statement::~statement()
+statement::~statement() NOEXCEPT_FALSE
 {
 	finalize(false);
 }

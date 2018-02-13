@@ -35,7 +35,7 @@ public:
 	statement(session& s, string_t const& sql);
 
 	// Finalize statement on destroy.
-	~statement();
+	~statement() NOEXCEPT_FALSE;
 
 	// Execute statement. Return true if result exists.
 	bool exec();

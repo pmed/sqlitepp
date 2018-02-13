@@ -55,7 +55,7 @@ session::session(string_t const& file_name, int flags)
 }
 //----------------------------------------------------------------------------
 
-session::~session()
+session::~session() NOEXCEPT_FALSE
 {
 	try
 	{

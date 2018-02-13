@@ -36,7 +36,7 @@ public:
 	explicit session(string_t const& file_name, int flags = 0);
 	
 	// Close session on destroy.
-	~session();
+	~session() NOEXCEPT_FALSE;
 
 	// Open database session. Previous one will be closed.
 	// Optional parameter flags for file open operations

@@ -50,7 +50,7 @@ transaction::transaction(session& s, type t)
 }
 //----------------------------------------------------------------------------
 
-transaction::~transaction()
+transaction::~transaction() NOEXCEPT_FALSE
 {
 	if ( do_rollback_ )
 	{
